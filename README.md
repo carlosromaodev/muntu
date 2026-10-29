@@ -18,10 +18,16 @@ npm run ios                # iOS (simulador no macOS ou Expo Go no iPhone)
 npm run build:web          # exporta as duas versões web para apps/*/dist
 ```
 
-Cada ecrã tem a sua rota: `/recepcao`, `/inscricao`, `/membro`, `/caixa`, `/turno`, `/tesouraria`, `/painel`,
-`/aprovacoes`, `/retencao`, `/planos`, `/rede`, `/avisos` e, na app do membro, `/acesso` e `/plano`.
-No avatar (canto superior direito) muda-se entre **Gestão do ginásio** e **App do membro**, o tema claro/escuro
-e o modo **sem rede**. Na web desktop, **⌘K / Ctrl+K** abre a pesquisa de membros.
+O desktop e o mobile são **dois desenhos diferentes**, fiéis aos ficheiros do projecto:
+
+| Desenho | Onde aparece | Telas (rotas) |
+|---|---|---|
+| **MUNTU Desktop v4** — gestão do ginásio | `web-desktop`; nativo em ecrãs ≥ 1024 px | `/recepcao` `/inscricao` `/membro` `/caixa` `/tesouraria` `/painel` `/planos` `/rede` `/avisos` (D1–D9) |
+| **MUNTU Mobile** — membro e dono | `web-mobile`; nativo no telemóvel | Membro: `/acesso` (M1) `/plano` (M2) `/aulas` `/conta` · Dono: `/dono` (O1) `/aprovacoes` (O2) `/filiais` `/conta` |
+
+No mobile, em **Conta → Ver como** troca-se entre a app do membro e a app do dono. No desktop, o avatar **CB**
+abre o tema e o modo **sem rede**, e **⌘K / Ctrl+K** abre a pesquisa de membros. O desktop mantém a largura mínima
+do desenho (1024 px); numa janela mais estreita a página desloca-se na horizontal, como no protótipo.
 
 ## Estrutura
 
@@ -29,49 +35,33 @@ e o modo **sem rede**. Na web desktop, **⌘K / Ctrl+K** abre a pesquisa de memb
 muntu/
 ├─ apps/
 │  ├─ ios-android/   App nativa (iPhone, iPad, Android) · Face ID, vibração, EAS Build
-│  ├─ web-desktop/   Web para computador · navegação de topo, tabelas completas, ⌘K
-│  └─ web-mobile/    Web para o browser do telemóvel · barra inferior, instalável (PWA)
+│  ├─ web-desktop/   Web para computador · desenho desktop
+│  └─ web-mobile/    Web para o browser do telemóvel · desenho mobile, instalável (PWA)
 └─ packages/
-   └─ shared/        Tudo o que as três apps partilham
+   └─ shared/
       └─ src/
-         ├─ screens/   14 telas (gestao/ e membro/)
-         ├─ ui/        design system: T, Btn, HoldButton, StatBand, Table, Sheet, Chips, QR, Logo…
-         ├─ shell/     cabeçalho, navegação de topo, barra inferior, folhas, pesquisa, conta
+         ├─ desktop/   DesktopShell (cabeçalho + 9 separadores) e as telas D1–D9
+         ├─ mobile/    MobileShell (barra inferior de 4 separadores) e as telas M1, M2, O1, O2, Aulas, Filiais, Conta
+         ├─ ui/        design system partilhado: T, Btn, HoldButton, StatBand, Table, Sheet, Chips, QR, Logo…
+         ├─ shell/     MuntuApp (escolhe o desenho), rotas, notificações
          ├─ theme/     tokens da marca (claro e escuro), breakpoints
          ├─ lib/       formatação Kz, vibração, biometria
          ├─ store/     estado partilhado (Zustand)
          └─ data/      dados de exemplo — substituir pela API
 ```
 
-Cada app tem apenas as rotas (`app/`), a configuração (`app.json`), os ícones e o modo de navegação.
-As telas e as regras vivem uma só vez em `packages/shared`, por isso uma correcção chega às três apps ao mesmo tempo.
+Cada app tem apenas as rotas (`app/`), a configuração (`app.json`), os ícones e o desenho que usa
+(`ui="desktop"`, `ui="mobile"` ou `ui="auto"` em `app/[screen].tsx`). As telas, o design system e as regras vivem
+uma só vez em `packages/shared`.
 
-| App | Navegação | Específico |
+| App | Desenho | Específico |
 |---|---|---|
-| `ios-android` | barra inferior no telemóvel, topo no tablet | Face ID / impressão digital, vibração nativa, EAS Build |
-| `web-desktop` | sempre no topo | pesquisa ⌘K, painel lateral de detalhe, tabelas com todas as colunas |
-| `web-mobile` | sempre em baixo | PWA instalável, ecrã inteiro, vibração no Chrome Android |
+| `ios-android` | mobile no telemóvel, desktop em ecrãs ≥ 1024 px | Face ID / impressão digital, vibração nativa, EAS Build |
+| `web-desktop` | desktop | pesquisa ⌘K, painel lateral de detalhe, tabelas com todas as colunas |
+| `web-mobile` | mobile | PWA instalável, ecrã inteiro, vibração no Chrome Android |
 
-### Responsividade
-
-Três breakpoints (`theme/tokens.ts`): **telemóvel** < 720 px, **tablet** 720–1099 px, **desktop** ≥ 1100 px.
-
-- Tabelas mostram todas as colunas no desktop e viram cartões empilhados no telemóvel (`ui/Table.tsx`).
-- As faixas de números passam de uma linha (desktop) para destaque + grelha (tablet/telemóvel).
-- Painéis de detalhe abrem ao lado no desktop e como folha inferior no telemóvel (`ui/Sheet.tsx`).
-
-## As 14 telas
-
-| Gestão | | Membro |
-|---|---|---|
-| 01 Recepção · 02 Inscrição · 03 Membro · 04 Caixa | 05 Turno · 06 Tesouraria · 07 Painel · 08 Aprovações | 13 Acesso (QR que renova a cada 30 s) |
-| 09 Retenção · 10 Planos · 11 Rede · 12 Avisos SMS | | 14 O meu plano (Multicaixa Express) |
-
-Destaques das três frentes do ciclo actual:
-
-- **Confiança operacional** — fecho de caixa com contagem cega, passagem de turno com divergência registada sem apagar o turno anterior, trilha de auditoria só de acrescentar, estornos com aprovação.
-- **Retenção e rentabilidade** — membros em risco (frequência a cair + renovação próxima + sessões por realizar) com tarefa para a equipa e registo do resultado; fugas de receita no painel.
-- **Estrutura para expansão** — filiais, Rede MUNTU entre ginásios, planos e regras com aprovação do dono.
+Quando a app mobile abre num ecrã largo (web mobile no computador, tablet em vertical), a coluna fica centrada com
+560 px no máximo, para manter as proporções do desenho.
 
 ## Vibração e confirmação
 
@@ -87,7 +77,7 @@ Destaques das três frentes do ciclo actual:
 
 Mapa completo em `packages/shared/src/lib/haptics.ts`.
 
-Acções que não se desfazem (aprovar, revelar o fecho de caixa, receber turno) usam **segurar para confirmar**
+No mobile, aprovar um pedido usa **segurar para confirmar**
 (`ui/HoldButton.tsx`): a barra enche com vibração, pede biometria e só então confirma. Soltar antes cancela.
 Na web e em aparelhos sem biometria a confirmação passa sem Face ID (próximo passo: PIN do gestor).
 

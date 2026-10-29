@@ -123,11 +123,11 @@ export const FUGAS = [
 
 export const OCC = [22, 48, 64, 41, 28, 20, 24, 30, 26, 22, 30, 52, 78, 92, 70, 44, 18];
 
-export type Approval = { id: string; kind: 'estorno' | 'caixa' | 'preco' | 'retro' | 'turno'; k: string; t: string; v: number; status?: 'aprovado' | 'recusado' };
+export type Approval = { id: string; kind: 'estorno' | 'caixa' | 'preco' | 'retro' | 'turno'; k: string; t: string; /** Resumo de uma linha (lista mobile). */ s?: string; v: number; status?: 'aprovado' | 'recusado' };
 export const APPROVALS: Approval[] = [
   { id: 'a1', kind: 'estorno', k: 'Estorno · Talatona · 08:40', t: 'Edson Mateus · cobrança duplicada no TPA. Pedido por Celma Bento.', v: -30000 },
-  { id: 'a2', kind: 'caixa', k: 'Fecho de caixa · Kilamba', t: 'Diferença no turno da tarde. Justificação: troco dado a mais.', v: -8000 },
-  { id: 'a3', kind: 'preco', k: 'Preço · Rede Mensal', t: 'De 45 000 para 50 000 Kz. Os 286 membros recebem SMS 30 dias antes.', v: 50000 },
+  { id: 'a2', kind: 'caixa', k: 'Fecho de caixa · Kilamba', t: 'Diferença no turno da tarde. Justificação: troco dado a mais.', s: 'Diferença no turno da tarde', v: -8000 },
+  { id: 'a3', kind: 'preco', k: 'Preço · Rede Mensal', t: 'De 45 000 para 50 000 Kz. Os 286 membros recebem SMS 30 dias antes.', s: '286 membros activos', v: 50000 },
 ];
 
 export const PLANOS = [
@@ -182,48 +182,6 @@ export const SMS_LOG = [
   { id: 8, h: 'Ontem', n: 'Wilson Tchiyaka', tel: '926 551 004', a: 'Vence hoje', ch: 'SMS', st: 'falhou' as StatusKey, why: 'Telefone desligado' },
 ];
 
-// ——— Passagem de turno ———
-export const TURNO = {
-  sai: { n: 'Celma Bento', turno: 'Manhã', h: '07:00–14:00' },
-  entra: { n: 'Rui Manuel', turno: 'Tarde', h: '14:00–22:00' },
-  /** Declarado por quem sai (oculto para quem recebe até contar). */
-  declarado: { dinheiro: 86000, tpa: 22000 },
-};
-
-export const TURNO_PAGAMENTOS = [
-  { id: 'p1', n: 'Ana Domingos', d: 'Mensalidade Rede · Express', v: 45000, h: '09:12' },
-  { id: 'p2', n: 'Kátia Muondo', d: 'Inscrição Local · TPA', v: 30000, h: '08:21' },
-  { id: 'p3', n: 'Joana Kiala', d: 'Mensalidade Híbrido · Transferência', v: 38000, h: '07:30' },
-];
-
-export const TURNO_PENDENCIAS = [
-  { id: 'q1', t: 'Ligar a Délcio Ngola sobre a mensalidade em atraso', d: 'Prometeu pagar hoje até às 18:00' },
-  { id: 'q2', t: 'Toalhas da sauna por repor', d: 'Fornecedor entrega às 16:00' },
-  { id: 'q3', t: 'Estorno de Edson Mateus aguarda o dono', d: 'Não voltar a cobrar no TPA' },
-];
-
-export const TURNO_TRILHA = [
-  { h: '13:58', q: 'Celma Bento', t: 'Declarou o caixa: 86 000,00 em dinheiro, 22 000,00 em TPA' },
-  { h: '13:52', q: 'Celma Bento', t: 'Registou 3 pendências para o turno da tarde' },
-  { h: '07:00', q: 'Celma Bento', t: 'Abriu o caixa com 20 000,00' },
-  { h: 'Ontem 22:04', q: 'Rui Manuel', t: 'Fechou o turno da noite sem diferença' },
-];
-
-// ——— Retenção ———
-export type RiskMember = { id: string; n: string; plano: string; f: string; signals: string[]; score: number; renov: string; valor: number; tel: string };
-export const RISK: RiskMember[] = [
-  { id: 'r1', n: 'Paulina Muxima', plano: 'Rede · Mensal', f: 'Talatona', signals: ['2 entradas em 21 dias (antes 12)', 'Renova em 3 dias', '4 sessões de PT por realizar'], score: 92, renov: '01/11', valor: 45000, tel: '912 778 340' },
-  { id: 'r2', n: 'Wilson Tchiyaka', plano: 'Híbrido', f: 'Kilamba', signals: ['Sem entradas há 16 dias', 'Renova em 5 dias'], score: 84, renov: '03/11', valor: 38000, tel: '926 551 004' },
-  { id: 'r3', n: 'Ivone Cassoma', plano: 'Local · Trimestral', f: 'Maianga', signals: ['Avaliação física em falta', 'Frequência −60% este mês'], score: 71, renov: '19/11', valor: 84000, tel: '923 001 774' },
-  { id: 'r4', n: 'Hélder Mbala', plano: 'Rede · Anual', f: 'Talatona', signals: ['3 aulas reservadas sem comparecer', 'Pediu informação de congelamento'], score: 66, renov: '02/02', valor: 450000, tel: '931 450 218' },
-  { id: 'r5', n: 'Teresa Lukamba', plano: 'Local · Mensal', f: 'Kilamba', signals: ['Sem entradas há 9 dias', 'Renova em 8 dias'], score: 58, renov: '06/11', valor: 30000, tel: '924 118 905' },
-];
-
-export const TAREFAS_INICIAIS = [
-  { id: 't1', n: 'Nelson Kapinga', t: 'Remarcar avaliação física em falta', quem: 'Treinador Abel', st: 'emcurso' as StatusKey, res: '' },
-  { id: 't2', n: 'Yola Fernandes', t: 'Contactar sobre renovação', quem: 'Celma Bento', st: 'feito' as StatusKey, res: 'Renovou por 3 meses com 5% de desconto' },
-];
-
 // ——— App do membro ———
 export const MEMBRO = {
   nome: 'Kátia Muondo',
@@ -244,3 +202,20 @@ export const MEMBRO = {
     { d: 'Seg · 06:58', f: 'Talatona' },
   ],
 };
+
+export const DIAS = ['Seg 26', 'Ter 27', 'Qua 28', 'Qui 29', 'Sex 30', 'Sáb 31'] as const;
+
+export type Aula = { id: string; dia: (typeof DIAS)[number]; h: string; n: string; coach: string; f: string; vagas: number; total: number };
+export const AULAS: Aula[] = [
+  { id: 'a1', dia: 'Qui 29', h: '06:30', n: 'Funcional', coach: 'Abel Tchissola', f: 'Talatona', vagas: 4, total: 16 },
+  { id: 'a2', dia: 'Qui 29', h: '07:30', n: 'Spinning', coach: 'Marta Neto', f: 'Talatona', vagas: 2, total: 20 },
+  { id: 'a3', dia: 'Qui 29', h: '12:15', n: 'Pilates', coach: 'Inês Cardoso', f: 'Kilamba', vagas: 0, total: 12 },
+  { id: 'a4', dia: 'Qui 29', h: '18:30', n: 'Kizomba Fit', coach: 'Nelo Bastos', f: 'Talatona', vagas: 9, total: 24 },
+  { id: 'a5', dia: 'Qui 29', h: '19:30', n: 'Boxe', coach: 'Abel Tchissola', f: 'Maianga', vagas: 5, total: 14 },
+  { id: 'a6', dia: 'Sex 30', h: '06:30', n: 'Funcional', coach: 'Abel Tchissola', f: 'Talatona', vagas: 7, total: 16 },
+  { id: 'a7', dia: 'Sex 30', h: '18:00', n: 'Spinning', coach: 'Marta Neto', f: 'Kilamba', vagas: 11, total: 20 },
+  { id: 'a8', dia: 'Sáb 31', h: '09:00', n: 'Treino ao ar livre', coach: 'Nelo Bastos', f: 'Talatona', vagas: 18, total: 30 },
+  { id: 'a9', dia: 'Seg 26', h: '07:30', n: 'Spinning', coach: 'Marta Neto', f: 'Talatona', vagas: 0, total: 20 },
+  { id: 'a10', dia: 'Ter 27', h: '18:30', n: 'Kizomba Fit', coach: 'Nelo Bastos', f: 'Talatona', vagas: 3, total: 24 },
+  { id: 'a11', dia: 'Qua 28', h: '19:30', n: 'Boxe', coach: 'Abel Tchissola', f: 'Maianga', vagas: 6, total: 14 },
+];

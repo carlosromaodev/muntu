@@ -3,15 +3,14 @@ import { useTheme } from '../../theme';
 import { PARCEIROS } from '../../data/sample';
 import { kn, kzSigned } from '../../lib/format';
 import { useNav } from '../../shell/nav';
-import { useNotify } from '../../shell/AppShell';
+import { useNotify } from '../../shell/notify';
 import { Btn, Cell, Page, PageHeader, Section, StatBand, Status, T, Table } from '../../ui';
 
 export function Rede() {
   const { bp } = useTheme();
-  const { bottomInset } = useNav();
   const notify = useNotify();
   return (
-    <Page bottomInset={bottomInset}>
+    <Page>
       <PageHeader eyebrow="Acesso entre ginásios · Outubro 2026" title="Rede MUNTU" actions={<Btn label="Convidar ginásio" haptic="press" onPress={() => notify('Convite enviado por SMS', 'ok')} />} />
       <StatBand
         hero={{ label: 'Kz · Saldo do mês', value: kn(94000), sub: 'Liquidação automática a 31/10' }}

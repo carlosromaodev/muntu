@@ -4,7 +4,7 @@ import { toneColor, useTheme } from '../../theme';
 import { RULES, ST, type StatusKey } from '../../data/sample';
 import { fill, kz } from '../../lib/format';
 import { useNav } from '../../shell/nav';
-import { useNotify } from '../../shell/AppShell';
+import { useNotify } from '../../shell/notify';
 import { Area, Banner, Btn, Cell, Chips, ListRow, Note, Page, PageHeader, Section, Segmented, StatBand, Status, T, Table, Tag } from '../../ui';
 
 type MState = 'normal' | 'divida' | 'congelado' | 'rede';
@@ -25,7 +25,7 @@ const AVISOS: Record<MState, [string, string, string, StatusKey][]> = {
 
 export function Membro() {
   const { c, g, compact, bp } = useTheme();
-  const { params, go, bottomInset } = useNav();
+  const { params, go } = useNav();
   const notify = useNotify();
   const initial = (params.estado as MState) || 'divida';
   const [st, setSt] = useState<MState>(MS[initial] ? initial : 'divida');
@@ -159,13 +159,13 @@ export function Membro() {
   );
 
   return (
-    <Page bottomInset={bottomInset}>
+    <Page>
       <PageHeader
         eyebrow={`Membro #4821 · ${st === 'rede' ? 'Kianda Fitness' : 'Desde Fev 2024 · base Talatona'}`}
         title={nome}
         actions={
-          <View style={{ gap: 6 }}>
-            <T v="eyebrow">Pré-visualizar estado</T>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <T v="eyebrow">Pré-visualizar</T>
             <Segmented
               value={st}
               onChange={(v) => { setSt(v); setComposer(false); }}
@@ -190,7 +190,7 @@ export function Membro() {
       {m.banner ? <Banner tone={tone} style={{ borderBottomWidth: 1, borderColor: c.line }}>{m.banner}</Banner> : null}
       <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', paddingVertical: 20, paddingHorizontal: g, borderBottomWidth: 1, borderColor: c.line }}>
         {actions.map((a) => (
-          <Btn key={a.l} kind={a.primary ? 'primary' : 'outline'} size="sm" label={a.l} haptic={a.primary ? 'press' : 'tap'} onPress={a.on} />
+          <Btn key={a.l} kind={a.primary ? 'primary' : 'outline'} size="sm" label={a.l} haptic={a.primary ? 'press' : 'tap'} onPress={a.on} style={{ height: 40, paddingHorizontal: 16 }} />
         ))}
       </View>
       {bp === 'wide' ? (

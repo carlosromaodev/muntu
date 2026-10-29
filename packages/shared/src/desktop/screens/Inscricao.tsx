@@ -5,14 +5,14 @@ import { CLIENTE_BI, PAY_METHODS, PLANS, RULES, SAMPLE_VARS } from '../../data/s
 import { fill, kn, mmss } from '../../lib/format';
 import { haptic } from '../../lib/haptics';
 import { useNav } from '../../shell/nav';
-import { useNotify } from '../../shell/AppShell';
+import { useNotify } from '../../shell/notify';
 import { Btn, Chips, Cols, Field, LinkBtn, Note, OptionRow, Page, PageHeader, QR, Status, Steps, T } from '../../ui';
 
 type PayState = 'idle' | 'waiting' | 'failed' | 'ok';
 
 export function Inscricao() {
   const { c, g, compact, bp } = useTheme();
-  const { go, bottomInset } = useNav();
+  const { go } = useNav();
   const notify = useNotify();
   const [step, setStep] = useState(0);
   const [secs, setSecs] = useState(0);
@@ -53,7 +53,7 @@ export function Inscricao() {
   const welcome = fill(RULES[0].tpl, { ...SAMPLE_VARS, data: '26/11' });
 
   return (
-    <Page bottomInset={bottomInset}>
+    <Page>
       <PageHeader
         eyebrow="Talatona · Uma tarefa, um ecrã"
         title="Nova inscrição"
@@ -81,7 +81,7 @@ export function Inscricao() {
             <View style={{ paddingLeft: compact ? 0 : 24, gap: 18 }}>
               <T v="eyebrow" color={c.ok}>Preenchido a partir do BI · confirme</T>
               {CLIENTE_BI.map((f) => (
-                <Field key={f.l} label={f.l} defaultValue={f.v} big />
+                <Field key={f.l} label={f.l} value={f.v} editable={false} big />
               ))}
             </View>
           </Cols>

@@ -1,3 +1,4 @@
+import { createContext, useContext } from 'react';
 import { useColorScheme, useWindowDimensions } from 'react-native';
 import { useMuntu } from '../store';
 import { bpFor, dark, gutter, light, type Bp, type Palette } from './tokens';
@@ -15,13 +16,21 @@ export type Theme = {
   wide: boolean;
 };
 
+/**
+ * Largura de layout. O desktop fixa um mínimo de 1024 px (como no desenho);
+ * o mobile limita a coluna. Cada shell fornece a largura que os ecrãs devem usar.
+ */
+export const LayoutWidth = createContext<number | null>(null);
+
 export function useTheme(): Theme {
   const scheme = useColorScheme();
   const pref = useMuntu((s) => s.themePref);
-  const { width: w, height: h } = useWindowDimensions();
+  const win = useWindowDimensions();
+  const override = useContext(LayoutWidth);
+  const w = override ?? win.width;
   const isDark = pref === 'system' ? scheme === 'dark' : pref === 'dark';
   const bp = bpFor(w);
-  return { c: isDark ? dark : light, dark: isDark, bp, w, h, g: gutter(bp), compact: bp === 'compact', wide: bp === 'wide' };
+  return { c: isDark ? dark : light, dark: isDark, bp, w, h: win.height, g: gutter(bp), compact: bp === 'compact', wide: bp === 'wide' };
 }
 
 export const toneColor = (c: Palette, tone: 'ok' | 'warn' | 'bad' | 'neutral' | 'ink') =>

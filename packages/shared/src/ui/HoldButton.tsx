@@ -13,6 +13,7 @@ type Props = {
   onFail?: () => void;
   duration?: number;
   onBrand?: boolean;
+  height?: number;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -21,7 +22,7 @@ type Props = {
  * biometria e só então confirma. Soltar antes cancela. Usado em acções que não
  * se desfazem: aprovar estorno, diferença de caixa, preço, receber turno.
  */
-export function HoldButton({ label, reason, onConfirm, onFail, duration = 1200, onBrand, style }: Props) {
+export function HoldButton({ label, reason, onConfirm, onFail, duration = 1200, onBrand, height = 52, style }: Props) {
   const { c } = useTheme();
   const p = useRef(new Animated.Value(0)).current;
   const step = useRef(0);
@@ -81,7 +82,7 @@ export function HoldButton({ label, reason, onConfirm, onFail, duration = 1200, 
       onPressOut={cancel}
       onLongPress={() => {}}
       delayLongPress={duration + 2000}
-      style={[{ height: 52, backgroundColor: bg, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' }, style]}
+      style={[{ height, backgroundColor: bg, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' }, style]}
     >
       <Animated.View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width, backgroundColor: c.brand }} />
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16 }}>

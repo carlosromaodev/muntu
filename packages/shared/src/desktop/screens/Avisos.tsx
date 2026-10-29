@@ -5,7 +5,7 @@ import { RULES, SAMPLE_VARS, SMS_LOG, type StatusKey } from '../../data/sample';
 import { fill, int } from '../../lib/format';
 import { haptic } from '../../lib/haptics';
 import { useNav } from '../../shell/nav';
-import { useNotify } from '../../shell/AppShell';
+import { useNotify } from '../../shell/notify';
 import { Area, Btn, Cell, Chips, Field, Page, PageHeader, Section, Sheet, Split, StatBand, Status, T, Table, Toggle } from '../../ui';
 
 type RuleState = { on: boolean; tpl: string; hora: string; ch: string };
@@ -13,7 +13,6 @@ const LOG_F = { Todos: null, Agendados: 'agendado', Entregues: 'entregue', Falha
 
 export function Avisos() {
   const { c, g, bp, compact } = useTheme();
-  const { bottomInset } = useNav();
   const notify = useNotify();
   const [rules, setRules] = useState<RuleState[]>(RULES.map((r) => ({ on: r.on, tpl: r.tpl, hora: r.hora, ch: r.ch })));
   const [ri, setRi] = useState(1);
@@ -34,7 +33,7 @@ export function Avisos() {
   const editor = <Editor i={ri} r={rules[ri]!} upd={upd} onSaved={() => { notify('Aviso guardado', 'ok'); if (!sideEditor) setEditorOpen(false); }} onTest={() => notify('Teste enviado para 923 456 789', 'ok')} />;
 
   return (
-    <Page bottomInset={bottomInset}>
+    <Page>
       <PageHeader
         eyebrow="Automações · SMS e WhatsApp"
         title="Avisos"
@@ -56,6 +55,15 @@ export function Avisos() {
       <Split ratio={[1.2, 1]} minRight={380} stackAt="medium" divide={sideEditor}>
         <Section title="Jornada do membro">
           <View>
+            {!compact ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingBottom: 10 }}>
+                <T v="eyebrow" style={{ width: 34 }}>N.º</T>
+                <T v="eyebrow" style={{ flex: 1 }}>Aviso · quando</T>
+                <T v="eyebrow" style={{ width: 100 }}>Canal</T>
+                <T v="eyebrow" right style={{ width: 70 }}>Mês</T>
+                <View style={{ width: 48 }} />
+              </View>
+            ) : null}
             {RULES.map((r, i) => {
               const st = rules[i]!;
               const sel = i === ri && sideEditor;

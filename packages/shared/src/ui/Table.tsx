@@ -32,12 +32,14 @@ type Props<R> = {
   empty?: string;
   /** Largura mínima no desktop/tablet antes de fazer scroll horizontal. */
   minWidth?: number;
+  /** Sem linha de cabeçalho (listas simples). */
+  hideHeader?: boolean;
 };
 
 /**
  * Tabela completa no desktop (todas as colunas) e cartões empilhados no telemóvel.
  */
-export function Table<R>({ cols, rows, rowKey, onRowPress, selected, empty = 'Sem resultados.', minWidth }: Props<R>) {
+export function Table<R>({ cols, rows, rowKey, onRowPress, selected, empty = 'Sem resultados.', minWidth, hideHeader }: Props<R>) {
   const { c, compact } = useTheme();
 
   if (!rows.length)
@@ -99,7 +101,7 @@ export function Table<R>({ cols, rows, rowKey, onRowPress, selected, empty = 'Se
 
   const grid = (
     <View style={{ minWidth }}>
-      <View style={{ flexDirection: 'row', gap: 16, paddingBottom: 10 }}>
+      {hideHeader ? null : <View style={{ flexDirection: 'row', gap: 16, paddingBottom: 10 }}>
         {cols.map((k) => (
           <View key={k.key} style={cell(k)}>
             <T v="eyebrow" numberOfLines={1}>
@@ -107,7 +109,7 @@ export function Table<R>({ cols, rows, rowKey, onRowPress, selected, empty = 'Se
             </T>
           </View>
         ))}
-      </View>
+      </View>}
       {rows.map((r) => {
         const key = rowKey(r);
         const sel = selected === key;

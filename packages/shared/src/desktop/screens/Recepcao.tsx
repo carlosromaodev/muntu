@@ -6,12 +6,12 @@ import { CHECKINS, DIVIDA, VENCER, type StatusKey } from '../../data/sample';
 import { kn, kz, nowHM } from '../../lib/format';
 import { haptic } from '../../lib/haptics';
 import { useNav } from '../../shell/nav';
-import { useNotify } from '../../shell/AppShell';
+import { useNotify } from '../../shell/notify';
 import { Btn, Cell, Dot, ListRow, Page, PageHeader, Section, Split, StatBand, Status, T, Table } from '../../ui';
 
 export function Recepcao() {
   const { c, g, compact } = useTheme();
-  const { go, bottomInset } = useNav();
+  const { go } = useNav();
   const notify = useNotify();
   const caixa = useMuntu((s) => s.caixaAberto);
   const setCaixa = useMuntu((s) => s.setCaixa);
@@ -24,13 +24,13 @@ export function Recepcao() {
   };
 
   return (
-    <Page bottomInset={bottomInset}>
+    <Page>
       <PageHeader
-        eyebrow="Quinta, 29 Outubro · Turno da manhã · Talatona"
+        eyebrow="Segunda, 26 Outubro · Turno da manhã · Talatona"
         title="Recepção"
         actions={
           <>
-            <Btn kind="outline" label="Check-in manual" onPress={() => go('membro', { estado: 'normal' })} />
+            <Btn kind="outline" label="Check-in manual" onPress={() => go('membro', { estado: 'divida' })} />
             <Btn label="Nova inscrição" haptic="press" onPress={() => go('inscricao')} />
           </>
         }
@@ -86,7 +86,7 @@ export function Recepcao() {
               { key: 'n', label: 'Membro', flex: 1.3, render: (r) => <Cell strong>{r.n}</Cell>, compact: 'primary' },
               { key: 'p', label: 'Plano', render: (r) => <Cell muted>{r.p}</Cell>, compact: 'secondary', text: (r) => r.p },
               { key: 'f', label: 'Filial', flex: 0.9, render: (r) => <Cell muted>{r.f}</Cell>, compact: 'hidden' },
-              { key: 's', label: 'Estado', w: 170, render: (r) => <Status s={r.s as StatusKey} sub={r.why || undefined} />, compact: 'end' },
+              { key: 's', label: 'Estado', w: 150, render: (r) => <Status s={r.s as StatusKey} sub={r.why || undefined} />, compact: 'end' },
             ]}
           />
         </Section>

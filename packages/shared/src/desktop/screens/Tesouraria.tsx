@@ -5,14 +5,13 @@ import { useMuntu } from '../../store';
 import { GYM, LEDGER, ST, type LedgerRow } from '../../data/sample';
 import { kn, kzSigned } from '../../lib/format';
 import { useNav } from '../../shell/nav';
-import { useNotify } from '../../shell/AppShell';
+import { useNotify } from '../../shell/notify';
 import { Area, Btn, Cell, Chips, KV, Note, Page, PageHeader, Section, Sheet, StatBand, Status, T, Table } from '../../ui';
 
 const MEIOS = ['Todos', 'Dinheiro', 'Multicaixa Express', 'TPA', 'Transferência'] as const;
 
 export function Tesouraria() {
   const { c, g, bp, compact } = useTheme();
-  const { bottomInset } = useNav();
   const [meio, setMeio] = useState<(typeof MEIOS)[number]>('Todos');
   const [sel, setSel] = useState<number | null>(null);
   const rows = LEDGER.filter((r) => meio === 'Todos' || r.m === meio);
@@ -40,7 +39,7 @@ export function Tesouraria() {
   );
 
   return (
-    <Page bottomInset={bottomInset}>
+    <Page>
       <PageHeader
         eyebrow="Livro razão · nada se apaga"
         title="Tesouraria"

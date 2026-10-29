@@ -1,5 +1,5 @@
 export { MuntuApp } from './shell/MuntuApp';
-export { ROUTES, isScreenId, type ScreenId, type NavMode } from './shell/nav';
+export { DESKTOP_NAV, MOBILE_TABS, isScreenId, type ScreenId, type UiMode } from './shell/nav';
 export { RootProviders } from './shell/RootProviders';
 export * from './theme';
 export * from './ui';

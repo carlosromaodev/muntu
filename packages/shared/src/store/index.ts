@@ -1,13 +1,13 @@
 import { create } from 'zustand';
-import { APPROVALS, type Approval, TAREFAS_INICIAIS, type StatusKey } from '../data/sample';
+import { APPROVALS, type Approval } from '../data/sample';
 import type { HapticKind } from '../lib/haptics';
 
-export type Role = 'gestao' | 'membro';
+/** Papel na app mobile (o desktop é sempre a gestão do ginásio). */
+export type Role = 'membro' | 'dono';
 export type ThemePref = 'system' | 'light' | 'dark';
 export type Filial = 'todas' | 'talatona' | 'kilamba' | 'maianga';
 
 export type Toast = { id: number; text: string; tone: 'ok' | 'warn' | 'bad' | 'info' };
-export type Tarefa = { id: string; n: string; t: string; quem: string; st: StatusKey; res: string };
 
 type State = {
   role: Role;
@@ -16,8 +16,8 @@ type State = {
   offline: boolean;
   caixaAberto: boolean;
   approvals: Approval[];
-  tarefas: Tarefa[];
   smsDone: Record<string, string>;
+  reservas: Record<string, boolean>;
   toasts: Toast[];
   setRole: (r: Role) => void;
   setThemePref: (t: ThemePref) => void;
@@ -26,9 +26,8 @@ type State = {
   setCaixa: (v: boolean) => void;
   addApproval: (a: Approval) => void;
   decide: (id: string, status: 'aprovado' | 'recusado') => void;
-  addTarefa: (t: Tarefa) => void;
-  updTarefa: (id: string, patch: Partial<Tarefa>) => void;
   markSms: (who: string, at: string) => void;
+  toggleReserva: (id: string) => void;
   toast: (text: string, tone?: Toast['tone']) => void;
   dismiss: (id: number) => void;
 };
@@ -36,14 +35,15 @@ type State = {
 let toastId = 1;
 
 export const useMuntu = create<State>((set) => ({
-  role: 'gestao',
-  themePref: 'system',
+  role: 'membro',
+  // O desenho é claro; o tema escuro fica disponível na Conta / no avatar.
+  themePref: 'light',
   filial: 'todas',
   offline: false,
   caixaAberto: true,
   approvals: APPROVALS,
-  tarefas: TAREFAS_INICIAIS,
   smsDone: {},
+  reservas: { a2: true },
   toasts: [],
   setRole: (role) => set({ role }),
   setThemePref: (themePref) => set({ themePref }),
@@ -52,9 +52,8 @@ export const useMuntu = create<State>((set) => ({
   setCaixa: (caixaAberto) => set({ caixaAberto }),
   addApproval: (a) => set((s) => ({ approvals: [a, ...s.approvals.filter((x) => x.id !== a.id)] })),
   decide: (id, status) => set((s) => ({ approvals: s.approvals.map((a) => (a.id === id ? { ...a, status } : a)) })),
-  addTarefa: (t) => set((s) => ({ tarefas: [t, ...s.tarefas] })),
-  updTarefa: (id, patch) => set((s) => ({ tarefas: s.tarefas.map((t) => (t.id === id ? { ...t, ...patch } : t)) })),
   markSms: (who, at) => set((s) => ({ smsDone: { ...s.smsDone, [who]: at } })),
+  toggleReserva: (id) => set((s) => ({ reservas: { ...s.reservas, [id]: !s.reservas[id] } })),
   toast: (text, tone = 'info') => {
     const id = toastId++;
     set((s) => ({ toasts: [...s.toasts.slice(-2), { id, text, tone }] }));
