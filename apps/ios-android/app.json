@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "MUNTU",
+    "slug": "muntu",
+    "scheme": "muntu",
+    "version": "0.1.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "ao.muntu.app",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "O MUNTU usa o Face ID para confirmar aprovações, estornos e fecho de caixa."
+      }
+    },
+    "android": {
+      "package": "ao.muntu.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#C8640C"
+      },
+      "permissions": [
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
+        "VIBRATE"
+      ],
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "O MUNTU usa o Face ID para confirmar aprovações, estornos e fecho de caixa."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "backgroundColor": "#C8640C"
+        }
+      ]
+    ],
+    "extra": {
+      "navMode": "auto"
+    }
+  }
+}

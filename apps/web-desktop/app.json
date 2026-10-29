@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "MUNTU",
+    "slug": "muntu-web-desktop",
+    "scheme": "muntu-web-desktop",
+    "version": "0.1.0",
+    "userInterfaceStyle": "automatic",
+    "platforms": [
+      "web"
+    ],
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png",
+      "name": "MUNTU",
+      "shortName": "MUNTU",
+      "themeColor": "#C8640C",
+      "backgroundColor": "#FBFAF7",
+      "display": "standalone"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "extra": {
+      "navMode": "top"
+    }
+  }
+}

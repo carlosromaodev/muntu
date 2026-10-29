@@ -1,0 +1,23 @@
+{
+  "name": "muntu",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MUNTU — plataforma de gestão de ginásios (iOS, Android, web desktop e web mobile)",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "web:desktop": "npm run web --workspace @muntu/web-desktop",
+    "web:mobile": "npm run web --workspace @muntu/web-mobile",
+    "ios": "npm run ios --workspace @muntu/ios-android",
+    "android": "npm run android --workspace @muntu/ios-android",
+    "start": "npm run start --workspace @muntu/ios-android",
+    "build:web": "npm run build --workspace @muntu/web-desktop && npm run build --workspace @muntu/web-mobile",
+    "typecheck": "tsc -p packages/shared --noEmit",
+    "fix-deps": "npm exec --workspace @muntu/ios-android -- expo install --fix && npm exec --workspace @muntu/web-desktop -- expo install --fix && npm exec --workspace @muntu/web-mobile -- expo install --fix"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.2"
+  }
+}

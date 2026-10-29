@@ -1,0 +1,19 @@
+{
+  "name": "@muntu/shared",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "peerDependencies": {
+    "@expo-google-fonts/outfit": "*",
+    "expo-haptics": "*",
+    "expo-local-authentication": "*",
+    "expo-splash-screen": "*",
+    "expo-status-bar": "*",
+    "react": "*",
+    "react-native": "*",
+    "react-native-safe-area-context": "*",
+    "react-native-svg": "*",
+    "zustand": "*"
+  }
+}

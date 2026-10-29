@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "MUNTU Mobile",
+    "slug": "muntu-web-mobile",
+    "scheme": "muntu-web-mobile",
+    "version": "0.1.0",
+    "userInterfaceStyle": "automatic",
+    "platforms": [
+      "web"
+    ],
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png",
+      "name": "MUNTU Mobile",
+      "shortName": "MUNTU",
+      "themeColor": "#C8640C",
+      "backgroundColor": "#FBFAF7",
+      "display": "standalone"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "extra": {
+      "navMode": "bottom"
+    }
+  }
+}
