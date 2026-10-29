@@ -40,7 +40,7 @@ export function MuntuApp({ ui, screen, role }: Props) {
     const h = height - insets.top - insets.bottom;
     const page = (
       <EnvCtx.Provider value={{ width: w, height: h }}>
-        <MuntuDesktop {...props} __vh={`${h}px`} />
+        <MuntuDesktop key={`${screen ?? ''}|${role ?? ''}`} {...props} __vh={`${h}px`} />
       </EnvCtx.Provider>
     );
     return (
@@ -66,7 +66,7 @@ export function MuntuApp({ ui, screen, role }: Props) {
     <View style={{ flex: 1, backgroundColor: wide ? '#ebe6d6' : '#fbfaf7', alignItems: 'center' }}>
       <StatusBar style="dark" />
       <View style={{ flex: 1, width: Math.min(width, MOBILE_MAX), backgroundColor: '#fbfaf7', paddingBottom: insets.bottom }}>
-        <MuntuMobile {...props} __safeTop={`${insets.top}px`} />
+        <MuntuMobile key={`${screen ?? ''}|${role ?? ''}`} {...props} __safeTop={`${insets.top}px`} />
       </View>
     </View>
   );
