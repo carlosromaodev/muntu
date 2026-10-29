@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#fbfaf7;color:#1d1c1a;font-family:Outfit,system-ui,sans-serif;font-variant-numeric:tabular-nums}*{box-sizing:border-box}a{color:#9a4c08}a:hover{color:#1d1c1a}button,input,select,textarea{font-family:inherit}button:disabled{cursor:not-allowed}:focus-visible{outline:2px solid #1d1c1a;outline-offset:2px}</style>
+</helmet>
+<div style="display:flex;min-height:100vh;min-width:1024px;background:#fbfaf7">
+
+<aside aria-label="Navegação principal" style="width:{{ sideW }};flex-shrink:0;background:#c8640c;color:#1d1c1a;display:flex;flex-direction:column;position:sticky;top:0;height:100vh">
+<div style="height:80px;display:flex;align-items:center;padding:0 24px;flex-shrink:0">
+<sc-if value="{{ expanded }}" hint-placeholder-val="{{ true }}"><dc-import name="Muntu Logo" variant="C" color="#1d1c1a" size="{{ 26 }}" hint-size="130px,26px"></dc-import></sc-if>
+<sc-if value="{{ collapsed }}"><dc-import name="Muntu Mark" variant="C" color="#1d1c1a" size="{{ 24 }}" hint-size="24px,24px"></dc-import></sc-if>
+</div>
+<nav style="flex:1;display:flex;flex-direction:column;gap:24px;padding:8px 0 24px;overflow:auto">
+<sc-for list="{{ nav }}" as="g" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column">
+<sc-if value="{{ expanded }}" hint-placeholder-val="{{ true }}"><span style="font-size:9px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;padding:0 24px 8px">{{ g.t }}</span></sc-if>
+<sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+<button onClick="{{ it.onClick }}" aria-current="{{ it.cur }}" title="{{ it.label }}" style="height:40px;display:flex;align-items:center;gap:12px;padding:0 24px;border:0;background:{{ it.bg }};color:#1d1c1a;font-size:12px;font-weight:{{ it.fw }};letter-spacing:.16em;text-transform:uppercase;text-align:left;cursor:pointer;white-space:nowrap" style-hover="background:#d9824a">
+<span style="font-size:10px;font-weight:600;letter-spacing:0;width:16px;flex-shrink:0">{{ it.num }}</span>
+<sc-if value="{{ expanded }}" hint-placeholder-val="{{ true }}"><span>{{ it.label }}</span></sc-if>
+</button>
+</sc-for>
+</div>
+</sc-for>
+</nav>
+<sc-if value="{{ expanded }}" hint-placeholder-val="{{ true }}">
+<label style="padding:20px 24px;display:flex;flex-direction:column;gap:6px;border-top:1px solid #1d1c1a;font-size:9px;font-weight:600;letter-spacing:.24em;text-transform:uppercase">Filial
+<select value="{{ filial }}" onChange="{{ setFilial }}" style="height:36px;border:1px solid #1d1c1a;background:transparent;color:#1d1c1a;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:0 8px;cursor:pointer">
+<option value="todas">Todas</option><option value="talatona">Talatona</option><option value="kilamba">Kilamba</option><option value="maianga">Maianga</option>
+</select></label>
+</sc-if>
+<button onClick="{{ toggleSide }}" aria-label="{{ sideLabel }}" style="height:44px;flex-shrink:0;border:0;border-top:1px solid #1d1c1a;background:transparent;color:#1d1c1a;font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;cursor:pointer" style-hover="background:#d9824a">{{ sideLabel }}</button>
+</aside>
+
+<div style="flex:1;min-width:0;display:flex;flex-direction:column">
+<header style="height:80px;display:flex;align-items:center;gap:24px;padding:0 40px;border-bottom:1px solid #e4e0d6;background:#fbfaf7;position:sticky;top:0;z-index:5">
+<button aria-label="Pesquisar membro" style="flex:1;min-width:200px;max-width:560px;height:44px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px;border:0;background:#ebe6d6;color:#55524b;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;text-align:left;cursor:pointer" style-hover="background:#e0d9c5"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">Pesquisar · nome, telefone, NIF, rosto</span><span style="flex-shrink:0;color:#1d1c1a">⌘K</span></button>
+<span style="flex:1"></span>
+<button onClick="{{ goD5 }}" style="height:44px;display:flex;align-items:center;gap:10px;padding:0 4px;border:0;background:transparent;color:#1d1c1a;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;white-space:nowrap;cursor:pointer">Aprovações<span style="min-width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:#1d1c1a;color:#fbfaf7;letter-spacing:0">{{ approvals }}</span></button>
+<span style="font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6b675f;white-space:nowrap">Celma Bento · Recepção</span>
+</header>
+
+<sc-if value="{{ offline }}">
+<div role="status" style="background:#1d1c1a;color:#ebe6d6;display:flex;align-items:center;gap:12px;padding:12px 40px;font-size:13px"><span style="width:8px;height:8px;border-radius:50%;background:#e0b23c"></span><span style="font-weight:600;letter-spacing:.16em;text-transform:uppercase;font-size:11px">Sem rede</span><span>Recepção e catracas continuam a funcionar. 7 operações em fila para sincronizar.</span></div>
+</sc-if>
+
+<main style="flex:1;display:flex;flex-direction:column">
+
+<sc-if value="{{ is.d1 }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="D1 Recepção" style="display:flex;flex-direction:column">
+<div style="display:flex;flex-wrap:wrap;border-bottom:1px solid #e4e0d6">
+<div style="flex:1 1 400px;padding:40px;display:flex;flex-direction:column;gap:20px;min-width:0">
+<span style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f">Segunda, 26 Outubro · Turno da manhã</span>
+<h1 style="margin:0;font-size:40px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;line-height:1.05">Recepção</h1>
+<span style="height:1px;background:#e4e0d6;margin:0 -40px"></span>
+<div style="display:flex;gap:12px;flex-wrap:wrap"><button onClick="{{ goD2 }}" style="height:48px;padding:0 24px;border:0;background:#1d1c1a;color:#fbfaf7;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;cursor:pointer" style-hover="background:#9a4c08">Nova inscrição</button><button onClick="{{ goD3 }}" style="height:40px;padding:0 16px;border:1px solid #1d1c1a;background:transparent;color:#1d1c1a;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;cursor:pointer;height:48px" style-hover="background:#1d1c1a;color:#fbfaf7">Check-in manual</button></div>
+</div><div style="flex:1 1 480px;max-width:640px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#ebe6d6"><div style="padding:32px 24px;min-width:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:24px;border-left:1px solid #d9d4c4;"><span style="font-size:13px;font-weight:300">01</span><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:30px;font-weight:300;line-height:1;white-space:nowrap">42</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Check-ins hoje</span></div></div><div style="padding:32px 24px;min-width:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:24px;border-left:1px solid #d9d4c4;"><span style="font-size:13px;font-weight:300">02</span><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:30px;font-weight:300;line-height:1;white-space:nowrap">18</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Dentro agora</span></div></div><sc-if value="{{ caixa }}" hint-placeholder-val="{{ true }}"><div style="padding:32px 24px;min-width:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:24px;border-left:1px solid #d9d4c4;"><span style="font-size:13px;font-weight:300">03</span><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:30px;font-weight:300;line-height:1;white-space:nowrap">184 500,00</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Kz em caixa</span><button onClick="{{ goD4 }}" style="height:40px;padding:0 16px;border:1px solid #1d1c1a;background:transparent;color:#1d1c1a;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;cursor:pointer;height:32px;align-self:flex-start;margin-top:4px" style-hover="background:#1d1c1a;color:#fbfaf7">Fechar caixa</button></div></div></sc-if><sc-if value="{{ caixaFechado }}"><div style="padding:32px 24px;min-width:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:24px;border-left:1px solid #d9d4c4;"><span style="font-size:13px;font-weight:300">03</span><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:30px;font-weight:300;line-height:1;white-space:nowrap">Fechado</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Caixa</span><button onClick="{{ abrirCaixa }}" style="height:48px;padding:0 24px;border:0;background:#1d1c1a;color:#fbfaf7;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;cursor:pointer;height:32px;padding:0 14px;align-self:flex-start;margin-top:4px" style-hover="background:#9a4c08">Abrir caixa</button></div></div></sc-if></div></div>
+<div style="display:flex;flex-wrap:wrap">
+<section style="flex:999 1 540px;min-width:0;padding:32px 40px;display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#1d1c1a">Check-ins recentes</h2>
+<div style="display:flex;flex-direction:column">
+<div style="display:grid;grid-template-columns:52px minmax(120px,1.3fr) minmax(0,1fr) minmax(0,1fr) 150px;gap:16px;padding:0 0 10px;font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f"><span>Hora</span><span>Membro</span><span>Plano</span><span>Filial</span><span>Estado</span></div>
+<sc-for list="{{ checkins }}" as="r" hint-placeholder-count="6">
+<button onClick="{{ r.onClick }}" style="display:grid;grid-template-columns:52px minmax(120px,1.3fr) minmax(0,1fr) minmax(0,1fr) 150px;gap:16px;align-items:center;padding:14px 0;border:0;border-top:1px solid #e4e0d6;background:transparent;color:#1d1c1a;font-size:14px;text-align:left;cursor:pointer" style-hover="background:#f4f1ea">
+<span style="color:#6b675f">{{ r.h }}</span><span style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ r.n }}</span><span style="color:#55524b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ r.p }}</span><span style="color:#55524b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ r.f }}</span>
+<span style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;color:{{ r.s.c }}"><span style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:{{ r.s.c }}"></span>{{ r.s.l }}</span><span style="font-size:11px;color:#6b675f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ r.why }}</span></span>
+</button>
+</sc-for>
+</div>
+</section>
+<div style="flex:1 1 300px;border-left:1px solid #e4e0d6;display:flex;flex-direction:column">
+<section style="padding:32px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid #e4e0d6">
+<h2 style="margin:0;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#1d1c1a;display:flex;align-items:center;gap:10px"><span style="width:8px;height:8px;border-radius:50%;background:#b42318"></span>Em dívida</h2>
+<sc-for list="{{ divida }}" as="r" hint-placeholder-count="2">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px solid #e4e0d6"><div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:14px;font-weight:500">{{ r.n }}</span><span style="font-size:12px;color:#6b675f">{{ r.d }} · {{ r.v }}</span></div><button onClick="{{ goD3 }}" style="height:40px;padding:0 16px;border:1px solid #1d1c1a;background:transparent;color:#1d1c1a;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;cursor:pointer;height:32px;padding:0 12px" style-hover="background:#1d1c1a;color:#fbfaf7">Cobrar</button></div>
+</sc-for>
+</section>
+<section style="padding:32px;display:flex;flex-direction:column;gap:12px">
+<h2 style="margin:0;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#1d1c1a;display:flex;align-items:center;gap:10px"><span style="width:8px;height:8px;border-radius:50%;background:#c99a1b"></span>A vencer</h2>
+<sc-for list="{{ vencer }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px solid #e4e0d6;font-size:14px"><span><span style="font-weight:500">{{ r.n }}</span><span style="color:#6b675f"> · {{ r.d }}</span></span><span style="white-space:nowrap">{{ r.v }}</span></div>
+</sc-for>
+</section>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ is.d2 }}">
+<div data-screen-label="D2 Nova inscrição" style="display:flex;flex-direction:column">
+<div style="display:flex;flex-wrap:wrap;border-bottom:1px solid #e4e0d6">
+<div style="flex:1 1 400px;padding:40px;display:flex;flex-direction:column;gap:20px;min-width:0">
+<span style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f">Talatona · Uma tarefa, um ecrã</span>
+<h1 style="margin:0;font-size:40px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;line-height:1.05">Nova inscrição</h1>
+<span style="height:1px;background:#e4e0d6;margin:0 -40px"></span>
+<div role="list" aria-label="Passos" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px"><sc-for list="{{ steps }}" as="s" hint-placeholder-count="4"><div role="listitem" style="display:flex;flex-direction:column;gap:8px"><span style="height:4px;background:{{ s.bar }}"></span><span style="font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:{{ s.color }}">{{ s.n }} · {{ s.l }}</span></div></sc-for></div>
+</div><div style="flex:1 1 480px;max-width:640px;display:grid;grid-template-columns:repeat(1,minmax(0,1fr));background:#ebe6d6"><div style="padding:32px 24px;min-width:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:24px;border-left:1px solid #d9d4c4;"><span style="font-size:13px;font-weight:300">Tempo</span><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:30px;font-weight:300;line-height:1;white-space:nowrap">{{ timer }}</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Meta: 3 minutos</span></div></div></div></div>
+<section style="padding:40px;display:flex;flex-direction:column;gap:24px;min-height:420px">
+<sc-if value="{{ st0 }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:40px">
+<div style="background:#1d1c1a;color:#ebe6d6;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px">
+<div style="width:72%;aspect-ratio:1.58;border:2px solid #c8640c;display:flex;align-items:flex-end;padding:12px"><span style="font-size:10px;font-weight:600;letter-spacing:.2em;color:#e68a3a">BILHETE DE IDENTIDADE</span></div>
+<span style="font-size:13px;color:#d9d4c4">BI lido pela câmara</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<span style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f;color:#2e7d4f">Preenchido a partir do BI · confirme</span>
+<sc-for list="{{ cliente }}" as="f" hint-placeholder-count="4">
+<label style="display:flex;flex-direction:column;gap:6px;font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f">{{ f.l }}<input value="{{ f.v }}" readonly="readonly" style="height:44px;border:0;border-bottom:1px solid #1d1c1a;background:transparent;padding:0;font-size:18px;font-weight:300;color:#1d1c1a;letter-spacing:0;text-transform:none"></label>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ st1 }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));border-top:1px solid #e4e0d6;border-left:1px solid #e4e0d6">
+<sc-for list="{{ plans }}" as="p" hint-placeholder-count="4">
+<button onClick="{{ p.onClick }}" disabled="{{ p.disabled }}" aria-pressed="{{ p.pressed }}" style="display:flex;flex-direction:column;gap:12px;padding:24px;border:0;border-right:1px solid #e4e0d6;border-bottom:1px solid #e4e0d6;box-shadow:{{ p.ring }};background:{{ p.bg }};text-align:left;color:#1d1c1a;opacity:{{ p.op }};min-height:220px;cursor:pointer">
+<span style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f">{{ p.scope }}</span>
+<span style="font-size:22px;font-weight:400;letter-spacing:.14em;text-transform:uppercase">{{ p.n }}</span>
+<span style="font-size:13px;color:#55524b">{{ p.d }}</span>
+<span style="flex:1"></span>
+<span style="font-size:20px;font-weight:300">{{ p.price }}</span>
+<span style="font-size:12px;color:#b42318">{{ p.note }}</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ st2 }}">
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px">
+<fieldset style="border:0;margin:0;padding:0;display:flex;flex-direction:column">
+<legend style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f;padding:0 0 12px">Meio de pagamento</legend>
+<sc-for list="{{ methods }}" as="m" hint-placeholder-count="4">
+<button onClick="{{ m.onClick }}" aria-pressed="{{ m.pressed }}" style="height:60px;display:flex;align-items:center;gap:16px;padding:0 16px;border:0;border-top:1px solid #e4e0d6;background:{{ m.bg }};font-size:15px;color:#1d1c1a;text-align:left;cursor:pointer" style-hover="background:#f4f1ea"><span style="width:14px;height:14px;border:1px solid #1d1c1a;background:{{ m.dot }};flex-shrink:0"></span><span style="flex:1;font-weight:500">{{ m.l }}</span><span style="font-size:12px;color:#6b675f">{{ m.d }}</span></button>
+</sc-for>
+</fieldset>
+<div style="background:#ebe6d6;padding:32px;display:flex;flex-direction:column;gap:16px">
+<span style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f">A cobrar · {{ planName }}</span>
+<span style="font-size:44px;font-weight:300;line-height:1">{{ planPrice }}</span>
+<span style="font-size:13px;color:#55524b">A subscrição só fica activa com o pagamento confirmado.</span>
+<sc-if value="{{ pay.idle }}" hint-placeholder-val="{{ true }}"><button onClick="{{ cobrar }}" style="height:48px;padding:0 24px;border:0;background:#1d1c1a;color:#fbfaf7;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;cursor:pointer;align-self:flex-start" style-hover="background:#9a4c08">Cobrar {{ planPrice }}</button></sc-if>
+<sc-if value="{{ pay.waiting }}"><div role="status" style="display:flex;flex-direction:column;gap:8px;border-top:2px solid #c99a1b;padding-top:14px"><span style="margin:0;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#1d1c1a;color:#7a5800">À espera do Multicaixa Express</span><span style="font-size:13px;color:#55524b">Pedido enviado para 923 456 789. O cliente confirma no telemóvel.</span><button onClick="{{ falhar }}" style="align-self:flex-start;border:0;background:none;padding:0;font-size:12px;color:#55524b;text-decoration:underline;cursor:pointer">Simular falha</button></div></sc-if>
+<sc-if value="{{ pay.failed }}"><div role="alert" style="display:flex;flex-direction:column;gap:10px;border-top:2px solid #b42318;padding-top:14px"><span style="margin:0;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#1d1c1a;color:#b42318">Pagamento não confirmado</span><span style="font-size:13px;color:#55524b">O cliente recusou ou não tinha saldo. Tente de novo ou troque o meio.</span><button onClick="{{ cobrar }}" style="height:48px;padding:0 24px;border:0;background:#1d1c1a;color:#fbfaf7;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;cursor:pointer;height:40px;align-self:flex-start" style-hover="background:#9a4c08">Tentar de novo</button></div></sc-if>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ st3 }}">
+<div style="display:flex;gap:48px;align-items:center;flex-wrap:wrap">
+<div style="background:#fff;border:1px solid #e4e0d6;padding:16px"><div role="img" aria-label="Código QR de acesso" style="display:grid;grid-template-columns:repeat(21,9px);grid-auto-rows:9px">
+<sc-for list="{{ qr }}" as="c" hint-placeholder-count="0"><span style="background:{{ c }}"></span></sc-for>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<span style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#2e7d4f"><span style="width:8px;height:8px;border-radius:50%;background:#2e7d4f"></span>Pago e activo</span>
+<span style="font-size:32px;font-weight:400;letter-spacing:.14em;text-transform:uppercase">Kátia Muondo</span>
+<span style="font-size:14px;color:#55524b">{{ planName }} · {{ planPrice }} · Factura AGT FR TAL/2026/1202</span>
+<sc-if value="{{ notSent }}" hint-placeholder-val="{{ true }}"><button onClick="{{ enviar }}" style="height:48px;padding:0 24px;border:0;background:#1d1c1a;color:#fbfaf7;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;cursor:pointer;align-self:flex-start" style-hover="background:#9a4c08">Enviar QR e factura por WhatsApp</button></sc-if>
+<sc-if value="{{ sent }}"><span role="status" style="font-size:14px;color:#2e7d4f">Enviado para 923 456 789. Inscrição feita em {{ timer }}.</span></sc-if>
+</div>
+</div>
+</sc-if>
+</section>
+<div style="display:flex;justify-content:space-between;gap:16px;padding:24px 40px;border-top:1px solid #e4e0d6">
+<button onClick="{{ back }}" style="height:40px;padding:0 16px;border:1px solid #1d1c1a;background:transparent;color:#1d1c1a;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;cursor:pointer;height:48px" style-hover="background:#1d1c1a;color:#fbfaf7">{{ backLabel }}</button>
+<button onClick="{{ next }}" disabled="{{ nextDisabled }}" style="height:48px;padding:0 24px;border:0;background:#1d1c1a;color:#fbfaf7;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;cursor:pointer;opacity:{{ nextOp }}" style-hover="background:#9a4c08">{{ nextLabel }}</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ is.d3 }}">
+<div data-screen-label="D3 Ficha do membro" style="display:flex;flex-direction:column">
+<div style="display:flex;flex-wrap:wrap;border-bottom:1px solid #e4e0d6">
+<div style="flex:1 1 400px;padding:40px;display:flex;flex-direction:column;gap:20px;min-width:0">
+<span style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f">Membros · Ficha</span>
+<h1 style="margin:0;font-size:40px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;line-height:1.05">Délcio Ngola</h1>
+<span style="height:1px;background:#e4e0d6;margin:0 -40px"></span>
+<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><span style="font-size:14px;color:#55524b">{{ m.origem }}</span><span style="flex:1"></span><div role="group" aria-label="Pré-visualizar estado" style="display:flex;border:1px solid #1d1c1a"><sc-for list="{{ mStates }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.onClick }}" aria-pressed="{{ o.pressed }}" style="height:32px;padding:0 12px;border:0;background:{{ o.bg }};color:{{ o.color }};font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;white-space:nowrap">{{ o.l }}</button></sc-for></div></div>
+</div><div style="flex:1 1 480px;max-width:640px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:#ebe6d6"><div style="padding:32px 24px;display:flex;flex-direction:column;justify-content:space-between;gap:20px;border-left:1px solid #d9d4c4"><span style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;color:{{ m.s.c }}"><span style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:{{ m.s.c }}"></span>{{ m.s.l }}</span><div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:56px;font-weight:300;line-height:1">{{ m.dias }}</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">{{ m.diasLabel }}</span></div></div><div style="padding:32px 24px;display:flex;flex-direction:column;justify-content:space-between;gap:20px;border-left:1px solid #d9d4c4"><span style="font-size:13px;font-weight:300">Plano</span><span style="font-size:15px;font-weight:500;line-height:1.4">{{ m.plano }}</span></div></div></div>
+<sc-if value="{{ m.banner }}"><div role="status" style="display:flex;align-items:center;gap:12px;padding:14px 40px;background:{{ m.s.bg }};color:{{ m.s.c }};font-size:14px;font-weight:500;border-bottom:1px solid #e4e0d6"><span style="width:8px;height:8px;border-radius:50%;background:{{ m.s.c }};flex-shrink:0"></span>{{ m.banner }}</div></sc-if>
+<div style="display:flex;flex-wrap:wrap">
+<div style="flex:1 1 260px;max-width:340px;border-right:1px solid #e4e0d6;display:flex;flex-direction:column">
+<div role="img" aria-label="Foto do membro" style="aspect-ratio:1;background:#ebe6d6;display:flex;align-items:center;justify-content:center;font-size:72px;font-weight:300;letter-spacing:.1em;color:#55524b">DN</div>
+<div style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<sc-for list="{{ m.actions }}" as="a" hint-placeholder-count="4"><button onClick="{{ a.onClick }}" style="min-height:44px;padding:4px 8px;border:{{ a.border }};background:{{ a.bg }};color:{{ a.color }};font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;grid-column:{{ a.span }}" style-hover="opacity:.85">{{ a.l }}</button></sc-for>
+</div>
+<section style="padding:0 24px 24px;display:flex;flex-direction:column;gap:12px">
+<h2 style="margin:0;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#1d1c1a">Filiais acessíveis</h2>
+<div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ m.filiais }}" as="f" hint-placeholder-count="3"><span style="padding:6px 10px;background:#ebe6d6;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase">{{ f }}</span></sc-for></div>
+</section>
+</div>
+<div style="flex:3 1 420px;min-width:0;padding:32px 40px;display:flex;flex-direction:column;gap:40px">
+<sc-if value="{{ m.showPay }}" hint-placeholder-val="{{ true }}">
+<section style="display:flex;flex-direction:column;gap:12px">
+<h2 style="margin:0;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#1d1c1a">Pagamentos</h2>
+<div>
+<sc-for list="{{ m.pays }}" as="r" hint-placeholder-count="3">
+<div style="display:grid;grid-template-columns:90px minmax(0,1.2fr) minmax(0,1fr) 120px 110px;align-items:center;gap:16px;padding:14px 0;border-top:1px solid #e4e0d6;font-size:14px">
+<span style="color:#6b675f">{{ r.d }}</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ r.desc }}</span>
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="color:#55524b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ r.m }}</span><span style="color:#6b675f;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ r.f }}</span></span><span style="text-align:right;white-space:nowrap">{{ r.v }}</span>
+<span style="justify-self:end"><span style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;color:{{ r.s.c }}"><span style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:{{ r.s.c }}"></span>{{ r.s.l }}</span></span>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-if>
+<sc-if value="{{ m.redeOnly }}"><p style="margin:0;padding:20px;background:#ebe6d6;font-size:14px;line-height:1.5;color:#1d1c1a">Membro de outro ginásio da Rede MUNTU. Só vê se o acesso é válido, o nome e a foto. Pagamentos e dados pessoais ficam no ginásio de origem.</p></sc-if>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h2 style="margin:0;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#1d1c1a">Entradas</h2>
+<div>
+<sc-for list="{{ m.entradas }}" as="r" hint-placeholder-count="4">
+<div style="display:grid;grid-template-columns:130px minmax(0,1fr) minmax(0,1fr);gap:16px;padding:14px 0;border-top:1px solid #e4e0d6;font-size:14px"><span style="color:#6b675f">{{ r.d }}</span><span>{{ r.f }}</span><span style="color:#55524b">{{ r.m }}</span></div>
+</sc-for>
+</div>
+</section>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ is.d4 }}">
+<div data-screen-label="D4 Fecho de caixa" style="display:flex;flex-direction:column">
+<div style="display:flex;flex-wrap:wrap;border-bottom:1px solid #e4e0d6">
+<div style="flex:1 1 400px;padding:40px;display:flex;flex-direction:column;gap:20px;min-width:0">
+<span style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f">Talatona · Turno da manhã · Celma Bento</span>
+<h1 style="margin:0;font-size:40px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;line-height:1.05">Fecho de caixa</h1>
+<span style="height:1px;background:#e4e0d6;margin:0 -40px"></span>
+<p style="margin:0;font-size:15px;line-height:1.5;color:#55524b;max-width:560px">{{ closeIntro }}</p>
+</div><div style="flex:1 1 480px;max-width:640px;display:grid;grid-template-columns:repeat(1,minmax(0,1fr));background:#ebe6d6"><div style="padding:32px 24px;display:flex;flex-direction:column;justify-content:space-between;gap:20px;border-left:1px solid #d9d4c4;background:{{ difBg }};color:{{ difFg }}"><span style="font-size:13px;font-weight:300">Diferença</span><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:36px;font-weight:300;line-height:1;white-space:nowrap">{{ difBig }}</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">{{ difLabel }}</span></div></div></div></div>
+<section style="padding:32px 40px;display:flex;flex-direction:column;gap:24px;max-width:960px">
+<div>
+<div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:16px;padding:0 0 10px;font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f"><span>Meio</span><span>Contado (Kz)</span><span>{{ colEsperado }}</span><span style="text-align:right">{{ colDif }}</span></div>
+<sc-for list="{{ closeRows }}" as="r" hint-placeholder-count="4">
+<div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:center;padding:12px 0;border-top:1px solid #e4e0d6;font-size:15px">
+<label for="{{ r.id }}" style="font-weight:500">{{ r.l }}</label>
+<input id="{{ r.id }}" value="{{ r.val }}" onChange="{{ r.onInput }}" readonly="{{ r.ro }}" inputmode="numeric" style="height:44px;border:0;border-bottom:1px solid #1d1c1a;background:transparent;padding:0;font-size:20px;font-weight:300;color:#1d1c1a;width:100%">
+<span style="color:#55524b">{{ r.esp }}</span><span style="text-align:right;color:{{ r.difC }};font-weight:500">{{ r.dif }}</span>
+</div>
+</sc-for>
+<div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:16px;padding:16px 0;border-top:2px solid #1d1c1a;font-size:15px;font-weight:600"><span style="letter-spacing:.16em;text-transform:uppercase;font-size:12px">Total</span><span>{{ totContado }}</span><span>{{ totEsp }}</span><span style="text-align:right;color:{{ totDifC }}">{{ totDif }}</span></div>
+</div>
+<sc-if value="{{ cl.count }}" hint-placeholder-val="{{ true }}"><button onClick="{{ revelar }}" style="height:48px;padding:0 24px;border:0;background:#1d1c1a;color:#fbfaf7;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;cursor:pointer;align-self:flex-start" style-hover="background:#9a4c08">Fechar e revelar diferença</button></sc-if>
+<sc-if value="{{ cl.zero }}"><div role="status" style="display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500;color:#2e7d4f"><span style="width:8px;height:8px;border-radius:50%;background:#2e7d4f"></span>Sem diferença. Caixa fechado às 14:02.</div></sc-if>
+<sc-if value="{{ cl.diff }}">
+<div style="display:flex;flex-direction:column;gap:16px;max-width:620px">
+<label style="display:flex;flex-direction:column;gap:8px;font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f">Justificação da diferença · obrigatória<textarea value="{{ just }}" onChange="{{ setJust }}" rows="3" placeholder="Explique o que aconteceu" style="border:1px solid #1d1c1a;background:#fff;padding:12px;font-size:15px;color:#1d1c1a;letter-spacing:0;text-transform:none;resize:vertical"></textarea></label>
+<button onClick="{{ pedirFecho }}" disabled="{{ noJust }}" style="height:48px;padding:0 24px;border:0;background:#1d1c1a;color:#fbfaf7;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;cursor:pointer;align-self:flex-start;opacity:{{ justOp }}" style-hover="background:#9a4c08">Pedir aprovação ao dono</button>
+</div>
+</sc-if>
+<sc-if value="{{ cl.pending }}"><div role="status" style="display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500;color:#7a5800"><span style="width:8px;height:8px;border-radius:50%;background:#c99a1b"></span>Diferença de {{ totDif }} a aguardar aprovação do dono. Caixa fechado.</div></sc-if>
+</section>
+</div>
+</sc-if>
+
+<sc-if value="{{ is.d5 }}">
+<div data-screen-label="D5 Tesouraria" style="display:flex;flex-direction:column">
+<div style="display:flex;flex-wrap:wrap;border-bottom:1px solid #e4e0d6">
+<div style="flex:1 1 400px;padding:40px;display:flex;flex-direction:column;gap:20px;min-width:0">
+<span style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f">Livro razão · nada se apaga</span>
+<h1 style="margin:0;font-size:40px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;line-height:1.05">Tesouraria</h1>
+<span style="height:1px;background:#e4e0d6;margin:0 -40px"></span>
+<div role="group" aria-label="Filtrar por meio" style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ chips }}" as="c" hint-placeholder-count="5"><button onClick="{{ c.onClick }}" aria-pressed="{{ c.pressed }}" style="height:32px;padding:0 12px;border:1px solid #1d1c1a;background:{{ c.bg }};color:{{ c.color }};font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;white-space:nowrap">{{ c.l }}</button></sc-for></div>
+</div><div style="flex:1 1 480px;max-width:640px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#ebe6d6"><div style="padding:32px 24px;min-width:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:24px;border-left:1px solid #d9d4c4;"><span style="font-size:13px;font-weight:300">01</span><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:30px;font-weight:300;line-height:1;white-space:nowrap">166 500,00</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Kz entradas</span></div></div><div style="padding:32px 24px;min-width:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:24px;border-left:1px solid #d9d4c4;"><span style="font-size:13px;font-weight:300">02</span><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:30px;font-weight:300;line-height:1;white-space:nowrap">42 500,00</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Kz saídas</span></div></div><div style="padding:32px 24px;min-width:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:24px;border-left:1px solid #d9d4c4;background:#c8640c;color:#1d1c1a;"><span style="font-size:13px;font-weight:300">03</span><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:30px;font-weight:300;line-height:1;white-space:nowrap">124 000,00</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Kz saldo</span></div></div></div></div>
+<div style="display:flex;align-items:flex-start">
+<section style="flex:1;min-width:0;padding:32px 40px;overflow-x:auto">
+<div style="min-width:620px">
+<div style="display:grid;grid-template-columns:48px minmax(0,1.3fr) minmax(0,1.2fr) minmax(0,.8fr) 120px 150px;gap:16px;padding:0 0 10px;font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f"><span>Hora</span><span>Movimento</span><span>Origem</span><span>Meio</span><span style="text-align:right">Valor</span><span>Estado</span></div>
+<sc-for list="{{ ledger }}" as="r" hint-placeholder-count="8">
+<button onClick="{{ r.onClick }}" aria-pressed="{{ r.pressed }}" style="width:100%;display:grid;grid-template-columns:48px minmax(0,1.3fr) minmax(0,1.2fr) minmax(0,.8fr) 120px 150px;gap:16px;align-items:center;padding:14px 8px;margin:0 -8px;border:0;border-top:1px solid #e4e0d6;background:{{ r.bg }};font-size:14px;color:#1d1c1a;text-align:left;cursor:pointer" style-hover="background:#f4f1ea">
+<span style="color:#6b675f">{{ r.h }}</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ r.d }}</span><span style="color:#9a4c08;text-decoration:underline;text-underline-offset:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ r.o }}</span><span style="color:#55524b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ r.m }}</span><span style="text-align:right;font-weight:500;white-space:nowrap">{{ r.v }}</span>
+<span style="min-width:0;overflow:hidden"><span style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;color:{{ r.s.c }}"><span style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:{{ r.s.c }}"></span>{{ r.s.l }}</span></span>
+</button>
+</sc-for>
+<sc-if value="{{ ledgerEmpty }}"><p style="margin:0;padding:24px 0;border-top:1px solid #e4e0d6;font-size:14px;color:#6b675f">Sem movimentos com este meio hoje.</p></sc-if>
+</div>
+</section>
+<sc-if value="{{ hasSel }}">
+<aside aria-label="Detalhe do movimento" style="width:320px;flex-shrink:0;align-self:stretch;border-left:1px solid #e4e0d6;background:#f4f1ea;padding:32px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f">Movimento · {{ sel.h }}</span><button onClick="{{ closeSel }}" aria-label="Fechar detalhe" style="border:0;background:none;padding:4px;font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#1d1c1a;cursor:pointer">Fechar ✕</button></div>
+<span style="font-size:32px;font-weight:300">{{ sel.v }}</span>
+<span style="font-size:15px;font-weight:500">{{ sel.d }}</span>
+<dl style="margin:0;display:flex;flex-direction:column;font-size:13px">
+<div style="display:flex;justify-content:space-between;gap:8px;border-top:1px solid #d9d4c4;padding:10px 0"><dt style="color:#6b675f">Origem</dt><dd style="margin:0;text-align:right">{{ sel.o }}</dd></div>
+<div style="display:flex;justify-content:space-between;gap:8px;border-top:1px solid #d9d4c4;padding:10px 0"><dt style="color:#6b675f">Meio</dt><dd style="margin:0">{{ sel.m }}</dd></div>
+<div style="display:flex;justify-content:space-between;gap:8px;border-top:1px solid #d9d4c4;padding:10px 0"><dt style="color:#6b675f">Operador</dt><dd style="margin:0">Celma Bento</dd></div>
+<div style="display:flex;justify-content:space-between;gap:8px;border-top:1px solid #d9d4c4;padding:10px 0"><dt style="color:#6b675f">Factura AGT</dt><dd style="margin:0">{{ sel.fac }}</dd></div>
+</dl>
+<sc-if value="{{ sel.note }}"><div role="status" style="padding:12px;background:{{ sel.s.bg }};color:{{ sel.s.c }};font-size:13px;font-weight:500">{{ sel.note }}</div></sc-if>
+<sc-if value="{{ est.can }}"><button onClick="{{ abrirEstorno }}" style="height:44px;border:1px solid #b42318;background:transparent;color:#b42318;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;cursor:pointer" style-hover="background:#f7e1de">Estornar</button></sc-if>
+<sc-if value="{{ est.form }}">
+<div style="display:flex;flex-direction:column;gap:10px">
+<label style="display:flex;flex-direction:column;gap:8px;font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f">Motivo · obrigatório<textarea value="{{ motivo }}" onChange="{{ setMotivo }}" rows="3" placeholder="Ex.: cobrança duplicada no TPA" style="border:1px solid #1d1c1a;background:#fff;padding:10px;font-size:14px;color:#1d1c1a;letter-spacing:0;text-transform:none;resize:vertical"></textarea></label>
+<button onClick="{{ pedirEstorno }}" disabled="{{ noMotivo }}" style="height:48px;padding:0 24px;border:0;background:#1d1c1a;color:#fbfaf7;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;cursor:pointer;height:44px;opacity:{{ motivoOp }}" style-hover="background:#9a4c08">Pedir aprovação</button>
+<span style="font-size:12px;line-height:1.5;color:#55524b">O original fica no livro razão. O estorno entra como novo movimento depois de aprovado.</span>
+</div>
+</sc-if>
+<sc-if value="{{ est.sent }}"><div role="status" style="padding:12px;background:#f5ecd0;color:#7a5800;font-size:13px;font-weight:500">Pedido enviado ao dono. A aguardar aprovação com biometria.</div></sc-if>
+</aside>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ is.d6 }}">
+<div data-screen-label="D6 Painel do dono" style="display:flex;flex-direction:column">
+<div style="display:flex;flex-wrap:wrap;border-bottom:1px solid #e4e0d6">
+<div style="flex:1 1 400px;padding:40px;display:flex;flex-direction:column;gap:20px;min-width:0">
+<span style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f">{{ dash.scope }} · Outubro 2026</span>
+<h1 style="margin:0;font-size:40px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;line-height:1.05">Painel do dono</h1>
+<span style="height:1px;background:#e4e0d6;margin:0 -40px"></span>
+<span style="font-size:15px;color:#55524b">O que devia ter entrado, o que entrou e porquê a diferença.</span>
+</div><div style="flex:1 1 480px;max-width:640px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#ebe6d6"><div style="padding:32px 24px;min-width:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:24px;border-left:1px solid #d9d4c4;"><span style="font-size:13px;font-weight:300">01</span><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:30px;font-weight:300;line-height:1;white-space:nowrap">{{ dash.e }}</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Kz · Receita esperada</span></div></div><div style="padding:32px 24px;min-width:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:24px;border-left:1px solid #d9d4c4;"><span style="font-size:13px;font-weight:300">02</span><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:30px;font-weight:300;line-height:1;white-space:nowrap">{{ dash.r }}</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Kz · Recebida</span></div></div><div style="padding:32px 24px;min-width:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:24px;border-left:1px solid #d9d4c4;background:#c8640c;color:#1d1c1a;"><span style="font-size:13px;font-weight:300">03</span><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:30px;font-weight:300;line-height:1;white-space:nowrap">{{ dash.d }}</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Kz · Diferença</span></div></div></div></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr))">
+<section style="padding:32px 40px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid #e4e0d6">
+<h2 style="margin:0;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#1d1c1a">A diferença, linha a linha</h2>
+<div><sc-for list="{{ dash.lines }}" as="l" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 72px 120px;gap:16px;align-items:center;padding:14px 0;border-top:1px solid #e4e0d6;font-size:14px"><span>{{ l.t }}</span><span style="font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b675f">{{ l.f }}</span><span style="text-align:right;font-weight:500;white-space:nowrap">{{ l.v }}</span></div>
+</sc-for></div>
+</section>
+<section style="padding:32px 40px;display:flex;flex-direction:column;gap:12px;border-left:1px solid #e4e0d6;border-bottom:1px solid #e4e0d6">
+<h2 style="margin:0;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#1d1c1a;display:flex;align-items:center;gap:10px"><span style="width:8px;height:8px;border-radius:50%;background:#b42318"></span>Fugas detectadas</h2>
+<div><sc-for list="{{ dash.fugas }}" as="l" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:3px;padding:14px 0;border-top:1px solid #e4e0d6"><span style="font-size:14px">{{ l.t }}</span><span style="font-size:12px;color:#6b675f">{{ l.f }} · {{ l.h }}</span></div>
+</sc-for></div>
+</section>
+<section style="padding:32px 40px;display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#1d1c1a">Ocupação por hora · média da semana</h2>
+<div role="img" aria-label="Pico de ocupação às 19h" style="height:200px;display:flex;align-items:flex-end;gap:4px">
+<sc-for list="{{ occ }}" as="o" hint-placeholder-count="17"><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end"><span style="width:100%;height:{{ o.h }};background:{{ o.c }}"></span><span style="font-size:10px;color:#6b675f;height:12px">{{ o.l }}</span></div></sc-for>
+</div>
+</section>
+<section style="padding:32px 40px;display:flex;flex-direction:column;gap:12px;border-left:1px solid #e4e0d6">
+<h2 style="margin:0;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#1d1c1a">Comparativo de filiais</h2>
+<div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) 60px 56px 72px;gap:16px;padding:0 0 10px;font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f"><span>Filial</span><span style="text-align:right">Recebido</span><span style="text-align:right">Activos</span><span style="text-align:right">Churn</span><span style="text-align:right">Ocupação</span></div>
+<sc-for list="{{ comp }}" as="c" hint-placeholder-count="3">
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) 60px 56px 72px;gap:16px;padding:14px 0;border-top:1px solid #e4e0d6;font-size:14px;background:{{ c.bg }};font-weight:{{ c.w }}"><span>{{ c.n }}</span><span style="text-align:right;white-space:nowrap">{{ c.r }}</span><span style="text-align:right">{{ c.a }}</span><span style="text-align:right">{{ c.ch }}</span><span style="text-align:right">{{ c.o }}</span></div>
+</sc-for>
+</div>
+</section>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ is.d7 }}">
+<div data-screen-label="D7 Planos e regras" style="display:flex;flex-direction:column">
+<div style="display:flex;flex-wrap:wrap;border-bottom:1px solid #e4e0d6">
+<div style="flex:1 1 400px;padding:40px;display:flex;flex-direction:column;gap:20px;min-width:0">
+<span style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f">Rede Mwangolé Fit · 3 filiais</span>
+<h1 style="margin:0;font-size:40px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;line-height:1.05">Planos e regras</h1>
+<span style="height:1px;background:#e4e0d6;margin:0 -40px"></span>
+<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><span style="font-size:14px;color:#55524b;flex:1;min-width:240px">Alterar o preço de um plano com membros activos precisa de aprovação do dono.</span><button style="height:48px;padding:0 24px;border:0;background:#1d1c1a;color:#fbfaf7;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;cursor:pointer" style-hover="background:#9a4c08">Novo plano</button></div>
+</div></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
+<sc-for list="{{ planos }}" as="p" hint-placeholder-count="6">
+<section style="padding:32px;display:flex;flex-direction:column;gap:14px;border-right:1px solid #e4e0d6;border-bottom:1px solid #e4e0d6;background:{{ p.bg }}">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-size:13px;font-weight:300">{{ p.num }}</span><span style="padding:4px 8px;background:#ebe6d6;font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase">{{ p.scope }}</span></div>
+<h2 style="margin:0;font-size:20px;font-weight:400;letter-spacing:.14em;text-transform:uppercase">{{ p.n }}</h2>
+<span style="font-size:28px;font-weight:300">{{ p.price }}</span>
+<dl style="margin:0;display:flex;flex-direction:column;font-size:13px">
+<div style="display:flex;justify-content:space-between;gap:8px;border-top:1px solid #e4e0d6;padding:8px 0"><dt style="color:#6b675f">Acesso</dt><dd style="margin:0;text-align:right">{{ p.acesso }}</dd></div>
+<div style="display:flex;justify-content:space-between;gap:8px;border-top:1px solid #e4e0d6;padding:8px 0"><dt style="color:#6b675f">Horário</dt><dd style="margin:0">{{ p.hor }}</dd></div>
+<div style="display:flex;justify-content:space-between;gap:8px;border-top:1px solid #e4e0d6;padding:8px 0"><dt style="color:#6b675f">Desconto máximo</dt><dd style="margin:0">{{ p.desc }}</dd></div>
+<div style="display:flex;justify-content:space-between;gap:8px;border-top:1px solid #e4e0d6;padding:8px 0"><dt style="color:#6b675f">Membros</dt><dd style="margin:0">{{ p.ativos }}</dd></div>
+</dl>
+<sc-if value="{{ p.editing }}"><div role="status" style="padding:12px;background:#f5ecd0;color:#7a5800;font-size:13px;line-height:1.45">{{ p.warn }}</div></sc-if>
+<button onClick="{{ p.onEdit }}" style="height:40px;padding:0 16px;border:1px solid #1d1c1a;background:transparent;color:#1d1c1a;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;cursor:pointer;align-self:flex-start" style-hover="background:#1d1c1a;color:#fbfaf7">{{ p.editLabel }}</button>
+</section>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ is.d8 }}">
+<div data-screen-label="D8 Rede MUNTU" style="display:flex;flex-direction:column">
+<div style="display:flex;flex-wrap:wrap;border-bottom:1px solid #e4e0d6">
+<div style="flex:1 1 400px;padding:40px;display:flex;flex-direction:column;gap:20px;min-width:0">
+<span style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f">Acesso entre ginásios · Outubro 2026</span>
+<h1 style="margin:0;font-size:40px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;line-height:1.05">Rede MUNTU</h1>
+<span style="height:1px;background:#e4e0d6;margin:0 -40px"></span>
+<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><span style="font-size:14px;color:#55524b;flex:1;min-width:240px">Liquidação automática a 31/10. Os parceiros só vêem acesso válido, nome e foto.</span><button style="height:48px;padding:0 24px;border:0;background:#1d1c1a;color:#fbfaf7;font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;cursor:pointer" style-hover="background:#9a4c08">Convidar ginásio</button></div>
+</div><div style="flex:1 1 480px;max-width:640px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#ebe6d6"><div style="padding:32px 24px;min-width:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:24px;border-left:1px solid #d9d4c4;"><span style="font-size:13px;font-weight:300">01</span><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:30px;font-weight:300;line-height:1;white-space:nowrap">186 000,00</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Kz a receber</span></div></div><div style="padding:32px 24px;min-width:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:24px;border-left:1px solid #d9d4c4;"><span style="font-size:13px;font-weight:300">02</span><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:30px;font-weight:300;line-height:1;white-space:nowrap">92 000,00</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Kz a pagar</span></div></div><div style="padding:32px 24px;min-width:0;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:24px;border-left:1px solid #d9d4c4;background:#c8640c;color:#1d1c1a;"><span style="font-size:13px;font-weight:300">03</span><div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:30px;font-weight:300;line-height:1;white-space:nowrap">94 000,00</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Kz saldo do mês</span></div></div></div></div>
+<section style="padding:32px 40px">
+<div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 84px 76px 130px 170px;gap:16px;padding:0 0 10px;font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f"><span>Ginásio parceiro</span><span>Cidade</span><span style="text-align:right">Recebidas</span><span style="text-align:right">Enviadas</span><span style="text-align:right">Saldo</span><span>Estado</span></div>
+<sc-for list="{{ parceiros }}" as="p" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 84px 76px 130px 170px;gap:16px;align-items:center;padding:16px 0;border-top:1px solid #e4e0d6;font-size:14px">
+<span style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ p.n }}</span><span style="color:#55524b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ p.c }}</span><span style="text-align:right">{{ p.rec }}</span><span style="text-align:right">{{ p.env }}</span><span style="text-align:right;font-weight:500;white-space:nowrap">{{ p.saldo }}</span>
+<span style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;color:{{ p.s.c }}"><span style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:{{ p.s.c }}"></span>{{ p.s.l }}</span><span style="font-size:11px;color:#6b675f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{ p.why }}</span></span>
+</div>
+</sc-for>
+</section>
+</div>
+</sc-if>
+
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;semRede&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const ST = {
+  pago:{l:'Pago',c:'#2e7d4f',bg:'#e3efe6'}, ok:{l:'Confirmado',c:'#2e7d4f',bg:'#e3efe6'}, ativo:{l:'Activo',c:'#2e7d4f',bg:'#e3efe6'},
+  vencer:{l:'A vencer',c:'#7a5800',bg:'#f5ecd0'}, pendente:{l:'Estorno pendente',c:'#7a5800',bg:'#f5ecd0'}, convite:{l:'Convite pendente',c:'#7a5800',bg:'#f5ecd0'},
+  divida:{l:'Em dívida',c:'#b42318',bg:'#f7e1de'}, bloq:{l:'Bloqueado',c:'#b42318',bg:'#f7e1de'}, retro:{l:'Bloqueado · data passada',c:'#b42318',bg:'#f7e1de'}, suspenso:{l:'Suspenso',c:'#b42318',bg:'#f7e1de'},
+  congelado:{l:'Congelado',c:'#55524b',bg:'#ebe6d6'}, rede:{l:'A treinar na rede',c:'#1d1c1a',bg:'#ebe6d6'}
+};
+const kz = n => { const s = Math.abs(n).toFixed(2).split('.'); return (n < 0 ? '−' : '') + s[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ',' + s[1] + ' Kz'; };
+const EXP = { dinheiro:88000, express:64500, tpa:22000, transf:10000 };
+const FIL = { talatona:{n:'Talatona',e:1240000,r:1196000,a:612,ch:'2,8%',o:'71%'}, kilamba:{n:'Kilamba',e:780000,r:712000,a:428,ch:'3,6%',o:'64%'}, maianga:{n:'Maianga',e:430000,r:394000,a:244,ch:'3,1%',o:'58%'} };
+const LINES = [
+  {t:'Estorno a aguardar aprovação · Edson Mateus',f:'talatona',v:30000},
+  {t:'Desconto acima do limite (25%) · Recepção',f:'talatona',v:14000},
+  {t:'2 subscrições activadas sem pagamento',f:'kilamba',v:60000},
+  {t:'Diferença no fecho de caixa · turno da tarde',f:'kilamba',v:8000},
+  {t:'Mensalidade em atraso há mais de 30 dias',f:'maianga',v:36000}
+];
+const FUGAS = [
+  {t:'2 subscrições activadas sem pagamento por Rui Manuel',f:'kilamba',h:'hoje 09:14'},
+  {t:'Membro gratuito com 14 check-ins esta semana',f:'talatona',h:'ontem'},
+  {t:'Movimento de caixa às 23:12, fora do horário',f:'maianga',h:'sábado'},
+  {t:'Operador com estornos 3× acima da média',f:'kilamba',h:'esta semana'}
+];
+const OCC = [22,48,64,41,28,20,24,30,26,22,30,52,78,92,70,44,18];
+const LEDGER = [
+  {id:1,h:'09:12',d:'Mensalidade Rede',o:'Ana Domingos · Subscrição #4821',m:'Multicaixa Express',v:45000,st:'ok',fac:'FR TAL/2026/1201'},
+  {id:2,h:'08:55',d:'Bar · 2 águas, 1 batido',o:'Venda #1093',m:'Dinheiro',v:3500,st:'ok',fac:'FR TAL/2026/1200'},
+  {id:3,h:'08:40',d:'Estorno · cobrança duplicada',o:'Edson Mateus · Subscrição #4790',m:'TPA',v:-30000,st:'pendente',fac:'NC TAL/2026/0031',note:'Estorno pedido às 08:40. A aguardar aprovação do dono.'},
+  {id:4,h:'08:21',d:'Inscrição Local',o:'Kátia Muondo · Subscrição #4822',m:'TPA',v:30000,st:'ok',fac:'FR TAL/2026/1199'},
+  {id:5,h:'08:02',d:'Despesa · produtos de limpeza',o:'Recibo anexado',m:'Dinheiro',v:-12500,st:'ok',fac:'—'},
+  {id:6,h:'07:48',d:'Mensalidade com data de 20/10',o:'Mário Sebastião · Subscrição #4511',m:'Dinheiro',v:30000,st:'retro',fac:'—',note:'Movimentos com data passada precisam de aprovação. Pedido enviado ao dono.'},
+  {id:7,h:'07:30',d:'Mensalidade Híbrido',o:'Joana Kiala · Subscrição #4602',m:'Transferência',v:38000,st:'ok',fac:'FR TAL/2026/1198'},
+  {id:8,h:'07:00',d:'Abertura de caixa',o:'Turno da manhã',m:'Dinheiro',v:20000,st:'ok',fac:'—'}
+];
+const PLANS = [
+  {id:'local',n:'Local',scope:'Local',d:'Só a filial Talatona',p:30000},
+  {id:'rede',n:'Rede',scope:'Rede',d:'Todas as filiais',p:45000},
+  {id:'hibrido',n:'Híbrido',scope:'Híbrido',d:'Talatona livre + 4 entradas/mês noutras',p:38000},
+  {id:'teste',n:'Teste grátis',scope:'7 dias',d:'1 por pessoa, validado por BI e telefone',p:0,disabled:true,note:'Já usado por este BI em 12/03/2026'}
+];
+const PLANOS = [
+  {id:1,n:'Local Mensal',scope:'Local',p:30000,acesso:'Filial de inscrição',hor:'06:00–22:00',desc:'10%',ativos:412},
+  {id:2,n:'Rede Mensal',scope:'Rede',p:45000,acesso:'Todas as filiais',hor:'06:00–22:00',desc:'10%',ativos:286},
+  {id:3,n:'Híbrido',scope:'Híbrido',p:38000,acesso:'Base + 4 entradas/mês',hor:'06:00–22:00',desc:'10%',ativos:142},
+  {id:4,n:'Piscina Manhã',scope:'Por horário',p:15000,acesso:'Piscina · Talatona',hor:'06:00–10:00',desc:'5%',ativos:58},
+  {id:5,n:'Rede Anual',scope:'Rede',p:450000,acesso:'Todas as filiais',hor:'06:00–22:00',desc:'15%',ativos:96},
+  {id:6,n:'Novo plano Estudante',scope:'Local',p:22000,acesso:'Filial de inscrição',hor:'10:00–17:00',desc:'0%',ativos:0}
+];
+class Component extends DCLogic {
+  state = { screen: (new URLSearchParams(location.search).get('screen')) || 'd1', collapsed:false, filial:'todas', caixa:true, step:0, secs:0, plan:'rede', pay:'express', payState:'idle', sent:false, mState:'normal',
+    counts:{dinheiro:'86000',express:'64500',tpa:'22000',transf:'10000'}, close:'count', just:'', sel:null, est:'none', motivo:'', editPlan:null, meio:'Todos' };
+  componentDidMount() { this.t = setInterval(() => { const s = this.state; if (s.screen === 'd2' && !s.sent) this.setState({ secs: s.secs + 1 }); }, 1000); }
+  componentWillUnmount() { clearInterval(this.t); clearTimeout(this.p); }
+  go = screen => this.setState({ screen });
+  renderVals() {
+    const s = this.state, set = o => () => this.setState(o);
+    const nav = [{t:'Operação',items:[['d1','Recepção'],['d2','Nova inscrição'],['d3','Membros']]},{t:'Caixa',items:[['d4','Fecho de caixa'],['d5','Tesouraria']]},{t:'Gestão',items:[['d6','Painel do dono'],['d7','Planos e regras'],['d8','Rede MUNTU']]}]
+      .map(g => ({ t:g.t, items:g.items.map(([id,label]) => ({ label, onClick:() => this.go(id), bg: s.screen===id?'#fbfaf7':'transparent', cur: s.screen===id?'page':undefined, fw: s.screen===id?600:500, num: '0'+id.slice(1) })) }));
+    const is = {}; ['d1','d2','d3','d4','d5','d6','d7','d8'].forEach(k => is[k] = s.screen === k);
+    // D1
+    const checkins = [['07:42','Ana Domingos','Rede · Mensal','Talatona','pago'],['07:38','Edson Mateus','Local · Mensal','Talatona','pago'],['07:31','Joana Kiala','Híbrido','Kilamba → Talatona','rede','Base: Kilamba · 2 de 4 entradas'],['07:25','Mário Sebastião','Local · Trimestral','Talatona','vencer','Vence amanhã'],['07:12','Yola Fernandes','Local · Mensal','Talatona','bloq','Plano expirou há 3 dias'],['07:04','Nelson Kapinga','Rede · Anual','Talatona','pago']]
+      .map(([h,n,p,f,k,why]) => ({h,n,p,f,s:ST[k],why:why||'', onClick:() => this.setState({ screen:'d3', mState: k==='bloq'?'divida':k==='rede'?'rede':'normal' })}));
+    // D2
+    const steps = ['Cliente','Plano','Pagamento','Acesso'].map((l,i) => ({ n:i+1, l, bar: i<=s.step?(i<s.step?'#1d1c1a':'#c8640c'):'#e4e0d6', color: i<=s.step?'#1d1c1a':'#8c877d' }));
+    const plan = PLANS.find(p => p.id === s.plan);
+    const plans = PLANS.map(p => ({ ...p, price: p.p ? kz(p.p)+' / mês' : '0,00 Kz', note:p.note||'', disabled:!!p.disabled, op:p.disabled?.55:1,
+      pressed: s.plan===p.id, ring: s.plan===p.id?'inset 0 0 0 2px #1d1c1a, inset 0 6px 0 #c8640c':'none', bg: s.plan===p.id?'#fff':'#fbfaf7', onClick:() => this.setState({ plan:p.id }) }));
+    const methods = [['express','Multicaixa Express','Push no telemóvel'],['tpa','TPA','Cartão'],['ref','Transferência','Por referência'],['dinheiro','Dinheiro','Conta no caixa']]
+      .map(([id,l,d]) => ({ l, d, pressed: s.pay===id, bg: s.pay===id?'#f4f1ea':'transparent', dot: s.pay===id?'#c8640c':'transparent', onClick:() => this.setState({ pay:id, payState:'idle' }) }));
+    const cobrar = () => { this.setState({ payState:'waiting' }); clearTimeout(this.p); this.p = setTimeout(() => { if (this.state.payState==='waiting') this.setState({ payState:'ok', step:3 }); }, 3500); };
+    let qr = []; for (let y=0;y<21;y++) for (let x=0;x<21;x++) { const f = (a,b) => x>=a&&x<a+7&&y>=b&&y<b+7; const fin = f(0,0)||f(14,0)||f(0,14); let on;
+      if (fin) { const lx=x%14===x?x:x-14, ly=y%14===y?y:y-14; const ex = x>=14?x-14:x, ey = y>=14?y-14:y; on = ex===0||ex===6||ey===0||ey===6||(ex>=2&&ex<=4&&ey>=2&&ey<=4); }
+      else on = ((x*7+y*13+x*y*3)%5)<2; qr.push(on?'#1d1c1a':'transparent'); }
+    const mm = String(Math.floor(s.secs/60)).padStart(2,'0'), ss = String(s.secs%60).padStart(2,'0');
+    const nextDisabled = s.step===2 && s.payState!=='ok';
+    // D3
+    const MS = {
+      normal:{s:ST.pago,banner:'',dias:'18',diasLabel:'dias restantes',plano:'Rede · Mensal · 45 000,00 Kz',origem:'Membro desde Fev 2024 · base Talatona'},
+      divida:{s:ST.divida,banner:'Mensalidade de Outubro por pagar há 12 dias. Acesso bloqueado até pagar.',dias:'0',diasLabel:'dias restantes',plano:'Rede · Mensal · 45 000,00 Kz',origem:'Membro desde Fev 2024 · base Talatona'},
+      congelado:{s:ST.congelado,banner:'Plano congelado até 10/11/2026 a pedido do membro (viagem).',dias:'18',diasLabel:'dias em pausa',plano:'Rede · Mensal · 45 000,00 Kz',origem:'Membro desde Fev 2024 · base Talatona'},
+      rede:{s:ST.rede,banner:'Membro do Kianda Fitness. Acesso válido pela Rede MUNTU: 3 de 6 visitas este mês.',dias:'3',diasLabel:'visitas restantes',plano:'Plano Rede · Kianda Fitness',origem:'Ginásio de origem: Kianda Fitness'}
+    };
+    const mb = MS[s.mState];
+    const A = (l,primary) => ({ l, span: primary?'1 / 3':'auto', onClick: l.startsWith('Cobrar')||l==='Renovar' ? () => this.setState({ screen:'d2', step:1 }) : undefined, border: primary?'0':'1px solid #1d1c1a', bg: primary?'#1d1c1a':'transparent', color: primary?'#fbfaf7':'#1d1c1a' });
+    const actions = { normal:[A('Check-in',1),A('Cobrar'),A('Renovar'),A('Congelar')], divida:[A('Cobrar 45 000,00 Kz',1),A('Renovar'),A('Pedir aprovação'),A('Enviar WhatsApp')], congelado:[A('Descongelar',1),A('Cobrar'),A('Renovar'),A('Histórico')], rede:[A('Libertar acesso',1),A('Ver auditoria')] }[s.mState];
+    const m = { ...mb, actions, showPay: s.mState!=='rede', redeOnly: s.mState==='rede',
+      filiais: s.mState==='rede' ? ['Talatona (visita)'] : ['Talatona · base','Kilamba','Maianga'],
+      pays: [['01/10/2026','Mensalidade Outubro','Multicaixa Express','FR TAL/2026/1184',45000, s.mState==='divida'?'divida':'pago'],['01/09/2026','Mensalidade Setembro','Multicaixa Express','FR TAL/2026/0977',45000,'pago'],['01/08/2026','Mensalidade Agosto','Dinheiro','FR TAL/2026/0802',45000,'pago']].map(([d,desc,mt,f,v,k]) => ({d,desc,m:mt,f,v:kz(v),s:ST[k]})),
+      entradas: [['26/10 · 07:15','Talatona','QR dinâmico'],['24/10 · 18:40','Kilamba','QR dinâmico · outra filial'],['23/10 · 06:58','Talatona','Reconhecimento facial'],['21/10 · 19:02','Talatona','QR dinâmico']].map(([d,f,mt]) => ({d,f,m:mt})) };
+    const mStates = [['normal','Activo'],['divida','Em dívida'],['congelado','Congelado'],['rede','Membro de rede']].map(([id,l]) => ({ l, pressed: s.mState===id, bg: s.mState===id?'#1d1c1a':'transparent', color: s.mState===id?'#fbfaf7':'#1d1c1a', onClick:() => this.setState({ mState:id }) }));
+    // D4
+    const revealed = s.close !== 'count';
+    let tc = 0, te = 0;
+    const closeRows = [['dinheiro','Dinheiro'],['express','Multicaixa Express'],['tpa','TPA'],['transf','Transferência']].map(([k,l]) => {
+      const c = parseFloat(String(s.counts[k]).replace(/\s/g,'').replace(',','.'))||0, d = c-EXP[k]; tc += c; te += EXP[k];
+      return { l, id:'cx-'+k, val:s.counts[k], ro:revealed, esp: revealed?kz(EXP[k]):'••••', dif: revealed?(d===0?'—':kz(d)):'', difC: d<0?'#b42318':'#2e7d4f',
+        onInput: e => { const v = e.target.value; this.setState(st => ({ counts:{ ...st.counts, [k]:v } })); } };
+    });
+    const td = tc - te;
+    const cl = { count:s.close==='count', zero:s.close==='revealed'&&td===0, diff:s.close==='revealed'&&td!==0, pending:s.close==='pending' };
+    // D5
+    const ledger = LEDGER.filter(r => s.meio==='Todos' || r.m===s.meio).map(r => ({ ...r, v:(r.v>0?'+':'')+kz(r.v), s:ST[r.st], pressed: s.sel===r.id, bg: s.sel===r.id?'#ebe6d6':'transparent', onClick:() => this.setState({ sel:r.id, est:'none', motivo:'' }) }));
+    const selR = ledger.find(r => r.id === s.sel);
+    const ledgerEmpty = ledger.length === 0;
+    const canEst = selR && selR.st==='ok' && LEDGER.find(r=>r.id===s.sel).v>0;
+    const chips = ['Todos','Dinheiro','Multicaixa Express','TPA','Transferência'].map(l => ({ l, pressed: s.meio===l, bg: s.meio===l?'#1d1c1a':'transparent', color: s.meio===l?'#fbfaf7':'#1d1c1a', onClick:() => this.setState({ meio:l, sel:null }) }));
+    // D6
+    const fk = s.filial, all = fk==='todas';
+    const sel6 = all ? Object.values(FIL).reduce((a,f) => ({ e:a.e+f.e, r:a.r+f.r }), {e:0,r:0}) : FIL[fk];
+    const dash = { scope: all?'Todas as filiais':FIL[fk].n, e:kz(sel6.e).replace(' Kz',''), r:kz(sel6.r).replace(' Kz',''), d:kz(sel6.e-sel6.r).replace(' Kz',''),
+      lines: LINES.filter(l => all||l.f===fk).map(l => ({ t:l.t, f:FIL[l.f].n, v:kz(l.v) })),
+      fugas: FUGAS.filter(l => all||l.f===fk).map(l => ({ ...l, f:FIL[l.f].n })) };
+    const mx = Math.max(...OCC);
+    const occ = OCC.map((v,i) => ({ h: Math.round(v/mx*100)+'%', c: v===mx?'#c8640c':'#1d1c1a', l: (i%2===0)?String(6+i).padStart(2,'0'):'' }));
+    const comp = Object.entries(FIL).map(([k,f]) => ({ n:f.n, r:kz(f.r), a:f.a, ch:f.ch, o:f.o, bg: (!all&&k===fk)?'#ebe6d6':'transparent', w: (!all&&k===fk)?600:400 }));
+    // D7
+    const planos = PLANOS.map((p,i) => ({ ...p, num: String(i+1).padStart(2,'0'), bg: s.editPlan===p.id?'#f4f1ea':'transparent', price: kz(p.p), ativos: p.ativos?p.ativos+' membros activos':'Sem membros', editing: s.editPlan===p.id,
+      warn: p.ativos ? `Este plano tem ${p.ativos} membros activos. A alteração de preço vai para aprovação do dono.` : 'Sem membros activos. Pode alterar o preço directamente.',
+      bd: s.editPlan===p.id?'#1d1c1a':'#e4e0d6', editLabel: s.editPlan===p.id?'Pedir aprovação':'Alterar preço', onEdit:() => this.setState({ editPlan: s.editPlan===p.id?null:p.id }) }));
+    // D8
+    const parceiros = [['Kianda Fitness','Luanda · Talatona',64,31,54000,'ativo'],['Benguela Gym Center','Benguela',12,18,-9000,'ativo'],['Huambo Power','Huambo',0,0,0,'convite','Enviado a 22/10'],['Lobito Strong','Lobito',22,9,19500,'suspenso','Liquidação de Setembro por pagar'],['Viana Box','Luanda · Viana',30,14,29500,'ativo']]
+      .map(([n,c,rec,env,v,k,why]) => ({ n,c,rec,env, saldo: v===0?'—':(v>0?'+':'')+kz(v), s:ST[k], why:why||'' }));
+    return {
+      sideW: s.collapsed?'72px':'240px', expanded:!s.collapsed, collapsed:s.collapsed, goD5:() => this.go('d5'), ledgerEmpty, sideLabel: s.collapsed?'Expandir':'Recolher menu', toggleSide:() => this.setState({ collapsed:!s.collapsed }), nav,
+      filial:s.filial, setFilial: e => this.setState({ filial:e.target.value }), approvals: 3 + (s.close==='pending'?1:0) + (s.est==='sent'?1:0), offline: !!this.props.semRede, is,
+      caixa:s.caixa, caixaFechado:!s.caixa, abrirCaixa:set({ caixa:true, close:'count' }), goD2:() => this.go('d2'), goD3:() => this.setState({ screen:'d3', mState:'divida' }), goD4:() => this.go('d4'), checkins,
+      divida:[['Yola Fernandes','Plano expirou há 3 dias',30000],['Délcio Ngola','Por pagar há 12 dias',45000]].map(([n,d,v]) => ({n,d,v:kz(v)})),
+      vencer:[['Mário Sebastião','Vence amanhã',30000],['Paulina Muxima','Vence em 3 dias',45000],['Wilson Tchiyaka','Vence em 5 dias',38000]].map(([n,d,v]) => ({n,d,v:kz(v)})),
+      timer:`${mm}:${ss}`, steps, st0:s.step===0, st1:s.step===1, st2:s.step===2, st3:s.step===3,
+      cliente:[{l:'Nome completo',v:'Kátia Domingos Muondo'},{l:'Data de nascimento',v:'14/08/1996'},{l:'NIF',v:'005812347LA041'},{l:'Telefone',v:'923 456 789'}],
+      plans, methods, planName: plan.n, planPrice: kz(plan.p), pay:{ idle:s.payState==='idle', waiting:s.payState==='waiting', failed:s.payState==='failed' },
+      cobrar, falhar:() => { clearTimeout(this.p); this.setState({ payState:'failed' }); }, qr, sent:s.sent, notSent:!s.sent, enviar:set({ sent:true }),
+      back:() => s.step===0 ? this.go('d1') : this.setState({ step:s.step-1, payState:'idle' }), backLabel: s.step===0?'Cancelar':'Voltar',
+      next:() => s.step===3 ? this.setState({ screen:'d1', step:0, secs:0, payState:'idle', sent:false }) : this.setState({ step:s.step+1 }),
+      nextLabel: ['Confirmar dados','Continuar para pagamento','Continuar','Concluir'][s.step], nextDisabled, nextOp: nextDisabled?.35:1,
+      m, mStates,
+      closeIntro: revealed ? 'O valor esperado só aparece depois da contagem. Diferenças precisam de justificação.' : 'Conte o caixa sem ver o valor esperado. Só depois de fechar vê a diferença.',
+      colEsperado: revealed?'Esperado':'Esperado (oculto)', colDif: revealed?'Diferença':'', closeRows, totContado:kz(tc), totEsp: revealed?kz(te):'••••', totDif: revealed?kz(td):'', totDifC: td<0?'#b42318':'#2e7d4f',
+      difBig: revealed ? (td===0?'0,00':kz(td).replace(' Kz','')) : '••••', difLabel: revealed?'Kz':'Oculta até fechar', difBg: !revealed?'#ebe6d6':td===0?'#e3efe6':td<0?'#c8640c':'#e3efe6', difFg:'#1d1c1a',
+      cl, revelar:() => this.setState({ close:'revealed' }), just:s.just, setJust:e => this.setState({ just:e.target.value }), noJust:!s.just.trim(), justOp: s.just.trim()?1:.35,
+      pedirFecho:() => this.setState({ close:'pending', caixa:false }),
+      chips, ledger, detailW: selR?'340px':'0px', hasSel:!!selR, sel: selR||{s:{}}, closeSel:set({ sel:null }),
+      est:{ can: canEst && s.est==='none', form: canEst && s.est==='form', sent: canEst && s.est==='sent' }, abrirEstorno:set({ est:'form' }),
+      motivo:s.motivo, setMotivo:e => this.setState({ motivo:e.target.value }), noMotivo:!s.motivo.trim(), motivoOp: s.motivo.trim()?1:.35, pedirEstorno:set({ est:'sent' }),
+      dash, occ, comp, planos, parceiros
+    };
+  }
+}
+</script>
+</body>
+</html>

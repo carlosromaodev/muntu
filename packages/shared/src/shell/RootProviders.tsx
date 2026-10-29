@@ -3,11 +3,10 @@ import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts, Outfit_300Light, Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold } from '@expo-google-fonts/outfit';
-import { useTheme } from '../theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-/** Fontes Outfit, área segura e ecrã de arranque. Usado no _layout de cada app. */
+/** Fonte Outfit (300/400/500/600, a mesma dos desenhos), área segura e ecrã de arranque. */
 export function RootProviders({ children }: { children: React.ReactNode }) {
   const [loaded, error] = useFonts({ Outfit_300Light, Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold });
   const ready = loaded || !!error;
@@ -16,12 +15,7 @@ export function RootProviders({ children }: { children: React.ReactNode }) {
   }, [ready]);
   return (
     <SafeAreaProvider>
-      <Background>{ready ? children : null}</Background>
+      <View style={{ flex: 1, backgroundColor: '#fbfaf7' }}>{ready ? children : null}</View>
     </SafeAreaProvider>
   );
-}
-
-function Background({ children }: { children: React.ReactNode }) {
-  const { c } = useTheme();
-  return <View style={{ flex: 1, backgroundColor: c.bg }}>{children}</View>;
 }

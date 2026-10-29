@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#d9d4c4;color:#1d1c1a;font-family:Outfit,system-ui,sans-serif;font-variant-numeric:tabular-nums}*{box-sizing:border-box}a{color:#9a4c08}a:hover{color:#1d1c1a}button{font-family:inherit}</style>
+</helmet>
+<section style="padding:48px;display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#55524b">Ronda 2 · Recepção (D1) em duas direcções de marca</span><span style="font-size:15px;color:#1d1c1a">Escolhe uma; aplico-a aos 8 ecrãs.</span></div>
+<div style="display:flex;gap:48px;flex-wrap:wrap;align-items:flex-start">
+
+<div id="2a" style="display:flex;flex-direction:column;gap:12px">
+<span style="align-self:flex-start;font-size:11px;font-weight:600;letter-spacing:.2em;background:#1d1c1a;color:#ebe6d6;padding:4px 10px">2A · BLOCO LARANJA · CLARO</span>
+<div style="width:1440px;height:900px;display:flex;background:#fbfaf7;overflow:hidden">
+<aside style="width:248px;flex-shrink:0;background:#c8640c;color:#f3ecd9;display:flex;flex-direction:column">
+<div style="height:88px;display:flex;align-items:center;padding:0 28px"><dc-import name="Muntu Logo" variant="C" color="#f3ecd9" size="{{ 26 }}" hint-size="130px,26px"></dc-import></div>
+<nav style="flex:1;display:flex;flex-direction:column;gap:28px;padding:16px 0">
+<sc-for list="{{ nav }}" as="g" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column">
+<span style="font-size:9px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:#f3d9bd;padding:0 28px 10px">{{ g.t }}</span>
+<sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+<span style="height:40px;display:flex;align-items:center;gap:12px;padding:0 28px;font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;background:{{ it.aBg }};color:{{ it.aColor }}">{{ it.label }}</span>
+</sc-for>
+</div>
+</sc-for>
+</nav>
+<div style="padding:28px;display:flex;flex-direction:column;gap:4px;border-top:1px solid #d98a4a"><span style="font-size:9px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:#f3d9bd">Filial</span><span style="font-size:14px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">Talatona ▾</span></div>
+</aside>
+<div style="flex:1;display:flex;flex-direction:column;min-width:0">
+<header style="height:88px;display:flex;align-items:center;gap:24px;padding:0 40px;border-bottom:1px solid #e4e0d6">
+<span style="flex:1;max-width:560px;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:#ebe6d6;font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:#55524b"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">Pesquisar membro · nome, telefone, NIF, rosto</span><span style="flex-shrink:0;color:#1d1c1a">⌘K</span></span>
+<span style="flex:1"></span>
+<span style="font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;display:flex;align-items:center;gap:10px">Aprovações<span style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:#1d1c1a;color:#fbfaf7;letter-spacing:0">3</span></span>
+<span style="font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6b675f">Celma Bento · Recepção</span>
+</header>
+<div style="display:flex;border-bottom:1px solid #e4e0d6">
+<div style="flex:1;padding:40px;display:flex;flex-direction:column;gap:20px">
+<span style="font-size:9px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:#6b675f">Segunda, 26 Outubro · Turno da manhã</span>
+<h1 style="margin:0;font-size:44px;font-weight:400;letter-spacing:.22em;text-transform:uppercase;line-height:1">Recepção</h1>
+<span style="height:1px;background:#e4e0d6;margin:0 -40px"></span>
+<div style="display:flex;align-items:center;gap:24px"><span style="font-size:14px;color:#6b675f;max-width:360px">Cada pessoa, cada entrada, cada kwanza com dono.</span><span style="flex:1"></span><span style="height:48px;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;padding:0 24px;background:#1d1c1a;color:#fbfaf7;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Nova inscrição</span></div>
+</div>
+<div style="width:560px;flex-shrink:0;display:grid;grid-template-columns:repeat(3,1fr);background:#ebe6d6">
+<sc-for list="{{ kpis }}" as="k" hint-placeholder-count="3">
+<div style="padding:32px 24px;display:flex;flex-direction:column;justify-content:space-between;border-left:1px solid #d9d4c4"><span style="font-size:13px;font-weight:300;color:#6b675f">{{ k.n }}</span><div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:{{ k.fs }};font-weight:300;line-height:1;white-space:nowrap">{{ k.v }}</span><span style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#55524b">{{ k.l }}</span></div></div>
+</sc-for>
+</div>
+</div>
+<div style="flex:1;display:flex;min-height:0">
+<div style="flex:1;padding:32px 40px;display:flex;flex-direction:column;min-width:0">
+<div style="display:flex;justify-content:space-between;padding-bottom:16px"><span style="font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase">Check-ins recentes</span><span style="font-size:12px;color:#6b675f">Actualizado agora</span></div>
+<sc-for list="{{ checkins }}" as="r" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:60px minmax(0,1.3fr) minmax(0,1fr) 170px;align-items:center;gap:16px;padding:14px 0;border-top:1px solid #e4e0d6;font-size:14px">
+<span style="color:#6b675f">{{ r.h }}</span><span style="font-weight:500">{{ r.n }}</span><span style="color:#55524b">{{ r.p }}</span>
+<span style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:{{ r.s.c }}"><span style="width:8px;height:8px;border-radius:50%;background:{{ r.s.c }}"></span>{{ r.s.l }}</span>
+</div>
+</sc-for>
+</div>
+<div style="width:380px;flex-shrink:0;border-left:1px solid #e4e0d6;display:flex;flex-direction:column">
+<sc-for list="{{ alerts }}" as="a" hint-placeholder-count="2">
+<div style="padding:32px;display:flex;flex-direction:column;gap:14px;border-bottom:1px solid #e4e0d6">
+<div style="display:flex;align-items:center;gap:10px"><span style="width:8px;height:8px;border-radius:50%;background:{{ a.c }}"></span><span style="font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase">{{ a.t }}</span></div>
+<sc-for list="{{ a.rows }}" as="r" hint-placeholder-count="2"><div style="display:flex;justify-content:space-between;gap:12px;font-size:14px"><span>{{ r.n }}<span style="color:#6b675f"> · {{ r.d }}</span></span><span style="white-space:nowrap">{{ r.v }}</span></div></sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="2b" style="display:flex;flex-direction:column;gap:12px">
+<span style="align-self:flex-start;font-size:11px;font-weight:600;letter-spacing:.2em;background:#1d1c1a;color:#ebe6d6;padding:4px 10px">2B · GRAFITE · ESCURO (BALCÃO)</span>
+<div style="width:1440px;height:900px;display:flex;background:#1d1c1a;color:#ebe6d6;overflow:hidden">
+<aside style="width:248px;flex-shrink:0;border-right:1px solid #34322f;display:flex;flex-direction:column">
+<div style="height:88px;display:flex;align-items:center;padding:0 28px;border-bottom:1px solid #34322f"><dc-import name="Muntu Logo" variant="C" color="#ebe6d6" size="{{ 26 }}" hint-size="130px,26px"></dc-import></div>
+<nav style="flex:1;display:flex;flex-direction:column;gap:28px;padding:28px 0">
+<sc-for list="{{ nav }}" as="g" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column">
+<span style="font-size:9px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:#8c877d;padding:0 28px 10px">{{ g.t }}</span>
+<sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+<span style="height:40px;display:flex;align-items:center;gap:12px;padding:0 28px;font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:{{ it.bColor }}"><span style="width:8px;height:8px;background:{{ it.bMark }}"></span>{{ it.label }}</span>
+</sc-for>
+</div>
+</sc-for>
+</nav>
+<div style="padding:28px;display:flex;flex-direction:column;gap:4px;border-top:1px solid #34322f"><span style="font-size:9px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:#8c877d">Filial</span><span style="font-size:14px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">Talatona ▾</span></div>
+</aside>
+<div style="flex:1;display:flex;flex-direction:column;min-width:0">
+<header style="height:88px;display:flex;align-items:center;gap:24px;padding:0 40px;border-bottom:1px solid #34322f">
+<div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:#8c877d">26 Outubro · Turno da manhã</span><h1 style="margin:0;font-size:22px;font-weight:400;letter-spacing:.24em;text-transform:uppercase">Recepção</h1></div>
+<span style="flex:1"></span>
+<span style="font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;display:flex;align-items:center;gap:10px">Aprovações<span style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;background:#c8640c;color:#1d1c1a;letter-spacing:0">3</span></span>
+<span style="font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#8c877d">Celma Bento</span>
+</header>
+<div style="display:grid;grid-template-columns:1.25fr 1fr;height:300px">
+<div style="background:#ebe6d6;color:#1d1c1a;padding:40px;display:flex;flex-direction:column;justify-content:space-between">
+<span style="font-size:9px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:#6b675f">Pesquisa universal · ⌘K</span>
+<span style="font-size:40px;font-weight:300;line-height:1.15;color:#6b675f">Nome, telefone,<br>NIF ou rosto<span style="display:inline-block;width:3px;height:40px;background:#c8640c;vertical-align:-6px;margin-left:6px"></span></span>
+<div style="display:flex;gap:12px"><span style="height:44px;display:flex;align-items:center;padding:0 20px;background:#1d1c1a;color:#ebe6d6;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Nova inscrição</span><span style="height:44px;display:flex;align-items:center;padding:0 20px;border:1px solid #1d1c1a;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Check-in manual</span></div>
+</div>
+<div style="background:#c8640c;color:#1d1c1a;padding:40px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden">
+<div style="position:absolute;right:-70px;top:-70px;opacity:.18"><dc-import name="Muntu Mark" variant="C" color="#1d1c1a" size="{{ 300 }}" hint-size="300px,300px"></dc-import></div>
+<span style="font-size:9px;font-weight:600;letter-spacing:.24em;text-transform:uppercase">Caixa aberto · desde 07:00</span>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:64px;font-weight:300;line-height:1;letter-spacing:-.01em">184 500,00</span><span style="font-size:12px;font-weight:600;letter-spacing:.24em">KZ · 23 MOVIMENTOS</span></div>
+<span style="align-self:flex-start;height:40px;display:flex;align-items:center;padding:0 18px;border:1px solid #1d1c1a;font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Fechar caixa</span>
+</div>
+</div>
+<div style="flex:1;display:grid;grid-template-columns:1.6fr 1fr 1fr;min-height:0">
+<div style="padding:32px 40px;display:flex;flex-direction:column;gap:20px;border-right:1px solid #34322f;min-width:0">
+<div style="display:flex;justify-content:space-between;align-items:flex-start"><span style="font-size:40px;font-weight:300;line-height:1">01</span><span style="font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase">Check-ins · 42 hoje</span></div>
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ checkins }}" as="r" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:52px minmax(0,1fr) 140px;align-items:center;gap:12px;padding:11px 0;border-top:1px solid #34322f;font-size:14px">
+<span style="color:#8c877d">{{ r.h }}</span><span>{{ r.n }}</span>
+<span style="display:flex;align-items:center;gap:8px;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:{{ r.s.d }}"><span style="width:8px;height:8px;border-radius:50%;background:{{ r.s.d }}"></span>{{ r.s.l }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+<sc-for list="{{ alerts }}" as="a" hint-placeholder-count="2">
+<div style="padding:32px;display:flex;flex-direction:column;gap:20px;border-right:1px solid #34322f">
+<div style="display:flex;justify-content:space-between;align-items:flex-start"><span style="font-size:40px;font-weight:300;line-height:1">{{ a.num }}</span><span style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase"><span style="width:8px;height:8px;border-radius:50%;background:{{ a.d }}"></span>{{ a.t }}</span></div>
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ a.rows }}" as="r" hint-placeholder-count="2"><div style="display:flex;flex-direction:column;gap:4px;padding:12px 0;border-top:1px solid #34322f"><span style="font-size:14px">{{ r.n }}</span><span style="display:flex;justify-content:space-between;font-size:12px;color:#8c877d"><span>{{ r.d }}</span><span style="color:#ebe6d6">{{ r.v }}</span></span></div></sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const S = { pago:{l:'Pago',c:'#2e7d4f',d:'#5fb37f'}, rede:{l:'Rede · Kilamba',c:'#55524b',d:'#b9b3a6'}, vencer:{l:'A vencer',c:'#8a6400',d:'#e0b23c'}, bloq:{l:'Bloqueado',c:'#b42318',d:'#e5675c'} };
+    const nav = [{t:'Operação',items:['Recepção','Nova inscrição','Membros']},{t:'Caixa',items:['Fecho de caixa','Tesouraria']},{t:'Gestão',items:['Painel do dono','Planos e regras','Rede MUNTU']}]
+      .map(g => ({ t:g.t, items:g.items.map((label,i) => { const on = label==='Recepção'; return { label, aBg: on?'#fbfaf7':'transparent', aColor: on?'#1d1c1a':'#f3ecd9', bColor: on?'#ebe6d6':'#8c877d', bMark: on?'#c8640c':'transparent' }; }) }));
+    const checkins = [['07:42','Ana Domingos','Rede · Mensal','pago'],['07:38','Edson Mateus','Local · Mensal','pago'],['07:31','Joana Kiala','Híbrido','rede'],['07:25','Mário Sebastião','Local · Trimestral','vencer'],['07:12','Yola Fernandes','Local · Mensal','bloq'],['07:04','Nelson Kapinga','Rede · Anual','pago']].map(([h,n,p,k]) => ({h,n,p,s:S[k]}));
+    const alerts = [
+      { num:'02', t:'Em dívida', c:'#b42318', d:'#e5675c', rows:[{n:'Yola Fernandes',d:'há 3 dias',v:'30 000,00 Kz'},{n:'Délcio Ngola',d:'há 12 dias',v:'45 000,00 Kz'}] },
+      { num:'03', t:'A vencer', c:'#c99a1b', d:'#e0b23c', rows:[{n:'Mário Sebastião',d:'amanhã',v:'30 000,00 Kz'},{n:'Paulina Muxima',d:'em 3 dias',v:'45 000,00 Kz'},{n:'Wilson Tchiyaka',d:'em 5 dias',v:'38 000,00 Kz'}] }
+    ];
+    const kpis = [{n:'01',v:'42',l:'Check-ins hoje',fs:'48px'},{n:'02',v:'18',l:'Dentro agora',fs:'48px'},{n:'03',v:'184 500,00',l:'Kz em caixa',fs:'30px'}];
+    return { nav, checkins, alerts, kpis };
+  }
+}
+</script>
+</body>
+</html>

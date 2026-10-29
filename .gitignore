@@ -1,6 +1,8 @@
 node_modules/
 .expo/
 dist/
+dist-android/
+scripts/verificar.log
 web-build/
 *.tsbuildinfo
 .DS_Store

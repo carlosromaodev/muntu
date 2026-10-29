@@ -1,8 +1,11 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { MuntuApp } from '@muntu/shared';
 
-/** Cada ecrã do MUNTU é uma rota: /recepcao, /caixa, /painel… (desktop) ou /acesso, /plano, /dono… (mobile). */
+/**
+ * Abre o protótipo no ecrã pedido: /d6?role=dono (desktop) ou /m1, /r1?role=rececao (mobile).
+ * Sem ecrã, começa no ecrã de entrada do desenho.
+ */
 export default function Screen() {
-  const { screen } = useLocalSearchParams<{ screen?: string }>();
-  return <MuntuApp screen={screen} ui="auto" onNavigate={(id) => router.navigate(`/${id}`)} />;
+  const { screen, role } = useLocalSearchParams<{ screen?: string; role?: string }>();
+  return <MuntuApp ui="auto" screen={screen} role={role} />;
 }

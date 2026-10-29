@@ -3,7 +3,7 @@
   "short_name": "MUNTU",
   "description": "Gestão de ginásios",
   "lang": "pt-AO",
-  "start_url": "/acesso",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
