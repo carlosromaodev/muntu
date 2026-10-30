@@ -1,1 +1,2 @@
-export { default } from './[screen]';
+// Gerado por tools/gen-routes.mjs — não editar à mão.
+export { Login as default } from '@muntu/shared/mobile';

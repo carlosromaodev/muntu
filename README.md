@@ -2,76 +2,112 @@
 
 Plataforma de gestão de ginásios: recepção, caixa e passagem de turno, finanças, personal trainers,
 gestão do dono, rede de ginásios e a app do membro.
-Um só código para **iOS, Android, web desktop e web mobile** (Expo + React Native).
+Um só código para **iOS, Android, web mobile e web desktop**, feito com Expo (SDK 58) e React Native.
 
-## O visual vem directamente dos ficheiros de desenho
+## Arrancar no Windows
 
-Os ficheiros de desenho do projecto estão em [`design/`](design). A app **não redesenha** os ecrãs à mão:
-`tools/dc2rn.py` converte cada ficheiro de desenho (template, estilos, textos e lógica do protótipo) num
-componente React Native, e `packages/shared/src/design/runtime.jsx` desenha-o em iOS, Android e web.
-Tipografia (Outfit 300/400/500/600), cores, espaçamentos e o logotipo ficam exactamente como no desenho.
+1. Abra `scripts\instalar.cmd`. O script:
+   - prepara um Node 24 LTS portátil se o seu Node não for suportado;
+   - instala as dependências;
+   - corre o `expo-doctor`;
+   - compila as quatro plataformas.
 
-| Desenho | Componente gerado | Onde aparece |
+   O registo fica em `scripts\instalar.log`.
+2. Depois use:
+
+| Ficheiro | O que faz |
+|---|---|
+| `scripts\abrir-expo-go.cmd` | Servidor para a app **Expo Go** (telemóvel na mesma rede Wi-Fi; leia o QR). |
+| `scripts\abrir-expo-go-tunel.cmd` | O mesmo, em modo túnel (o telemóvel pode estar noutra rede). |
+| `scripts\abrir-web-desktop.cmd` | Desktop no navegador: http://localhost:8081 |
+| `scripts\abrir-web-mobile.cmd` | Mobile no navegador: http://localhost:8082 |
+| `scripts\verificar.cmd` | Volta a compilar tudo sem reinstalar (`scripts\verificar.log`). |
+
+> O Expo Go das lojas só abre projectos do SDK 58. O Expo SDK 58 precisa de Node 22.13+, 24.3+ ou 26+.
+> As versões ímpares, como a 25, não são suportadas.
+
+### Entrar no protótipo
+
+Use qualquer senha com 6 ou mais caracteres. O prefixo do número escolhe o papel:
+
+| Número | Telemóvel | Desktop |
 |---|---|---|
-| `MUNTU Desktop v8.dc.html` | `MuntuDesktop` | `web-desktop`; nativo em ecrãs ≥ 1024 px |
-| `MUNTU Mobile.dc.html` | `MuntuMobile` | `web-mobile`; nativo no telemóvel |
-| `Muntu Logo` · `Muntu Mark` · `Muntu Selo` | `MuntuLogo` · `MuntuMark` · `MuntuSelo` | usados pelos dois |
-
-Quando o desenho mudar, substitua o ficheiro em `design/` e volte a gerar:
-
-```bash
-python3 tools/dc2rn.py design packages/shared/src/design/generated
-```
-
-As únicas adaptações ao protótipo estão declaradas em `tools/dc2rn.py` (secção `CONFIG`):
-o mobile ocupa o ecrã inteiro e usa a área segura real em vez da barra de estado desenhada (9:41 · 5G);
-no desktop a barra lateral fica fixa e o conteúdo tem scroll próprio.
-
-## Arrancar (Windows, macOS ou Linux)
-
-Requisitos: Node.js 20 ou superior e npm.
-
-```bash
-npm install                # na raiz — instala as três apps e o pacote partilhado
-npm run fix-deps           # alinha as versões com o Expo SDK instalado (recomendado na 1.ª vez)
-
-npm run web:desktop        # web desktop  → http://localhost:8081
-npm run web:mobile         # web mobile   → http://localhost:8082
-npm run android            # Android (emulador ou Expo Go)
-npm run ios                # iOS (simulador no macOS ou Expo Go no iPhone)
-npm run build:web          # exporta as duas versões web para apps/*/dist
-```
-
-Abrir directamente um ecrã do protótipo: `http://localhost:8081/d6?role=dono` (desktop) ou
-`http://localhost:8082/r1?role=rececao` (mobile). Sem ecrã, a app abre no ecrã de entrada do desenho.
+| 923 … | Membro | Não entra: os membros usam o telemóvel. |
+| 924 … | Recepção (começa por receber o turno) | Recepção (começa por receber o turno) |
+| 925 … | Finanças | Tesouraria |
+| 926 … | Personal trainer | Agenda do PT |
+| 927 … | Dono | Painel do dono |
 
 ## Estrutura
 
 ```
 muntu/
-├─ design/                ficheiros de desenho (fonte da verdade do visual)
-├─ tools/dc2rn.py         conversor desenho → React Native
+├─ design/                    ficheiros de desenho (a referência visual)
 ├─ apps/
-│  ├─ ios-android/        app nativa (iPhone, iPad, Android) · EAS Build
-│  ├─ web-desktop/        web para computador
-│  └─ web-mobile/         web para o telemóvel, instalável (PWA)
-└─ packages/shared/src/
-   ├─ design/runtime.jsx  primitivos: caixa, texto, grelha, campos, listas, SVG
-   ├─ design/css.js       conversão dos estilos CSS para React Native
-   ├─ design/generated/   componentes gerados (não editar à mão)
-   ├─ shell/              MuntuApp (escolhe desktop/mobile), fontes e área segura
-   └─ lib/haptics.ts      vibração ao tocar (nativo)
+│  ├─ ios-android/app/        rotas da app nativa (geradas)
+│  ├─ web-mobile/app/         rotas da web mobile (geradas, as mesmas da nativa)
+│  └─ web-desktop/app/        rotas do desktop (geradas)
+├─ packages/shared/src/
+│  ├─ theme/tokens.ts         cores, tipografia Outfit, presets de texto
+│  ├─ brand/                  Logo, Símbolo e Selo MUNTU (geometria exacta do desenho)
+│  ├─ ui/                     componentes com animação e vibração:
+│  │                          Button, Chip, Segmented, Tabs, Field, Select, Sheet, Toast,
+│  │                          Toggle, Stepper, Progress, Bars, CountUp, QR…
+│  ├─ data/                   dados do protótipo (mobile.ts e desk.ts, tirados dos desenhos)
+│  ├─ store/                  estado partilhado (zustand): operação, receber turno, criar conta
+│  ├─ mobile/                 TopBar, barra de separadores, ecrãs por papel
+│  │   └─ screens/            auth, rececao, membro, equipa, dono, turno, onboarding, shared
+│  └─ desktop/                Shell (menu lateral e cabeçalho), kit (KPIs, painéis, tabelas)
+│      └─ screens/            recepcao, operacao, dono, equipa, fluxos
+└─ tools/
+   ├─ gen-routes.mjs          gera as rotas das três apps a partir de um só mapa
+   └─ outline.py              resume um ecrã do desenho (textos, listas e acções)
+```
+
+### Navegação
+
+- **Telemóvel (iOS, Android e web mobile).** Usa uma pilha nativa do Expo Router.
+  - No iOS, desliza-se para voltar; no Android, a transição é lateral.
+  - Cada papel tem os seus separadores: `/rececao/entradas`, `/dono/painel`, `/membro/acesso`…
+  - A barra de separadores é numerada como no desenho e o indicador laranja desliza.
+  - Os ecrãs de detalhe abrem por cima: `/recuperacao`, `/receber-turno/dinheiro`, `/nova-actividade`…
+- **Desktop.** Cada secção do menu lateral é uma rota (`/rececao`, `/membros`, `/painel`, `/tesouraria`…).
+  - O destaque do menu acompanha a rota com animação.
+  - `⌘K` ou `Ctrl+K` abre a pesquisa de membros.
+
+Para mudar rotas, edite o mapa em `tools/gen-routes.mjs` e corra `node tools/gen-routes.mjs`.
+
+### Experiência nativa
+
+- **Animações.** Feitas com Reanimated:
+  - listas que entram em cascata;
+  - indicadores de separador e controlos segmentados que deslizam;
+  - números de KPI que contam;
+  - barras de gráfico que crescem;
+  - folhas que sobem do fundo e se fecham arrastando para baixo;
+  - confirmações animadas.
+- **Vibração.** O `expo-haptics` dá resposta ao tocar, seleccionar, ter sucesso, receber um aviso ou um erro.
+- **Face ID e impressão digital.** O `expo-local-authentication` pede confirmação nas aprovações do dono.
+- **Integração com o sistema.**
+  - Áreas seguras, teclado que não tapa os campos, puxar para actualizar.
+  - O botão "voltar" do Android fecha as folhas.
+
+## Comandos
+
+```bash
+npm install
+npm run web:desktop      # http://localhost:8081
+npm run web:mobile       # http://localhost:8082
+npm run start            # Expo Go / dev build
+npm run build:web
+npm run typecheck
+npm run doctor
+node tools/gen-routes.mjs
 ```
 
 ## Lojas (a partir de `apps/ios-android`)
 
 ```bash
-npx eas build --profile preview --platform android   # APK para testes internos
-npx eas build --profile production --platform ios    # TestFlight / App Store
+npx eas build --profile preview --platform android
+npx eas build --profile production --platform ios
 ```
-
-## Notas técnicas
-
-- Expo SDK 54, React Native 0.81, Expo Router, react-native-svg, fonte Outfit (`@expo-google-fonts/outfit`).
-- Os dados são os do protótipo (na lógica de cada desenho). O próximo passo é ligar as acções a uma API.
-- Se o `npm install` avisar sobre versões, corra `npm run fix-deps`.

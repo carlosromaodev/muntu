@@ -15,9 +15,13 @@
     "start": "npm run start --workspace @muntu/ios-android",
     "build:web": "npm run build --workspace @muntu/web-desktop && npm run build --workspace @muntu/web-mobile",
     "typecheck": "tsc -p packages/shared --noEmit",
-    "fix-deps": "npm exec --workspace @muntu/ios-android -- expo install --fix && npm exec --workspace @muntu/web-desktop -- expo install --fix && npm exec --workspace @muntu/web-mobile -- expo install --fix"
+    "fix-deps": "npm exec --workspace @muntu/ios-android -- expo install --fix",
+    "doctor": "cd apps/ios-android && npx --yes expo-doctor@latest"
   },
   "devDependencies": {
-    "typescript": "~5.9.2"
+    "typescript": "~6.0.3"
+  },
+  "engines": {
+    "node": "^22.13.0 || ^24.3.0 || >=26.0.0"
   }
 }

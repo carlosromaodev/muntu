@@ -6,14 +6,27 @@
   "types": "src/index.ts",
   "peerDependencies": {
     "@expo-google-fonts/outfit": "*",
+    "expo": "*",
+    "expo-font": "*",
     "expo-haptics": "*",
+    "expo-linear-gradient": "*",
     "expo-local-authentication": "*",
+    "expo-router": "*",
     "expo-splash-screen": "*",
     "expo-status-bar": "*",
     "react": "*",
     "react-native": "*",
+    "react-native-gesture-handler": "*",
+    "react-native-reanimated": "*",
     "react-native-safe-area-context": "*",
+    "react-native-screens": "*",
     "react-native-svg": "*",
+    "react-native-worklets": "*",
     "zustand": "*"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./mobile": "./src/mobile/index.ts",
+    "./desktop": "./src/desktop/index.ts"
   }
 }
