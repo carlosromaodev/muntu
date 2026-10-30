@@ -10,7 +10,12 @@ import { Easing, FadeIn, FadeInDown, FadeInUp, FadeOut, LinearTransition, Reduce
  * mutáveis, por isso não se partilham entre componentes).
  */
 export const EASE = Easing.bezier(0.2, 0.7, 0.2, 1);
-const RM = ReduceMotion.System;
+/*
+ * No telemóvel respeita "reduzir movimento". Na web anima sempre: com os
+ * "efeitos de animação" do Windows desligados o browser pede para não animar
+ * e o desktop ficava sem movimento nenhum.
+ */
+const RM = Platform.OS === 'web' ? ReduceMotion.Never : ReduceMotion.System;
 
 export const DUR = { press: 110, color: 200, enter: 420, pop: 380, sheet: 320, bar: 600, fill: 800 } as const;
 
