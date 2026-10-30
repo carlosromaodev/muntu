@@ -7,7 +7,7 @@ import { haptic } from '../../lib/haptics';
 import { kn, onlyDigits, phone } from '../../lib/format';
 import { useMuntu } from '../../store/useMuntu';
 import { C, GUTTER, type } from '../../theme/tokens';
-import { M, Avatar, Badge, Button, Checkbox, Chip, ChipGroup, Field, Note, Press, Reveal, Row, Select, Segmented, Txt, useToast } from '../../ui';
+import { M, Avatar, Badge, Button, Checkbox, Chip, ChipGroup, Field, Note, Press, Reveal, Row, Select, Segmented, Txt, useToast, doneBar } from '../../ui';
 import { LinkCard, Section, TabScreen } from '../Layout';
 
 const stBadge = (k: StKey) => <Badge label={ST[k][0]} tone={ST[k][1]} />;
@@ -95,7 +95,7 @@ export function Membros() {
       <View style={{ paddingHorizontal: GUTTER, paddingTop: 16 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 44, paddingHorizontal: 14, backgroundColor: C.sand }}>
           <Txt style={[type(14, 400), { color: C.muted }]}>○</Txt>
-          <TextInput value={q} onChangeText={setQ} placeholder="Nome, telefone ou nº de membro" placeholderTextColor={C.faint} style={[type(14, 400), { flex: 1, color: C.ink, outlineStyle: 'none' } as any]} returnKeyType="search" clearButtonMode="while-editing" />
+          <TextInput {...doneBar} value={q} onChangeText={setQ} placeholder="Nome, telefone ou nº de membro" placeholderTextColor={C.faint} style={[type(14, 400), { flex: 1, color: C.ink, outlineStyle: 'none' } as any]} returnKeyType="search" clearButtonMode="while-editing" />
         </View>
       </View>
       <Section first>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { LayoutChangeEvent, Platform, StyleProp, TextInput, TextInputProps, View, ViewStyle } from 'react-native';
 import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { DUR, fade, timing } from './motion';
+import { doneBar } from './Keyboard';
 import { C, type } from '../theme/tokens';
 import { Press } from './Press';
 import { Txt } from './Txt';
@@ -116,7 +117,7 @@ export function Tabs<T extends string>({ options, value, onChange, style }: { op
 }
 
 /** Campo de texto sublinhado com rótulo, como nos formulários do desenho. */
-export function Field({ label, prefix, right, error, style, inputStyle, big, ...input }: TextInputProps & { label?: string; prefix?: string; right?: React.ReactNode; error?: string; style?: StyleProp<ViewStyle>; inputStyle?: any; big?: boolean }) {
+export function Field({ label, prefix, right, error, style, inputStyle, big, inputRef, ...input }: TextInputProps & { label?: string; prefix?: string; right?: React.ReactNode; error?: string; style?: StyleProp<ViewStyle>; inputStyle?: any; big?: boolean; inputRef?: React.Ref<React.ComponentRef<typeof TextInput>> }) {
   const [focus, setFocus] = useState(false);
   const f = useTimed(focus);
   const line = useAnimatedStyle(() => ({ backgroundColor: interpolateColor(f.value, [0, 1], [error ? C.bad : C.lineStrong, C.ink]), height: 1 + f.value }));
@@ -130,8 +131,10 @@ export function Field({ label, prefix, right, error, style, inputStyle, big, ...
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: big ? 44 : 38 }}>
         {prefix ? <Txt style={[type(big ? 16 : 15, 400), { color: C.faint }]}>{prefix}</Txt> : null}
         <TextInput
+          ref={inputRef}
           placeholderTextColor={C.faint}
           selectionColor={C.accent}
+          {...doneBar}
           {...input}
           onFocus={(e) => {
             setFocus(true);
@@ -161,6 +164,7 @@ export function TextArea({ style, ...input }: TextInputProps & { style?: StylePr
   return (
     <TextInput
       multiline
+      {...doneBar}
       placeholderTextColor={C.faint}
       selectionColor={C.accent}
       textAlignVertical="top"
@@ -255,6 +259,7 @@ export function MoneyInput({ value, onChangeText, placeholder, editable = true, 
   return (
     <View style={[{ flexDirection: 'row', alignItems: 'center', gap: 8, height, paddingHorizontal: 12, borderWidth: 1, borderColor: editable ? C.ink : C.line, backgroundColor: '#fff' }, style]}>
       <TextInput
+        {...doneBar}
         value={value}
         editable={editable}
         onChangeText={(t) => onChangeText(t.replace(/[^\d\s,.]/g, ''))}

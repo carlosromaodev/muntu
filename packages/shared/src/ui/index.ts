@@ -6,5 +6,6 @@ export * from './Controls';
 export * from './Data';
 export * from './Overlay';
 export * from './Icon';
+export * from './Keyboard';
 export * as M from './motion';
 export { EASE, timing } from './motion';

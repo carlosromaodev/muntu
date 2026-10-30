@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,8 +29,17 @@ export function Login() {
   const [err, setErr] = useState('');
   const [forgot, setForgot] = useState(false);
   const [busy, setBusy] = useState(false);
+  const scroll = useRef<React.ComponentRef<typeof ScrollView>>(null);
+  const pwRef = useRef<React.ComponentRef<typeof TextInput>>(null);
+
+  // Com o teclado aberto, desliza até ao fim para o botão "Entrar" ficar à vista.
+  useEffect(() => {
+    const sub = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setTimeout(() => scroll.current?.scrollToEnd({ animated: true }), 60));
+    return () => sub.remove();
+  }, []);
 
   const entrar = () => {
+    Keyboard.dismiss();
     const t = onlyDigits(tel);
     if (t.length !== 9) return fail('O número tem 9 dígitos.');
     if (pw.length < 6) return fail('A senha tem pelo menos 6 caracteres.');
@@ -50,13 +59,17 @@ export function Login() {
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: C.paper }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Animated.View entering={M.fade(600)} pointerEvents="none" style={{ position: 'absolute', top: insets.top - 30, right: -120 }}>
+    <View style={{ flex: 1, backgroundColor: C.paper }}>
+      {/* Símbolo e logótipo fixos: não se mexem com o teclado nem com o scroll. */}
+      <View pointerEvents="none" style={{ position: 'absolute', top: insets.top - 30, right: -120 }}>
         <MuntuMark variant="C" color={C.sand} size={320} />
-      </Animated.View>
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1, paddingTop: insets.top + 12, paddingHorizontal: GUTTER, paddingBottom: insets.bottom + 12 }}>
+      </View>
+      <View style={{ paddingTop: insets.top + 12, paddingHorizontal: GUTTER, paddingBottom: 8 }}>
         <MuntuLogo size={20} />
-        <View style={{ flex: 1, minHeight: 120 }} />
+      </View>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} contentContainerStyle={{ flexGrow: 1, paddingHorizontal: GUTTER, paddingBottom: insets.bottom + 12 }}>
+        <View style={{ flex: 1, minHeight: 80 }} />
         <Animated.View entering={M.enter(120)} style={{ gap: 26, paddingBottom: 8 }}>
           <View style={{ gap: 10 }}>
             <Txt v="eyebrow" c={C.muted}>
@@ -72,9 +85,13 @@ export function Login() {
             big
             value={tel}
             onChangeText={(v) => {
-              setTel(phone(v));
+              const n = phone(v);
+              setTel(n);
               setErr('');
+              // Número completo (9 dígitos): passa para a senha.
+              if (onlyDigits(n).length === 9 && onlyDigits(tel).length < 9) pwRef.current?.focus();
             }}
+            onSubmitEditing={() => pwRef.current?.focus()}
             keyboardType="phone-pad"
             textContentType="telephoneNumber"
             autoComplete="tel"
@@ -83,6 +100,7 @@ export function Login() {
           <Field
             label="Senha"
             big
+            inputRef={pwRef}
             value={pw}
             placeholder="••••••••"
             secureTextEntry={!show}
@@ -119,6 +137,7 @@ export function Login() {
           <Txt style={[type(13, 400), { color: '#9a4c08' }]}>→</Txt>
         </Press>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }

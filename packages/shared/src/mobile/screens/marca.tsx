@@ -8,7 +8,7 @@ import { haptic } from '../../lib/haptics';
 import { canPickImage, pickImage } from '../../lib/pickImage';
 import { Brand, DEFAULT_BRAND, useMuntu } from '../../store/useMuntu';
 import { C, GUTTER, type } from '../../theme/tokens';
-import { M, Button, Note, Press, QR, qrCells, Txt, useToast } from '../../ui';
+import { M, Button, Note, Press, QR, qrCells, Txt, useToast, doneBar } from '../../ui';
 import { StackScreen } from '../Layout';
 
 const SMALL_QR = qrCells(3);
@@ -125,7 +125,7 @@ export function BrandForm({ b }: { b: BrandDraft }) {
         <Txt v="eyebrow" c={C.muted}>
           Nome na app
         </Txt>
-        <TextInput value={b.d.name} onChangeText={b.setName} maxLength={22} autoCapitalize="characters" accessibilityLabel="Nome na app" style={[type(16, 400, 0.14), { height: 44, borderBottomWidth: 1, borderBottomColor: C.ink, color: C.ink, paddingVertical: 0 }, Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null]} />
+        <TextInput {...doneBar} value={b.d.name} onChangeText={b.setName} maxLength={22} autoCapitalize="characters" accessibilityLabel="Nome na app" style={[type(16, 400, 0.14), { height: 44, borderBottomWidth: 1, borderBottomColor: C.ink, color: C.ink, paddingVertical: 0 }, Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null]} />
       </View>
       <View style={{ gap: 12 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -146,7 +146,7 @@ export function BrandForm({ b }: { b: BrandDraft }) {
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
           <View style={{ width: 44, height: 44, backgroundColor: b.c }} />
-          <TextInput value={b.hex} onChangeText={b.setHex} autoCapitalize="none" autoCorrect={false} placeholder="#c8640c" placeholderTextColor={C.faint} accessibilityLabel="Cor em hexadecimal" style={[type(16, 400), { flex: 1, height: 44, borderBottomWidth: 1, borderBottomColor: C.ink, color: C.ink, paddingVertical: 0 }, Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null]} />
+          <TextInput {...doneBar} value={b.hex} onChangeText={b.setHex} autoCapitalize="none" autoCorrect={false} placeholder="#c8640c" placeholderTextColor={C.faint} accessibilityLabel="Cor em hexadecimal" style={[type(16, 400), { flex: 1, height: 44, borderBottomWidth: 1, borderBottomColor: C.ink, color: C.ink, paddingVertical: 0 }, Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null]} />
           <Txt tabular style={[type(12, 400), { color: C.muted }]}>
             {b.ratioL}
           </Txt>

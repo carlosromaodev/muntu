@@ -8,7 +8,7 @@ import { kn, knc } from '../../lib/format';
 import { handoverView, useHandover } from '../../store/handover';
 import { useMuntu } from '../../store/useMuntu';
 import { C, GUTTER, TONES, type } from '../../theme/tokens';
-import { M, Badge, Button, Field, MoneyInput, Note, Press, Reveal, Row, TextArea, Txt } from '../../ui';
+import { M, Badge, Button, Field, MoneyInput, Note, Press, Reveal, Row, TextArea, Txt, doneBar } from '../../ui';
 import { BackLink, Footer, Page, Section, Steps, TopBar } from '../Layout';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -153,7 +153,7 @@ export function ContarDinheiro() {
                   <Press disabled={h.revealed} feedback="select" onPress={() => h.setQ(d.k, q - step)} style={{ width: 30, height: 32, alignItems: 'center', justifyContent: 'center' }}>
                     <Txt style={type(14, 400)}>−</Txt>
                   </Press>
-                  <TextInput
+                  <TextInput {...doneBar}
                     editable={!h.revealed}
                     value={String(q)}
                     onChangeText={(t) => h.setQ(d.k, parseInt(t.replace(/\D/g, ''), 10) || 0)}

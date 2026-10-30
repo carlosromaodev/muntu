@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Platform, RefreshControl, ScrollView, ScrollViewProps, StyleProp, View, ViewStyle } from 'react-native';
+import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, ScrollViewProps, StyleProp, View, ViewStyle } from 'react-native';
 import { usePathname, useRouter } from 'expo-router';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -116,8 +116,9 @@ export function Page({ children, contentStyle, refresh = true, footer, ...rest }
     haptic('select');
     setTimeout(() => setRefreshing(false), 700);
   }, []);
+  // No iOS o corpo encolhe com o teclado, para o botão do rodapé ficar sempre à vista.
   return (
-    <View style={{ flex: 1, backgroundColor: C.paper }}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: C.paper }}>
       <ScrollView
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
@@ -128,7 +129,7 @@ export function Page({ children, contentStyle, refresh = true, footer, ...rest }
         {children}
       </ScrollView>
       {footer}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

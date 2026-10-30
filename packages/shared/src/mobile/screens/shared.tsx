@@ -7,7 +7,7 @@ import { haptic } from '../../lib/haptics';
 import { initials, kn } from '../../lib/format';
 import { unreadCount, useMuntu } from '../../store/useMuntu';
 import { C, GUTTER, type } from '../../theme/tokens';
-import { M, Avatar, Badge, Bars, Button, Chip, ChipGroup, CountUp, Field, Note, Progress, Reveal, Row, Segmented, Select, TextArea, Txt, useToast, Press, Dot } from '../../ui';
+import { M, Avatar, Badge, Bars, Button, Chip, ChipGroup, CountUp, Field, Note, Progress, Reveal, Row, Segmented, Select, TextArea, Txt, useToast, Press, Dot, doneBar } from '../../ui';
 import { Footer, Page, Section, StackScreen, TabScreen, useHome } from '../Layout';
 import { home } from '../nav';
 
@@ -173,7 +173,7 @@ export function PassarTurno() {
               <Txt v="body" numberOfLines={1} style={{ flex: 0.9, textAlign: 'right' }}>
                 {kn(exp)}
               </Txt>
-              <TextInput
+              <TextInput {...doneBar}
                 value={cash}
                 onChangeText={(v) => (setCash(v), setErr(''))}
                 placeholder="Contar"
@@ -301,7 +301,7 @@ function PresentList() {
     <Section title="Membros presentes" right={<Txt v="label" c={C.muted}>{`${list.length} com check-in`}</Txt>}>
       <View style={{ height: 44, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, backgroundColor: C.sand, marginBottom: 6 }}>
         <View style={{ width: 11, height: 11, borderWidth: 1.5, borderColor: C.grey, borderRadius: 6 }} />
-        <TextInput value={q} onChangeText={(t) => (setQ(t), setAll(true))} placeholder="Procurar quem está dentro" placeholderTextColor={C.faint} accessibilityLabel="Procurar membro presente" style={[type(14, 400), { flex: 1, minWidth: 0, color: C.ink, paddingVertical: 0 }, Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null]} />
+        <TextInput {...doneBar} value={q} onChangeText={(t) => (setQ(t), setAll(true))} placeholder="Procurar quem está dentro" placeholderTextColor={C.faint} accessibilityLabel="Procurar membro presente" style={[type(14, 400), { flex: 1, minWidth: 0, color: C.ink, paddingVertical: 0 }, Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null]} />
       </View>
       {shown.map((p) => (
         <View key={p.n} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderTopWidth: 1, borderTopColor: C.line }}>

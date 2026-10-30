@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts, Outfit_300Light, Outfit_400Regular, Outfit_500Medium, Outfit_600SemiBold } from '@expo-google-fonts/outfit';
 import { ToastProvider } from '../ui/Overlay';
+import { KeyboardDoneBar } from '../ui/Keyboard';
 import { C } from '../theme/tokens';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -23,6 +24,7 @@ export function RootProviders({ children }: { children: React.ReactNode }) {
         <StatusBar style="dark" />
         <ToastProvider>
           <View style={{ flex: 1, backgroundColor: C.paper }}>{ready ? children : null}</View>
+          <KeyboardDoneBar />
         </ToastProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
