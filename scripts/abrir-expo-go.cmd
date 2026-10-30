@@ -28,5 +28,9 @@ echo.
 echo  Leia o codigo QR abaixo com a camara (iPhone) ou com o Expo Go (Android), na mesma rede Wi-Fi.
 echo  Se o telemovel nao ligar, feche esta janela e use abrir-expo-go-tunel.cmd
 echo.
-call npx expo start --go
+rem Usa a primeira porta livre a partir de 8081 (sem perguntar).
+set PORT=8081
+:procurar_porta
+netstat -ano | findstr /R /C:":%PORT% .*LISTENING" >nul && (set /a PORT+=1 & goto procurar_porta)
+call npx expo start --go --port %PORT%
 pause
