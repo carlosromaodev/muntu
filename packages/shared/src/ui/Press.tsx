@@ -19,7 +19,7 @@ export type PressProps = Omit<PressableProps, 'style' | 'children'> & {
  * Superfície tocável com resposta física: encolhe ligeiramente ao premir,
  * vibra no nativo e mostra estado de hover/foco na web.
  */
-export function Press({ style, children, feedback = 'tap', scaleTo = 0.97, onPress, onPressIn, onPressOut, disabled, ...rest }: PressProps) {
+export function Press({ style, children, feedback = 'tap', scaleTo = 0.97, onPress, onPressIn, onPressOut, onHoverIn, onHoverOut, disabled, ...rest }: PressProps) {
   const scale = useSharedValue(1);
   const [hovered, setHovered] = useState(false);
   const [pressed, setPressed] = useState(false);
@@ -48,8 +48,14 @@ export function Press({ style, children, feedback = 'tap', scaleTo = 0.97, onPre
         scale.value = withTiming(1, timing(DUR.press));
         onPressOut?.(e);
       }}
-      onHoverIn={() => setHovered(true)}
-      onHoverOut={() => setHovered(false)}
+      onHoverIn={(e) => {
+        setHovered(true);
+        onHoverIn?.(e);
+      }}
+      onHoverOut={(e) => {
+        setHovered(false);
+        onHoverOut?.(e);
+      }}
       style={[
         typeof style === 'function' ? style(st) : style,
         anim,

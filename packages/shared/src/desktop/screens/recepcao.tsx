@@ -10,7 +10,7 @@ import { haptic } from '../../lib/haptics';
 import { kn, onlyDigits, phone } from '../../lib/format';
 import { useMuntu } from '../../store/useMuntu';
 import { C, type } from '../../theme/tokens';
-import { M as Mo, Avatar, Button, Checkbox, Chip, ChipGroup, Field, Note, Press, QR, qrCells, Select, Tabs, TextArea, Txt, useToast } from '../../ui';
+import { M as Mo, Avatar, Button, Checkbox, Chip, ChipGroup, Field, Note, Press, QR, qrCells, Select, Tabs, TextArea, Txt, useToast, WaterButton } from '../../ui';
 import { Cols, DPage, KpiRow, Muted, PageHead, Panel, Status, Strong, Table, Tag } from '../kit';
 import { HOME, DRole } from '../nav';
 
@@ -71,7 +71,7 @@ export function DLogin() {
           {err ? <Note tone="bad" text={err} /> : null}
           {forgot ? <Note text="Peça ao dono para repor a senha. Recebe uma senha temporária por SMS." /> : null}
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Button label="Entrar" size="lg" onPress={entrar} feedback="press" style={{ paddingHorizontal: 28 }} />
+            <WaterButton label="Entrar" onPress={entrar} />
             <Press feedback="select" onPress={() => setForgot(!forgot)}>
               <Txt style={[type(13, 400), { color: '#9a4c08' }]}>Esqueci a senha</Txt>
             </Press>
