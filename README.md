@@ -24,7 +24,9 @@ Um só código para **iOS, Android, web mobile e web desktop**, feito com Expo (
 | `scripts\verificar.cmd` | Volta a compilar tudo sem reinstalar (`scripts\verificar.log`). |
 
 > **iPhone:** o Expo Go exige sessão iniciada com a **mesma conta Expo** no computador e na app
-> (`abrir-expo-go.cmd` pede o login na primeira vez). O Android não exige.
+> (`abrir-expo-go.cmd` pede o utilizador e a senha na primeira vez). O Android não exige.
+> Se a conta Expo foi criada com Google ou GitHub (sem senha): em expo.dev › Account settings ›
+> Access tokens crie um token e guarde-o, sozinho, em `scripts\expo-token.txt` (o ficheiro não vai para o Git).
 >
 > O Expo Go das lojas só abre projectos do SDK 58. O Expo SDK 58 precisa de Node 22.13+, 24.3+ ou 26+.
 > As versões ímpares, como a 25, não são suportadas.
