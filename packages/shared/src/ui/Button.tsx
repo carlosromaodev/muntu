@@ -5,7 +5,7 @@ import { HapticKind } from '../lib/haptics';
 import { Press } from './Press';
 import { Txt } from './Txt';
 
-export type ButtonKind = 'solid' | 'outline' | 'accent' | 'ghost' | 'soft' | 'danger' | 'light';
+export type ButtonKind = 'solid' | 'solidAccent' | 'outline' | 'accent' | 'ghost' | 'soft' | 'danger' | 'light';
 export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg';
 
 const H: Record<ButtonSize, number> = { xs: 28, sm: 34, md: 42, lg: 52 };
@@ -16,6 +16,9 @@ function colors(kind: ButtonKind, hovered: boolean) {
   switch (kind) {
     case 'solid':
       return { bg: hovered ? '#34322e' : C.ink, fg: C.paper, bd: hovered ? '#34322e' : C.ink };
+    case 'solidAccent':
+      // Preto que fica laranja ao passar o rato (botão Entrar do desktop).
+      return { bg: hovered ? C.accent : C.ink, fg: hovered ? C.ink : C.paper, bd: hovered ? C.accent : C.ink };
     case 'accent':
       return { bg: hovered ? '#b55a0a' : C.accent, fg: C.ink, bd: hovered ? '#b55a0a' : C.accent };
     case 'outline':
