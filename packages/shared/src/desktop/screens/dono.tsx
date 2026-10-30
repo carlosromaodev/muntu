@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, LinearTransition, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { APPR, FIL, FUGAS, LINES, LIQ, LOG, OPS, PARC, PLANOS, PV, REDE_REG, RULES, SAMPLE, ST, TREND, VIS, fill } from '../../data/desk';
-import { COMPARE, DOCUMENTS, LOST, NOTICE_TARGETS, NOTICES, OCC, REFERRAL_REVIEW, REWARDS, STAFF } from '../../data/mobile';
+import { BRAND_SWATCHES, COMPARE, DOCUMENTS, LOST, NOTICE_TARGETS, NOTICES, OCC, REFERRAL_REVIEW, REWARDS, STAFF } from '../../data/mobile';
 import { confirmBiometric } from '../../lib/auth';
 import { haptic } from '../../lib/haptics';
 import { kn } from '../../lib/format';
 import { IMPORT_KINDS, useOnboarding } from '../../store/onboarding';
 import { useMuntu } from '../../store/useMuntu';
 import { C, type } from '../../theme/tokens';
-import { Avatar, Bars, Button, Checkbox, Chip, ChipGroup, Field, Note, Press, Progress, Select, Stepper, Tabs, TextArea, Toggle, Txt, useToast } from '../../ui';
+import { M as Mo, Avatar, Bars, Button, Checkbox, Chip, ChipGroup, Field, Note, Press, Progress, Select, Stepper, Tabs, TextArea, Toggle, Txt, useToast } from '../../ui';
 import { Cols, DPage, KpiRow, Muted, PageHead, Panel, Status, Strong, Table, Tag } from '../kit';
 import { useDesk } from '../session';
+import { BrandMark, BrandPreview, useBrandDraft } from '../../mobile/screens/marca';
 
 const kz = (v: number) => `${v < 0 ? '−' : ''}${kn(v)},00 Kz`;
 const rnd = (x: number) => Math.round(x / 500) * 500;
@@ -58,14 +59,14 @@ export function DPainel() {
           {APPR.map((a, i) => {
             const st = approvals[a.id];
             return (
-              <Animated.View key={a.id} layout={LinearTransition} style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.line }}>
+              <Animated.View key={a.id} layout={Mo.layout()} style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.line }}>
                 <View style={{ flex: 1, gap: 2 }}>
                   <Muted size={12}>{a.k}</Muted>
                   <Txt style={type(14, 400)}>{a.t}</Txt>
                 </View>
                 <Strong size={16}>{kz(a.v)}</Strong>
                 {st ? (
-                  <Animated.View entering={ZoomIn}>
+                  <Animated.View entering={Mo.fade()}>
                     <Tag l={st === 'ok' ? 'Aprovado' : 'Recusado'} c={st === 'ok' ? C.ok : C.bad} bg={st === 'ok' ? C.okBg : C.badBg} />
                   </Animated.View>
                 ) : (
@@ -196,7 +197,7 @@ export function DPlanos() {
         {PLANOS.map((p, i) => {
           const on = edit === p.id;
           return (
-            <Animated.View key={p.id} entering={FadeInDown.delay(i * 40)} layout={LinearTransition} style={{ width: '31.8%', minWidth: 260, backgroundColor: on ? C.canvas : C.paper, borderWidth: 1, borderColor: C.line, padding: 24, gap: 10 }}>
+            <Animated.View key={p.id} entering={Mo.enter(i * 40)} layout={Mo.layout()} style={{ width: '31.8%', minWidth: 260, backgroundColor: on ? C.canvas : C.paper, borderWidth: 1, borderColor: C.line, padding: 24, gap: 10 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Muted size={12}>{String(i + 1).padStart(2, '0')}</Muted>
                 <Tag l={p.scope} c={C.ink} bg={C.sand} />
@@ -272,7 +273,7 @@ export function DRede() {
             />
             <Muted size={12}>Os parceiros só vêem acesso válido, nome e foto. Pagamentos, dados pessoais e avisos ficam no ginásio de origem.</Muted>
           </Panel>
-          <Animated.View key={ps.n} entering={FadeIn}>
+          <Animated.View key={ps.n} entering={Mo.fade()}>
             <Panel>
               <Muted size={12}>Parceiro desde {ps.since}</Muted>
               <Txt style={type(22, 400, 0.14, true)}>{ps.n}</Txt>
@@ -380,7 +381,7 @@ export function DAvisosSms() {
             ]}
           />
         </Panel>
-        <Animated.View key={ri} entering={FadeIn}>
+        <Animated.View key={ri} entering={Mo.fade()}>
           <Panel>
             <Muted size={12}>Aviso 0{ri + 1} · editar</Muted>
             <Txt style={type(20, 400, 0.14, true)}>{RULES[ri]!.n}</Txt>
@@ -469,7 +470,7 @@ export function DEquipa() {
           </Panel>
           <Panel title="Enviados">
             {sent.map((a, i) => (
-              <Animated.View key={a.t + i} entering={FadeInDown} style={{ paddingVertical: 10, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, gap: 6 }}>
+              <Animated.View key={a.t + i} entering={Mo.enter()} style={{ paddingVertical: 10, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, gap: 6 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                   <Tag l={a.p === 'urgente' ? 'Urgente' : 'Informação'} c={a.p === 'urgente' ? C.bad : C.grey} bg={a.p === 'urgente' ? C.badBg : C.sand} />
                   <Muted size={11}>
@@ -510,7 +511,7 @@ export function DReceitasPerdidas() {
             ['res', 'Kz · resolvido', C.ok, 'Recuperado ou justificado'],
           ] as const
         ).map(([k, l, c, d], i) => (
-          <Animated.View key={k} entering={FadeInDown.delay(i * 40)} style={{ flex: 1, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 22, gap: 6 }}>
+          <Animated.View key={k} entering={Mo.enter(i * 40)} style={{ flex: 1, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 22, gap: 6 }}>
             <Muted size={12}>{l}</Muted>
             <Txt style={[type(36, 300), { color: c }]}>{kn(sum(k))}</Txt>
             <Muted size={12}>{d}</Muted>
@@ -579,7 +580,7 @@ export function DFiliais() {
         {cards.map((f, i) => {
           const pct = Math.round((f.r / f.e) * 100);
           return (
-            <Animated.View key={f.n} entering={FadeInDown.delay(i * 50)} style={{ flex: 1, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 22, gap: 10 }}>
+            <Animated.View key={f.n} entering={Mo.enter(i * 50)} style={{ flex: 1, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 22, gap: 10 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Txt style={type(13, 600, 0.2, true)}>{f.n}</Txt>
                 <Txt style={[type(11, 500), { color: f.al ? C.bad : C.ok }]}>{f.al || `${pct}% cobrado`}</Txt>
@@ -623,11 +624,11 @@ export function DFiliais() {
               <Button label="Começar" kind="outline" size="sm" style={{ alignSelf: 'flex-start' }} onPress={() => setShow(true)} />
             </>
           ) : done ? (
-            <Animated.View entering={ZoomIn}>
+            <Animated.View entering={Mo.fade()}>
               <Note tone="ok" text={`Filial ${n} criada a partir de ${from}. Copiado: ${NFX.filter(([k]) => x[k]).map(([, l]) => l.toLowerCase()).join(', ')}.`} />
             </Animated.View>
           ) : (
-            <Animated.View entering={FadeInDown} style={{ gap: 12 }}>
+            <Animated.View entering={Mo.enter()} style={{ gap: 12 }}>
               <View style={{ flexDirection: 'row', gap: 16 }}>
                 <Field style={{ flex: 1 }} label="Nome" value={n} onChangeText={setN} />
                 <Select style={{ flex: 1 }} label="Copiar de" value={from} onChange={setFrom} options={['Talatona', 'Kilamba', 'Maianga'].map((v) => ({ v, l: v }))} />
@@ -721,7 +722,7 @@ export function DGestao() {
                 <Panel key={k.k} title={k.l} style={{ flex: 1, borderColor: ld ? C.ink : C.line }} right={!ld ? <Button label="Carregar" size="sm" onPress={() => ob.set({ imported: { ...ob.imported, [k.k]: true } })} /> : <Tag l="Carregado" c={C.ok} bg={C.okBg} />}>
                   <Muted size={12}>{k.d}</Muted>
                   {ld ? (
-                    <Animated.View entering={FadeInDown} style={{ gap: 10 }}>
+                    <Animated.View entering={Mo.enter()} style={{ gap: 10 }}>
                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
                         {k.cols.filter(([, ok]) => ok).map(([n]) => (
                           <Tag key={n} l={`${n} ✓`} c={C.ok} bg={C.okBg} />
@@ -767,7 +768,7 @@ export function DGestao() {
           <Cols flex={[1, 1]}>
             <Panel title="A validar">
               {REFERRAL_REVIEW.filter((r) => !rev[r.id]).map((r) => (
-                <Animated.View key={r.id} entering={FadeInDown} layout={LinearTransition} style={{ paddingVertical: 12, borderTopWidth: 1, borderTopColor: C.line, gap: 8 }}>
+                <Animated.View key={r.id} entering={Mo.enter()} layout={Mo.layout()} style={{ paddingVertical: 12, borderTopWidth: 1, borderTopColor: C.line, gap: 8 }}>
                   <Strong>{r.t}</Strong>
                   <Txt style={[type(12, 400), { color: C.bad }]}>{r.why}</Txt>
                   <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -803,6 +804,102 @@ export function DGestao() {
           </Cols>
         </View>
       )}
+    </DPage>
+  );
+}
+
+/** Linha de formulário do desktop: rótulo e ajuda à esquerda, controlo à direita. */
+function FormRow({ title, help, children, last }: { title: string; help: string; children: React.ReactNode; last?: boolean }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: 24, paddingVertical: 24, paddingHorizontal: 28, borderBottomWidth: last ? 0 : 1, borderBottomColor: C.line }}>
+      <View style={{ width: 180, gap: 4 }}>
+        <Txt style={type(15, 600)}>{title}</Txt>
+        <Muted size={12}>{help}</Muted>
+      </View>
+      <View style={{ flex: 1, minWidth: 0, gap: 12 }}>{children}</View>
+    </View>
+  );
+}
+
+const WHERE: [string, string][] = [
+  ['Cartão de acesso', 'O QR de entrada usa a cor e o logotipo.'],
+  ['Botões principais', 'Reservar PT, pagar e aceitar vaga.'],
+  ['SMS e facturas', 'O nome aparece como remetente e no cabeçalho.'],
+];
+
+/** dp (dono) · Marca do ginásio. */
+export function DMarca() {
+  const b = useBrandDraft();
+  return (
+    <DPage>
+      <PageHead title="Marca do ginásio" sub="Logotipo, nome e cor que os teus membros vêem na app" actions={[{ label: 'Repor padrão', kind: 'outline', onPress: b.reset }, { label: 'Aplicar marca', onPress: b.save }]} />
+      {b.saved ? (
+        <Animated.View entering={Mo.pop()} style={{ marginHorizontal: 40, marginBottom: 16 }}>
+          <Note tone="ok" text="Aplicado na app dos membros de todas as filiais." />
+        </Animated.View>
+      ) : null}
+      <View style={{ flexDirection: 'row', gap: 20, paddingHorizontal: 40, paddingBottom: 24, alignItems: 'flex-start' }}>
+        <Animated.View entering={Mo.enter()} style={{ flex: 1, minWidth: 0, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line }}>
+          <FormRow title="Logotipo" help="PNG ou SVG com fundo transparente. Sem logotipo, mostramos o nome.">
+            {b.d.logo ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderWidth: 1, borderColor: C.line, backgroundColor: '#fff' }}>
+                <View style={{ width: 88, height: 60, backgroundColor: b.c, alignItems: 'center', justifyContent: 'center' }}>
+                  <BrandMark logo={b.d.logo} name="" color={b.ink} h={44} w={76} />
+                </View>
+                <Txt style={[type(14, 400), { flex: 1 }]}>Logotipo carregado</Txt>
+                <Button label="Remover" kind="outline" size="sm" onPress={b.rmLogo} />
+              </View>
+            ) : (
+              <Press feedback="select" scaleTo={0.995} onPress={b.upload} accessibilityLabel="Carregar logotipo" style={({ hovered }) => ({ height: 120, alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1.5, borderStyle: 'dashed', borderColor: hovered ? C.ink : C.faint, backgroundColor: '#fff' })}>
+                <Txt style={type(15, 500)}>Clica para escolher o ficheiro</Txt>
+                <Muted size={12}>Até 2 MB · mínimo 400 px de largura</Muted>
+              </Press>
+            )}
+          </FormRow>
+          <FormRow title="Nome na app" help="Até 22 caracteres.">
+            <Field big value={b.d.name} onChangeText={b.setName} maxLength={22} autoCapitalize="characters" accessibilityLabel="Nome na app" inputStyle={{ letterSpacing: 2.2 }} />
+          </FormRow>
+          <FormRow title="Cor de destaque" help="A interface da equipa mantém as cores MUNTU." last>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              {BRAND_SWATCHES.map(([col, l]) => {
+                const on = b.c === col;
+                return (
+                  <Press key={col} feedback="select" onPress={() => b.pick(col)} accessibilityLabel={l} accessibilityState={{ selected: on }} style={{ width: 44, height: 44, padding: on ? 2 : 0, borderWidth: on ? 2 : 0, borderColor: C.ink }}>
+                    <View style={{ flex: 1, backgroundColor: col }} />
+                  </Press>
+                );
+              })}
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <View style={{ width: 160 }}>
+                <Field value={b.hex} onChangeText={b.setHex} autoCapitalize="none" autoCorrect={false} placeholder="#c8640c" accessibilityLabel="Cor em hexadecimal" />
+              </View>
+              <Txt tabular style={[type(13, 400), { color: C.muted }]}>
+                Contraste {b.ratioL}
+              </Txt>
+              <Tag l={b.low ? 'Baixo · escolhe um tom mais escuro ou mais claro' : 'Legível'} c={b.low ? C.warn : C.ok} bg={b.low ? C.warnBg : C.okBg} />
+            </View>
+          </FormRow>
+        </Animated.View>
+        <Animated.View entering={Mo.enter(60)} style={{ width: 420, gap: 20 }}>
+          <View style={{ backgroundColor: C.canvas, borderWidth: 1, borderColor: C.line, paddingVertical: 28, gap: 18 }}>
+            <Txt style={[type(10, 600, 0.22, true), { color: C.muted, textAlign: 'center' }]}>Pré-visualização · app do membro</Txt>
+            <BrandPreview b={b} width={260} />
+          </View>
+          <View style={{ backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 24, gap: 4 }}>
+            <Txt style={[type(15, 600), { marginBottom: 6 }]}>Onde aparece</Txt>
+            {WHERE.map(([l, d], i) => (
+              <View key={l} style={{ flexDirection: 'row', gap: 12, paddingVertical: 12, borderTopWidth: i ? 1 : 0, borderTopColor: C.line }}>
+                <View style={{ width: 8, height: 8, marginTop: 6, backgroundColor: b.c }} />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Strong size={14}>{l}</Strong>
+                  <Muted size={12}>{d}</Muted>
+                </View>
+              </View>
+            ))}
+          </View>
+        </Animated.View>
+      </View>
     </DPage>
   );
 }

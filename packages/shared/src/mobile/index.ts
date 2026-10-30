@@ -7,3 +7,5 @@ export { Resumo, Cobrancas, Agenda, Pedidos, ActividadesEquipa } from './screens
 export { Painel, Aprovacoes, EquipaDono, ContaDono, Filiais, AvisosEquipa, ReceitasPerdidas, NovaFilial, Cofre, Regras, Indicacoes } from './screens/dono';
 export { ReceberTurno, ContarDinheiro, ConferirPagamentos, ReverPendencias, AssumirTurno } from './screens/turno';
 export { ObConta, ObGinasio, ObImportar, ObConfirmar, ObAvisar, Importar } from './screens/onboarding';
+export { Ocorrencia } from './screens/ocorrencia';
+export { Marca, BrandForm, BrandPreview, BrandMark, useBrandDraft } from './screens/marca';

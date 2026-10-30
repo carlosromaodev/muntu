@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, FadeOut, LinearTransition, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MuntuLogo } from '../../brand/Logo';
 import { haptic } from '../../lib/haptics';
@@ -9,7 +9,7 @@ import { kn, onlyDigits, phone } from '../../lib/format';
 import { IMPORT_KINDS, onboardingCounts, useOnboarding } from '../../store/onboarding';
 import { useMuntu } from '../../store/useMuntu';
 import { C, GUTTER, type } from '../../theme/tokens';
-import { Button, Checkbox, Chip, Field, Note, Press, Progress, Reveal, Row, Select, TextArea, Txt } from '../../ui';
+import { M, Button, Checkbox, Chip, Field, Note, Press, Progress, Reveal, Row, Select, TextArea, Txt } from '../../ui';
 import { BackLink, Footer, Page, Section, StackScreen, Steps } from '../Layout';
 
 const LABELS = ['Responsável', 'Ginásio e filiais', 'Importar dados', 'Confirmar dados', 'Enviar credenciais'];
@@ -108,7 +108,7 @@ export function ObGinasio() {
         </Section>
         <Section title="Filiais" right={<Txt v="label" c={C.muted}>{`${o.fils.length} ${o.fils.length === 1 ? 'filial' : 'filiais'}`}</Txt>}>
           {o.fils.map((f, i) => (
-            <Animated.View key={i} entering={FadeInDown} exiting={FadeOut} layout={LinearTransition} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, paddingVertical: 4 }}>
+            <Animated.View key={i} entering={M.enter()} exiting={M.fadeOut()} layout={M.layout()} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, paddingVertical: 4 }}>
               <Txt v="small" c={C.muted} style={{ width: 22 }}>
                 {String(i + 1).padStart(2, '0')}
               </Txt>
@@ -140,7 +140,7 @@ function ImportKinds() {
         const mg = !!o.merge[k.k];
         return (
           <Reveal key={k.k} i={idx}>
-            <Animated.View layout={LinearTransition} style={{ borderWidth: 1, borderColor: ld ? C.ink : C.line, backgroundColor: ld ? '#fff' : 'transparent', padding: 14, gap: 12, marginBottom: 12 }}>
+            <Animated.View layout={M.layout()} style={{ borderWidth: 1, borderColor: ld ? C.ink : C.line, backgroundColor: ld ? '#fff' : 'transparent', padding: 14, gap: 12, marginBottom: 12 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <View style={{ flex: 1 }}>
                   <Txt v="bodyStrong">{k.l}</Txt>
@@ -157,7 +157,7 @@ function ImportKinds() {
                   </Txt>
                 </View>
               ) : (
-                <Animated.View entering={FadeInDown} style={{ gap: 10 }}>
+                <Animated.View entering={M.enter()} style={{ gap: 10 }}>
                   <Txt v="small">
                     {k.f}
                     {slug}.xlsx · {k.lines}
@@ -191,7 +191,7 @@ function ImportKinds() {
                   </Press>
                   {showErr[k.k] && k.bad
                     ? k.errs.map(([l, n, p]) => (
-                        <Animated.View key={l} entering={FadeInDown} style={{ backgroundColor: C.badBg, padding: 8 }}>
+                        <Animated.View key={l} entering={M.enter()} style={{ backgroundColor: C.badBg, padding: 8 }}>
                           <Txt v="small">
                             Linha {l} · {n}
                           </Txt>
@@ -422,7 +422,7 @@ export function ObAvisar() {
             </Section>
           </>
         ) : o.smSt === 'sending' ? (
-          <Animated.View entering={FadeIn} style={{ padding: GUTTER, gap: 12 }}>
+          <Animated.View entering={M.fade()} style={{ padding: GUTTER, gap: 12 }}>
             <Txt v="label" c={C.muted}>
               A enviar
             </Txt>
@@ -432,7 +432,7 @@ export function ObAvisar() {
             <Progress value={total ? o.smSent / total : 0} color={C.accent} height={6} />
           </Animated.View>
         ) : (
-          <Animated.View entering={ZoomIn.springify().damping(14)} style={{ padding: GUTTER, gap: 12 }}>
+          <Animated.View entering={M.pop()} style={{ padding: GUTTER, gap: 12 }}>
             <View style={{ backgroundColor: C.okBg, padding: 18, gap: 8 }}>
               <Txt v="label" c={C.ok}>
                 Credenciais enviadas

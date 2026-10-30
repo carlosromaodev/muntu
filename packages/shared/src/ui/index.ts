@@ -5,3 +5,6 @@ export * from './Bits';
 export * from './Controls';
 export * from './Data';
 export * from './Overlay';
+export * from './Icon';
+export * as M from './motion';
+export { EASE, timing } from './motion';

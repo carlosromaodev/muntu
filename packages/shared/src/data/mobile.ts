@@ -270,14 +270,13 @@ export const DENOMS = [
   { k: 'n1000', l: 'Notas de 1 000', v: 1000 },
   { k: 'n500', l: 'Notas de 500', v: 500 },
   { k: 'n200', l: 'Notas de 200', v: 200 },
-  { k: 'coin', l: 'Moedas · valor total', v: 1 },
 ];
 export const SHIFT_EXPECTED_CASH = 85000;
 export const SHIFT_PAYS = [
-  { k: 'tpa', l: 'TPA', d: 'Fecho do terminal às 14:00 · 6 operações', v: 22000 },
-  { k: 'exp', l: 'Multicaixa Express', d: '14 confirmações no extracto', v: 64500 },
-  { k: 'ref', l: 'Referências Multicaixa', d: '2 pagamentos', v: 10000 },
-  { k: 'pen', l: 'Por confirmar', d: '1 transferência · não entra na caixa', v: 15000 },
+  { k: 'tpa', l: 'TPA', d: 'Fecho do terminal às 14:00 · 6 operações', v: 22000, src: 'Mensalidades 15 000 · Bar 4 500 · PT 2 500', proof: 'fecho do terminal' },
+  { k: 'exp', l: 'Multicaixa Express', d: '14 confirmações no extracto', v: 64500, src: 'Mensalidades 52 000 · Inscrições 9 000 · Bar 3 500', proof: 'extracto' },
+  { k: 'ref', l: 'Referências Multicaixa', d: '2 pagamentos', v: 10000, src: 'Mensalidades 10 000', proof: 'extracto' },
+  { k: 'pen', l: 'Por confirmar', d: '1 transferência · não entra na caixa', v: 15000, src: 'Transferência de Délcio Ngola', proof: 'comprovativo' },
 ];
 export const SHIFT_PENDING = [
   { id: 'q1', k: 'cob', t: 'Cobrança · Mário Sebastião', d: '30 000 Kz · 12 dias em atraso' },
@@ -287,3 +286,47 @@ export const SHIFT_PENDING = [
   { id: 'q5', k: 'oco', t: 'Catraca 2 em manutenção', d: 'Técnico chega às 15:00' },
 ];
 export const PENDING_KIND: Record<string, [string, Tone]> = { cob: ['Cobrança', 'warn'], doc: ['Documento', 'neutral'], rec: ['Reclamação', 'bad'], res: ['Reserva', 'neutral'], oco: ['Ocorrência', 'bad'] };
+
+/** Membros com check-in feito agora (lotação). `pt` = sessão com treinador. */
+export const PRESENT: { n: string; pl: string; h: string; z: string; pt?: string }[] = [
+  { n: 'Kátia Muondo', pl: 'Rede Mensal', h: '09:38', z: 'Musculação', pt: 'PT Nuno' },
+  { n: 'Délcio Ngola', pl: 'Rede Mensal', h: '09:31', z: 'Cardio' },
+  { n: 'Ana Domingos', pl: 'Rede Mensal', h: '09:22', z: 'Aula · Funcional' },
+  { n: 'Edson Mateus', pl: 'Local Mensal', h: '09:15', z: 'Musculação' },
+  { n: 'Luísa Tomás', pl: 'Híbrido', h: '09:12', z: 'Aula · Funcional' },
+  { n: 'Paulo Jorge', pl: 'Local Mensal', h: '09:04', z: 'Cardio' },
+  { n: 'Joana Kiala', pl: 'Híbrido', h: '08:57', z: 'Musculação', pt: 'PT Leonor' },
+  { n: 'Celso Pedro', pl: 'Rede · visita Kilamba', h: '08:49', z: 'Musculação' },
+  { n: 'Marta Neto', pl: 'Local Mensal', h: '08:41', z: 'Aula · Funcional' },
+  { n: 'Sara Domingos', pl: 'Local Mensal', h: '08:33', z: 'Cardio' },
+  { n: 'Hélder Pinto', pl: 'Rede Mensal', h: '08:20', z: 'Musculação' },
+  { n: 'Rosa Kiala', pl: 'Diário', h: '08:12', z: 'Cardio' },
+];
+
+/** Ocorrências: tipos, zonas e as que já existem (membro / equipa). */
+export const INCIDENT_TYPES = {
+  m: ['Equipamento', 'Limpeza', 'Segurança', 'Atendimento', 'Lesão', 'Outro'],
+  s: ['Equipamento', 'Instalações', 'Segurança', 'Membro', 'Acidente', 'Sistema', 'Outro'],
+} as const;
+export const INCIDENT_ZONES = ['Musculação', 'Cardio', 'Sala de aulas', 'Balneários', 'Recepção', 'Entrada e parque'];
+export const INCIDENT_STEPS = ['Recebida', 'Em análise', 'Resolvida'];
+export const INCIDENTS_SEED: { m: [string, string, string, number][]; s: [string, string, string, number][] } = {
+  m: [
+    ['OC-0131', 'Passadeira 4 parada', 'Cardio · há 3 dias', 2],
+    ['OC-0118', 'Balneário sem água quente', 'Balneários · 12 Out', 3],
+  ],
+  s: [
+    ['OC-0139', 'Catraca 2 em manutenção', 'Entrada · hoje 08:10', 1],
+    ['OC-0127', 'Membro escorregou no balneário', 'Balneários · 18 Out', 3],
+  ],
+};
+
+/** Cores de destaque sugeridas para a marca do ginásio. */
+export const BRAND_SWATCHES: [string, string][] = [
+  ['#c8640c', 'Padrão MUNTU'],
+  ['#1f5f8b', 'Atlântico'],
+  ['#2e7d4f', 'Mata'],
+  ['#8b1e3f', 'Bordô'],
+  ['#5b3f8c', 'Ametista'],
+  ['#1d1c1a', 'Grafite'],
+];

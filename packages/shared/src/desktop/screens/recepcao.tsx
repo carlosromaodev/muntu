@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, LinearTransition, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { MuntuLogo } from '../../brand/Logo';
 import { MuntuSelo } from '../../brand/Selo';
 import { AV, BAN, fill, MEMBERS, Member, PLANS, RULES, SAMPLE, ST } from '../../data/desk';
@@ -10,7 +10,7 @@ import { haptic } from '../../lib/haptics';
 import { kn, onlyDigits, phone } from '../../lib/format';
 import { useMuntu } from '../../store/useMuntu';
 import { C, type } from '../../theme/tokens';
-import { Avatar, Button, Checkbox, Chip, ChipGroup, Field, Note, Press, QR, qrCells, Select, Tabs, TextArea, Txt, useToast } from '../../ui';
+import { M as Mo, Avatar, Button, Checkbox, Chip, ChipGroup, Field, Note, Press, QR, qrCells, Select, Tabs, TextArea, Txt, useToast } from '../../ui';
 import { Cols, DPage, KpiRow, Muted, PageHead, Panel, Status, Strong, Table, Tag } from '../kit';
 import { HOME, DRole } from '../nav';
 
@@ -47,7 +47,7 @@ export function DLogin() {
     <View style={{ flex: 1, flexDirection: 'row', backgroundColor: C.paper, minWidth: 1024 }}>
       <View style={{ flex: 1, paddingHorizontal: 48, paddingVertical: 40, justifyContent: 'space-between', maxWidth: 560 }}>
         <MuntuLogo size={22} />
-        <Animated.View entering={FadeInDown.duration(500)} style={{ gap: 26, maxWidth: 380 }}>
+        <Animated.View entering={Mo.enter()} style={{ gap: 26, maxWidth: 380 }}>
           <View style={{ gap: 10 }}>
             <Txt style={[type(10, 600, 0.22, true), { color: C.muted }]}>Recepção, finanças, PT e gestão</Txt>
             <Txt accessibilityRole="header" style={type(40, 400, 0.18, true)}>
@@ -86,7 +86,7 @@ export function DLogin() {
       </View>
       <View style={{ flex: 1.2, backgroundColor: C.accent, padding: 40, justifyContent: 'space-between' }}>
         <Txt style={[type(10, 600, 0.22, true), { alignSelf: 'flex-end' }]}>Gestão de ginásios · Angola</Txt>
-        <Animated.View entering={ZoomIn.duration(900).springify().damping(18)} style={{ alignSelf: 'center' }}>
+        <Animated.View entering={Mo.fade(600)} style={{ alignSelf: 'center' }}>
           <MuntuSelo size={300} color={C.ink} grayColor={C.accentDeep} markColor={C.ink} />
         </Animated.View>
         <Txt style={type(10, 600, 0.22, true)}>Copyright ©2026</Txt>
@@ -224,7 +224,7 @@ export function DInscricao() {
       <View style={{ flexDirection: 'row', gap: 8, paddingHorizontal: 40, paddingBottom: 20 }}>
         {steps.map((l, i) => (
           <View key={l} style={{ flex: 1, gap: 8 }}>
-            <Animated.View layout={LinearTransition} style={{ height: 3, backgroundColor: i < step ? C.ink : i === step ? C.accent : C.line }} />
+            <Animated.View layout={Mo.layout()} style={{ height: 3, backgroundColor: i < step ? C.ink : i === step ? C.accent : C.line }} />
             <Txt style={[type(10, 600, 0.16, true), { color: i <= step ? C.ink : C.muted }]}>
               0{i + 1} · {l}
             </Txt>
@@ -234,7 +234,7 @@ export function DInscricao() {
       <View style={{ paddingHorizontal: 40 }}>
         <Panel i={0} style={{ minHeight: 340 }}>
           {step === 0 ? (
-            <Animated.View key="s0" entering={FadeInDown} style={{ gap: 20 }}>
+            <Animated.View key="s0" entering={Mo.enter()} style={{ gap: 20 }}>
               <Muted>Dados do cliente</Muted>
               <View style={{ flexDirection: 'row', gap: 32 }}>
                 <Field style={{ flex: 1 }} label="Nome completo" value={cli.nome} onChangeText={(v) => setCli({ ...cli, nome: v })} placeholder="Nome e apelido" />
@@ -247,7 +247,7 @@ export function DInscricao() {
               <Muted size={12}>O telefone é o acesso do membro à app. Recebe a senha temporária por SMS no fim da inscrição.</Muted>
             </Animated.View>
           ) : step === 1 ? (
-            <Animated.View key="s1" entering={FadeInDown} style={{ flexDirection: 'row', gap: 12 }}>
+            <Animated.View key="s1" entering={Mo.enter()} style={{ flexDirection: 'row', gap: 12 }}>
               {PLANS.map((x) => {
                 const on = plan === x.id;
                 return (
@@ -262,7 +262,7 @@ export function DInscricao() {
               })}
             </Animated.View>
           ) : step === 2 ? (
-            <Animated.View key="s2" entering={FadeInDown} style={{ flexDirection: 'row', gap: 28 }}>
+            <Animated.View key="s2" entering={Mo.enter()} style={{ flexDirection: 'row', gap: 28 }}>
               <View style={{ flex: 1, gap: 8 }}>
                 {[
                   ['express', 'Multicaixa Express', 'Push no telemóvel'],
@@ -300,7 +300,7 @@ export function DInscricao() {
               </View>
             </Animated.View>
           ) : (
-            <Animated.View key="s3" entering={FadeInDown} style={{ flexDirection: 'row', gap: 28 }}>
+            <Animated.View key="s3" entering={Mo.enter()} style={{ flexDirection: 'row', gap: 28 }}>
               <View style={{ alignItems: 'center', gap: 10 }}>
                 <View style={{ padding: 12, backgroundColor: '#fff', borderWidth: 1, borderColor: C.line }}>
                   <QR size={150} cells={qrCells()} />
@@ -413,7 +413,7 @@ export function DMembros() {
           </Muted>
           <View>
             {list.map((m, i) => (
-              <Animated.View key={m.id} entering={FadeInDown.delay(Math.min(i, 10) * 25)} layout={LinearTransition}>
+              <Animated.View key={m.id} entering={Mo.enter(Math.min(i, 10) * 25)} layout={Mo.layout()}>
                 <Press feedback="select" scaleTo={1} onPress={() => setSel(m.id)} style={({ hovered }) => ({ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 8, backgroundColor: sel === m.id ? C.sand : hovered ? C.paper : 'transparent' })}>
                   <Avatar initials={ini(m.n)} size={30} bg={C.paper} />
                   <View style={{ flex: 1 }}>
@@ -429,7 +429,7 @@ export function DMembros() {
             {!list.length ? <Muted>Nenhum membro encontrado.</Muted> : null}
           </View>
         </View>
-        <Animated.View key={M.id} entering={FadeIn.duration(260)} style={{ gap: 16 }}>
+        <Animated.View key={M.id} entering={Mo.fade(260)} style={{ gap: 16 }}>
           <View style={{ flexDirection: 'row', gap: 20, alignItems: 'flex-start' }}>
             <View style={{ width: 72, height: 72, backgroundColor: C.sand, alignItems: 'center', justifyContent: 'center' }}>
               <Txt style={type(24, 300, 0.1)}>{ini(M.n)}</Txt>
@@ -517,7 +517,7 @@ export function DMembros() {
           ) : curTab === 'avisos' ? (
             <Panel title="Avisos ao membro" right={<Button label={comp ? 'Cancelar' : 'Enviar SMS'} size="sm" kind={comp ? 'outline' : 'solid'} onPress={() => (setComp(!comp), setText(null))} />} pad={20}>
               {comp ? (
-                <Animated.View entering={FadeInDown} style={{ gap: 10, backgroundColor: C.canvas, padding: 14 }}>
+                <Animated.View entering={Mo.enter()} style={{ gap: 10, backgroundColor: C.canvas, padding: 14 }}>
                   <View style={{ flexDirection: 'row', gap: 6 }}>
                     {TPLS.map(([l], i) => (
                       <Chip key={l} label={l!} size="sm" on={tpl === i} onPress={() => (setTpl(i), setText(null))} />
@@ -610,7 +610,7 @@ export function DCobrar() {
       <Cols flex={[1.4, 1]}>
         <Panel title="Nova cobrança" i={0}>
           {res ? (
-            <Animated.View entering={ZoomIn.springify().damping(16)} style={{ gap: 12 }}>
+            <Animated.View entering={Mo.pop()} style={{ gap: 12 }}>
               <View style={{ backgroundColor: payNow ? C.okBg : C.warnBg, padding: 18, gap: 6 }}>
                 <Txt style={[type(10, 600, 0.2, true), { color: payNow ? C.ok : C.warn }]}>{res.title}</Txt>
                 <Txt style={type(20, 500)}>{res.doc}</Txt>
@@ -630,7 +630,7 @@ export function DCobrar() {
           ) : (
             <View style={{ gap: 18 }}>
               <Select label="Membro" value={mem} onChange={(v) => (setMem(v), setSel(null), setErr(''))} options={opts} />
-              <Animated.View key={mem} entering={FadeIn} style={{ backgroundColor: C.sand, padding: 14, flexDirection: 'row', alignItems: 'center' }}>
+              <Animated.View key={mem} entering={Mo.fade()} style={{ backgroundColor: C.sand, padding: 14, flexDirection: 'row', alignItems: 'center' }}>
                 <View style={{ flex: 1 }}>
                   <Strong>{cm.n}</Strong>
                   <Muted size={12}>
@@ -685,7 +685,7 @@ export function DCobrar() {
         </Panel>
         <Panel title="Documentos de hoje" right={<Muted size={12}>{`${hist.length} emitidos`}</Muted>} i={1}>
           {hist.map((h, i) => (
-            <Animated.View key={h.doc + i} entering={FadeInDown.delay(i * 30)} style={{ flexDirection: 'row', paddingVertical: 12, borderTopWidth: 1, borderTopColor: C.line }}>
+            <Animated.View key={h.doc + i} entering={Mo.enter(i * 30)} style={{ flexDirection: 'row', paddingVertical: 12, borderTopWidth: 1, borderTopColor: C.line }}>
               <View style={{ flex: 1 }}>
                 <Strong size={13}>{h.doc}</Strong>
                 <Muted size={12}>

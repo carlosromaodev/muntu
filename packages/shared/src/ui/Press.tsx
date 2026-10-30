@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { Platform, Pressable, PressableProps, StyleProp, ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { DUR, timing } from './motion';
 import { haptic, HapticKind } from '../lib/haptics';
 
 const APressable = Animated.createAnimatedComponent(Pressable);
@@ -39,12 +40,12 @@ export function Press({ style, children, feedback = 'tap', scaleTo = 0.97, onPre
       onPress={handlePress}
       onPressIn={(e) => {
         setPressed(true);
-        if (scaleTo !== 1) scale.value = withTiming(scaleTo, { duration: 90 });
+        if (scaleTo !== 1) scale.value = withTiming(scaleTo, timing(DUR.press));
         onPressIn?.(e);
       }}
       onPressOut={(e) => {
         setPressed(false);
-        scale.value = withSpring(1, { damping: 14, stiffness: 260 });
+        scale.value = withTiming(1, timing(DUR.press));
         onPressOut?.(e);
       }}
       onHoverIn={() => setHovered(true)}

@@ -1,14 +1,14 @@
 import React from 'react';
 import { ScrollView, StyleProp, View, ViewStyle } from 'react-native';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { C, type } from '../theme/tokens';
-import { Button, ButtonProps, CountUp, Dot, Press, Txt } from '../ui';
+import { M, Button, ButtonProps, CountUp, Dot, Press, Txt } from '../ui';
 
 /** Página do desktop: scroll vertical e entrada suave a cada mudança de ecrã. */
 export function DPage({ children, contentStyle }: { children: React.ReactNode; contentStyle?: StyleProp<ViewStyle> }) {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: C.canvas }} contentContainerStyle={[{ paddingBottom: 48 }, contentStyle]} keyboardShouldPersistTaps="handled">
-      <Animated.View entering={FadeIn.duration(220)}>{children}</Animated.View>
+      <Animated.View entering={M.fade(220)}>{children}</Animated.View>
     </ScrollView>
   );
 }
@@ -16,7 +16,7 @@ export function DPage({ children, contentStyle }: { children: React.ReactNode; c
 /** Título do ecrã (26 px, maiúsculas espaçadas) com subtítulo e acções. */
 export function PageHead({ title, sub, actions, children }: { title: string; sub?: string; actions?: (ButtonProps | React.ReactElement)[]; children?: React.ReactNode }) {
   return (
-    <Animated.View entering={FadeInDown.duration(280)} style={{ paddingTop: 32, paddingHorizontal: 40, paddingBottom: 24, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24 }}>
+    <Animated.View entering={M.enter()} style={{ paddingTop: 32, paddingHorizontal: 40, paddingBottom: 24, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24 }}>
       <View style={{ gap: 6, flexShrink: 1 }}>
         <Txt accessibilityRole="header" style={type(26, 500, 0.14, true)}>
           {title}
@@ -41,7 +41,7 @@ export function KpiRow({ hero, tiles, style }: { hero?: { label: string; value: 
   return (
     <View style={[{ flexDirection: 'row', gap: 16, paddingHorizontal: 40, paddingBottom: 20 }, style]}>
       {hero ? (
-        <Animated.View entering={FadeInDown.duration(320)} style={{ flex: 1.4, minWidth: 300, backgroundColor: hero.dark ? C.ink : C.accent, paddingVertical: 22, paddingHorizontal: 24, gap: 14, justifyContent: 'space-between' }}>
+        <Animated.View entering={M.enter()} style={{ flex: 1.4, minWidth: 300, backgroundColor: hero.dark ? C.ink : C.accent, paddingVertical: 22, paddingHorizontal: 24, gap: 14, justifyContent: 'space-between' }}>
           <Txt style={[type(13, 500), { color: hero.dark ? C.sand : C.ink }]}>{hero.label}</Txt>
           {typeof hero.value === 'number' ? (
             <CountUp value={hero.value} format={hero.format} numberOfLines={1} style={[type(fit((hero.format ?? String)(hero.value), 44, 10), 300), { color: hero.dark ? C.paper : C.ink }]} />
@@ -55,7 +55,7 @@ export function KpiRow({ hero, tiles, style }: { hero?: { label: string; value: 
         </Animated.View>
       ) : null}
       {tiles.map((t, i) => (
-        <Animated.View key={t.l} entering={FadeInDown.duration(320).delay(40 * (i + 1))} style={{ flex: 1, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, paddingVertical: 22, paddingHorizontal: 24, gap: 8, justifyContent: 'space-between' }}>
+        <Animated.View key={t.l} entering={M.enter(40 * (i + 1))} style={{ flex: 1, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, paddingVertical: 22, paddingHorizontal: 24, gap: 8, justifyContent: 'space-between' }}>
           <Txt numberOfLines={1} style={[type(fit(String(t.v), 32, tiles.length > 3 ? 7 : 10), 300), { color: t.c ?? C.ink }]}>
             {String(t.v)}
           </Txt>
@@ -72,7 +72,7 @@ export function KpiRow({ hero, tiles, style }: { hero?: { label: string; value: 
 /** Painel branco com título (secções do desenho). */
 export function Panel({ title, right, children, style, dot, pad = 28, i = 0 }: { title?: string; right?: React.ReactNode; children?: React.ReactNode; style?: StyleProp<ViewStyle>; dot?: string; pad?: number; i?: number }) {
   return (
-    <Animated.View entering={FadeInDown.duration(320).delay(60 + i * 50)} style={[{ backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, paddingVertical: 24, paddingHorizontal: pad, gap: 14 }, style]}>
+    <Animated.View entering={M.enter(60 + i * 50)} style={[{ backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, paddingVertical: 24, paddingHorizontal: pad, gap: 14 }, style]}>
       {title ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexShrink: 1 }}>
@@ -124,7 +124,7 @@ export function Table<T>({ cols, rows, render, onRow, selected, empty, keyOf }: 
           <View style={{ flexDirection: 'row', gap: 16, paddingVertical: 14, paddingHorizontal: onRow ? 8 : 0, marginHorizontal: onRow ? -8 : 0, borderTopWidth: 1, borderTopColor: C.line, alignItems: 'center', backgroundColor: on ? C.sand : hovered ? C.canvas : 'transparent' }}>{cols.map((c, k) => cell(c, content[k], k))}</View>
         );
         return (
-          <Animated.View key={keyOf?.(r, i) ?? i} entering={FadeInDown.duration(260).delay(Math.min(i, 10) * 30)}>
+          <Animated.View key={keyOf?.(r, i) ?? i} entering={M.enter(Math.min(i, 10) * 30)}>
             {onRow ? (
               <Press feedback="select" scaleTo={1} onPress={() => onRow(r)} accessibilityState={{ selected: !!on }}>
                 {({ hovered }) => inner(hovered)}

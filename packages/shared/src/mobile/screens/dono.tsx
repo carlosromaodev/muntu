@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, FadeOut, LinearTransition, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { ACT_KIND, ACT_STATE, APPROVALS, BRANCHES, COMPARE, DOCUMENTS, GOOD_RESULTS, LEAKS, LOST, NOTICE_TARGETS, NOTICES, OCC, OCC_NOW, lotLevel, RENEWALS, REFERRAL_REVIEW, REWARDS, STAFF, ST } from '../../data/mobile';
 import { confirmBiometric } from '../../lib/auth';
 import { haptic } from '../../lib/haptics';
 import { kn } from '../../lib/format';
 import { useMuntu } from '../../store/useMuntu';
+import { inkFor } from '../../lib/color';
 import { C, GUTTER, type } from '../../theme/tokens';
-import { Avatar, Badge, Button, Checkbox, Chip, ChipGroup, CountUp, Dot, Field, Note, Press, Progress, Reveal, Row, Segmented, Select, Stepper, TextArea, Toggle, Txt, useToast } from '../../ui';
+import { M, Avatar, Badge, Button, Checkbox, Chip, ChipGroup, CountUp, Dot, Field, Note, Press, Progress, Reveal, Row, Segmented, Select, Stepper, TextArea, Toggle, Txt, useToast } from '../../ui';
 import { Footer, LinkCard, Page, Section, StackScreen, TabScreen, TopBar } from '../Layout';
 
 const lostTotal = (st: Record<string, 'pot' | 'conf' | 'res'>, k: string) => LOST.filter((l) => (st[l.id] ?? l.st) === k).reduce((a, l) => a + l.v, 0);
@@ -104,7 +105,7 @@ export function Aprovacoes() {
   return (
     <TabScreen role="dono" eyebrow={`${open.length + acts.length} pedidos à espera`} title="Aprovações">
       {head ? (
-        <Animated.View key={head.id} entering={FadeInDown} exiting={FadeOut} style={{ backgroundColor: C.sand, padding: GUTTER, gap: 10 }}>
+        <Animated.View key={head.id} entering={M.enter()} exiting={M.fadeOut()} style={{ backgroundColor: C.sand, padding: GUTTER, gap: 10 }}>
           <Txt v="label" c={C.muted}>
             {head.k}
           </Txt>
@@ -116,7 +117,7 @@ export function Aprovacoes() {
           </View>
         </Animated.View>
       ) : (
-        <Animated.View entering={ZoomIn} style={{ margin: GUTTER, backgroundColor: C.okBg, padding: 16 }}>
+        <Animated.View entering={M.fade()} style={{ margin: GUTTER, backgroundColor: C.okBg, padding: 16 }}>
           <Txt v="bodyStrong" c={C.ok}>
             Sem pedidos financeiros à espera.
           </Txt>
@@ -126,7 +127,7 @@ export function Aprovacoes() {
         <Section title="Actividades propostas pelos PT">
           {acts.map((a, i) => (
             <Reveal key={a.id} i={i}>
-              <Animated.View layout={LinearTransition} style={{ paddingVertical: 14, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, gap: 6 }}>
+              <Animated.View layout={M.layout()} style={{ paddingVertical: 14, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, gap: 6 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                   <Txt v="label" c={C.muted}>
                     {ACT_KIND[a.tipo]}
@@ -257,6 +258,7 @@ export function EquipaDono() {
 /** o4 · Conta do dono (gestão do ginásio). */
 export function ContaDono() {
   const router = useRouter();
+  const brand = useMuntu((s) => s.brand);
   const { prefs, togglePref, signOut } = useMuntu();
   const links: [string, string, string][] = [
     ['Abrir nova filial', 'Copia planos, regras e permissões', '/nova-filial'],
@@ -292,8 +294,20 @@ export function ContaDono() {
           ))}
         </Section>
         <Section title="Gestão do ginásio">
+          <Press onPress={() => router.push('/marca')} style={({ hovered }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13, backgroundColor: hovered ? C.canvas : 'transparent' })}>
+            <View style={{ width: 28, height: 28, backgroundColor: brand.c, alignItems: 'center', justifyContent: 'center' }}>
+              <Txt style={[type(10, 600), { color: inkFor(brand.c) }]}>Aa</Txt>
+            </View>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Txt v="bodyStrong">Marca do ginásio</Txt>
+              <Txt v="small" c={C.muted}>
+                Logotipo, nome e cor na app dos membros
+              </Txt>
+            </View>
+            <Txt v="body">→</Txt>
+          </Press>
           {links.map(([t, d, to], i) => (
-            <Press key={t} onPress={() => router.push(to as any)} style={({ hovered }) => ({ flexDirection: 'row', alignItems: 'center', paddingVertical: 13, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, backgroundColor: hovered ? C.canvas : 'transparent' })}>
+            <Press key={t} onPress={() => router.push(to as any)} style={({ hovered }) => ({ flexDirection: 'row', alignItems: 'center', paddingVertical: 13, borderTopWidth: 1, borderTopColor: C.line, backgroundColor: hovered ? C.canvas : 'transparent' })}>
               <View style={{ flex: 1, gap: 2 }}>
                 <Txt v="bodyStrong">{t}</Txt>
                 <Txt v="small" c={C.muted}>
@@ -526,7 +540,7 @@ export function ReceitasPerdidas() {
           const s = st(l.id, l.st);
           return (
             <Reveal key={l.id} i={i}>
-              <Animated.View layout={LinearTransition} style={{ paddingVertical: 14, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, gap: 6 }}>
+              <Animated.View layout={M.layout()} style={{ paddingVertical: 14, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, gap: 6 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                   <Txt v="label" c={C.muted}>
                     {l.cat}
@@ -584,7 +598,7 @@ export function NovaFilial() {
   if (done)
     return (
       <StackScreen back="Filiais" eyebrow="Replica uma filial existente" title="Nova filial">
-        <Animated.View entering={ZoomIn.springify().damping(14)} style={{ margin: GUTTER, backgroundColor: C.okBg, padding: 18, gap: 10 }}>
+        <Animated.View entering={M.pop()} style={{ margin: GUTTER, backgroundColor: C.okBg, padding: 18, gap: 10 }}>
           <Txt v="label" c={C.ok}>
             Filial criada
           </Txt>
@@ -787,7 +801,7 @@ export function Indicacoes() {
       </View>
       <Section title="A validar">
         {pending.map((r, i) => (
-          <Animated.View key={r.id} entering={FadeInDown} exiting={FadeOut} layout={LinearTransition} style={{ paddingVertical: 12, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, gap: 8 }}>
+          <Animated.View key={r.id} entering={M.enter()} exiting={M.fadeOut()} layout={M.layout()} style={{ paddingVertical: 12, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, gap: 8 }}>
             <Txt v="bodyStrong">{r.t}</Txt>
             <Txt v="small" c={C.bad}>
               {r.why}

@@ -1,28 +1,29 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { TextInput, View } from 'react-native';
+import { Platform, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, FadeOut, LinearTransition, ZoomIn } from 'react-native-reanimated';
-import { ACT_KIND, ActivityKind, CAP, GOOD_RESULTS, NOTICES, OCC, OCC_NOW, lotLevel, RENEW_REASONS, RENEW_RESULTS, RENEWALS, RISK, RISK_REASONS, RISK_RESULTS, Role, ROLE_INFO, SHIFT_WEEK, STAFF, ST } from '../../data/mobile';
+import Animated from 'react-native-reanimated';
+import { ACT_KIND, ActivityKind, CAP, GOOD_RESULTS, NOTICES, OCC, OCC_NOW, lotLevel, PRESENT, RENEW_REASONS, RENEW_RESULTS, RENEWALS, RISK, RISK_REASONS, RISK_RESULTS, Role, ROLE_INFO, SHIFT_WEEK, STAFF, ST } from '../../data/mobile';
 import { haptic } from '../../lib/haptics';
-import { kn } from '../../lib/format';
+import { initials, kn } from '../../lib/format';
 import { unreadCount, useMuntu } from '../../store/useMuntu';
 import { C, GUTTER, type } from '../../theme/tokens';
-import { Avatar, Badge, Bars, Button, Chip, ChipGroup, CountUp, Field, Note, Progress, Reveal, Row, Segmented, Select, TextArea, Txt, useToast, Press, Dot } from '../../ui';
+import { M, Avatar, Badge, Bars, Button, Chip, ChipGroup, CountUp, Field, Note, Progress, Reveal, Row, Segmented, Select, TextArea, Txt, useToast, Press, Dot } from '../../ui';
 import { Footer, Page, Section, StackScreen, TabScreen, useHome } from '../Layout';
 import { home } from '../nav';
 
 /** e1 · Avisos recebidos pela equipa. */
 export function Avisos({ role }: { role: Role }) {
+  const router = useRouter();
   const { readNotices, markRead } = useMuntu();
   const un = unreadCount(readNotices);
   return (
-    <TabScreen role={role} eyebrow={un ? `${un} por ler` : 'Tudo lido'} title="Avisos">
+    <TabScreen role={role} eyebrow={un ? `${un} por ler` : 'Tudo lido'} title="Avisos" titleRight={<Button label="+ Ocorrência" kind="outline" size="sm" onPress={() => router.push('/ocorrencia')} />}>
       <Section first>
         {NOTICES.map((a, i) => {
           const rd = !!readNotices[a.id];
           return (
             <Reveal key={a.id} i={i}>
-              <Animated.View layout={LinearTransition}>
+              <Animated.View layout={M.layout()}>
               <View style={{ paddingVertical: 16, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, gap: 10, opacity: rd ? 0.6 : 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                   <Badge label={ST[a.p][0]} tone={ST[a.p][1]} />
@@ -36,7 +37,7 @@ export function Avisos({ role }: { role: Role }) {
                     {a.de} · para {a.to}
                   </Txt>
                   {rd ? (
-                    <Animated.View entering={ZoomIn}>
+                    <Animated.View entering={M.fade()}>
                       <Txt style={[type(10, 600, 0.14, true), { color: C.ok }]}>Lido ✓</Txt>
                     </Animated.View>
                   ) : (
@@ -62,7 +63,7 @@ export function Turno({ role }: { role: Role }) {
   const max = 8.2;
   return (
     <TabScreen role={role} eyebrow={`${info.name} · ${info.filial}`} title="Turno">
-      <Animated.View layout={LinearTransition} style={{ backgroundColor: onShift ? C.accent : C.sand, padding: GUTTER, gap: 10 }}>
+      <Animated.View layout={M.layout()} style={{ backgroundColor: onShift ? C.accent : C.sand, padding: GUTTER, gap: 10 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Dot size={8} color={onShift ? C.ink : C.faint} />
           <Txt v="label">{onShift ? 'Em turno desde 06:58' : 'Fora de turno'}</Txt>
@@ -197,14 +198,14 @@ export function PassarTurno() {
                 <Txt numberOfLines={1} style={[type(10, 600, 0.1), { flex: 0.9, textAlign: 'right', color: C.ok }]}>Confirmado ✓</Txt>
               </View>
             ))}
-            <Animated.View layout={LinearTransition} style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 12, marginTop: 6, backgroundColor: !has ? C.sand : dif === 0 ? C.okBg : C.badBg }}>
+            <Animated.View layout={M.layout()} style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 12, marginTop: 6, backgroundColor: !has ? C.sand : dif === 0 ? C.okBg : C.badBg }}>
               <Txt v="bodyStrong">Diferença</Txt>
               <Txt v="bodyStrong" c={!has ? C.grey : dif === 0 ? C.ok : C.bad}>
                 {has ? `${dif > 0 ? '+' : dif < 0 ? '−' : ''}${kn(Math.abs(dif))} Kz` : 'Conte o dinheiro'}
               </Txt>
             </Animated.View>
             {has && dif !== 0 ? (
-              <Animated.View entering={FadeInDown} style={{ marginTop: 12, gap: 8 }}>
+              <Animated.View entering={M.enter()} style={{ marginTop: 12, gap: 8 }}>
                 <Txt v="eyebrow" c={C.muted}>
                   Justificação · obrigatória
                 </Txt>
@@ -256,7 +257,7 @@ export function PassarTurno() {
           </Section>
         </>
       ) : st === 'wait' ? (
-        <Animated.View entering={FadeIn} style={{ padding: GUTTER, gap: 10 }}>
+        <Animated.View entering={M.fade()} style={{ padding: GUTTER, gap: 10 }}>
           <View style={{ backgroundColor: C.sand, padding: 18, gap: 8 }}>
             <Txt v="label">A aguardar confirmação</Txt>
             <Txt v="body">{to} confirma a contagem e as pendências na app dela.</Txt>
@@ -264,7 +265,7 @@ export function PassarTurno() {
           </View>
         </Animated.View>
       ) : (
-        <Animated.View entering={ZoomIn.springify().damping(14)} style={{ padding: GUTTER, gap: 14 }}>
+        <Animated.View entering={M.pop()} style={{ padding: GUTTER, gap: 14 }}>
           <View style={{ backgroundColor: dif ? C.warnBg : C.okBg, padding: 18, gap: 8 }}>
             <Txt v="label" c={dif ? C.warn : C.ok}>
               Turno entregue
@@ -285,6 +286,53 @@ export function PassarTurno() {
         </Animated.View>
       )}
     </StackScreen>
+  );
+}
+
+/** Quem está dentro agora (só a equipa vê). Primeiros 5, com pesquisa e "Ver todos". */
+function PresentList() {
+  const [q, setQ] = useState('');
+  const [all, setAll] = useState(false);
+  // No telemóvel a lista mostra os 10 check-ins mais recentes, com a zona sem o prefixo "Aula ·".
+  const list = PRESENT.slice(0, 10).map((p) => ({ ...p, z: p.z.replace('Aula · ', ''), pl: p.pl.replace('visita ', '') }));
+  const ql = q.trim().toLowerCase();
+  const shown = (all || ql ? list : list.slice(0, 5)).filter((p) => !ql || p.n.toLowerCase().includes(ql));
+  return (
+    <Section title="Membros presentes" right={<Txt v="label" c={C.muted}>{`${list.length} com check-in`}</Txt>}>
+      <View style={{ height: 44, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, backgroundColor: C.sand, marginBottom: 6 }}>
+        <View style={{ width: 11, height: 11, borderWidth: 1.5, borderColor: C.grey, borderRadius: 6 }} />
+        <TextInput value={q} onChangeText={(t) => (setQ(t), setAll(true))} placeholder="Procurar quem está dentro" placeholderTextColor={C.faint} accessibilityLabel="Procurar membro presente" style={[type(14, 400), { flex: 1, minWidth: 0, color: C.ink, paddingVertical: 0 }, Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null]} />
+      </View>
+      {shown.map((p) => (
+        <View key={p.n} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderTopWidth: 1, borderTopColor: C.line }}>
+          <View>
+            <Avatar initials={initials(p.n)} size={34} />
+            <View style={{ position: 'absolute', right: -2, bottom: -2, width: 9, height: 9, borderRadius: 5, backgroundColor: C.ok }} />
+          </View>
+          <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+            <Txt numberOfLines={1} style={type(14, 500)}>
+              {p.n}
+            </Txt>
+            <Txt v="small" c={C.muted}>
+              {p.pl} · {p.z}
+            </Txt>
+          </View>
+          <Txt tabular style={[type(13, 400), { color: C.grey }]}>
+            {p.h}
+          </Txt>
+        </View>
+      ))}
+      {!shown.length ? (
+        <Txt v="small" c={C.muted} style={{ paddingVertical: 12 }}>
+          Ninguém com esse nome lá dentro.
+        </Txt>
+      ) : null}
+      {!all && !ql ? (
+        <Press feedback="select" onPress={() => setAll(true)} style={{ height: 44, justifyContent: 'center', borderTopWidth: 1, borderTopColor: C.line }}>
+          <Txt style={type(10, 600, 0.18, true)}>Ver todos →</Txt>
+        </Press>
+      ) : null}
+    </Section>
   );
 }
 
@@ -318,6 +366,7 @@ export function GinasioAgora() {
           Mais calmo entre as 11:00 e as 14:00. Mais cheio às 19:00.
         </Txt>
       </Section>
+      {back.role !== 'membro' ? <PresentList /> : null}
       <Section title="Equipa presente" right={<Txt v="label" c={C.muted}>{`${onFloor.length} na Talatona`}</Txt>}>
         {onFloor.map((p, i) => (
           <Reveal key={p.i} i={i}>
@@ -365,7 +414,7 @@ export function Recuperacao() {
     const d = outcomes[id];
     if (open !== id) return null;
     return (
-      <Animated.View entering={FadeInDown.duration(220)} exiting={FadeOut.duration(120)} style={{ backgroundColor: C.canvas, padding: 14, gap: 10, marginTop: 10 }}>
+      <Animated.View entering={M.enter()} exiting={M.fadeOut(120)} style={{ backgroundColor: C.canvas, padding: 14, gap: 10, marginTop: 10 }}>
         <Txt v="label" c={C.muted}>
           Motivo
         </Txt>

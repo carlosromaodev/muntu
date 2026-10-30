@@ -1,15 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleProp, View, ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { DUR, timing } from './motion';
 import { C, type } from '../theme/tokens';
 import { Txt, TxtProps } from './Txt';
 
 /** Número que conta até ao valor (cabeçalhos de KPI). */
-export function CountUp({ value, format = (v: number) => String(Math.round(v)), duration = 700, ...txt }: { value: number; format?: (v: number) => string; duration?: number } & TxtProps) {
+export function CountUp({ value, format = (v: number) => String(Math.round(v)), duration = 420, ...txt }: { value: number; format?: (v: number) => string; duration?: number } & TxtProps) {
   const [shown, setShown] = useState(value);
-  const from = useRef(0);
+  // Só anima quando o valor muda (não conta a partir de zero ao abrir o ecrã).
+  const from = useRef(value);
   useEffect(() => {
     const start = from.current;
+    if (start === value) return;
     const t0 = Date.now();
     let raf = 0;
     const tick = () => {
@@ -55,7 +58,7 @@ export function Bars({ data, height = 110, colors, gap = 3, labels, labelEvery =
 function Bar({ h, color, i, label }: { h: number; color: string; i: number; label: string | null }) {
   const p = useSharedValue(0);
   useEffect(() => {
-    p.value = withDelay(i * 28, withTiming(h, { duration: 520 }));
+    p.value = withTiming(h, timing(DUR.bar));
   }, [h, i, p]);
   const st = useAnimatedStyle(() => ({ height: p.value }));
   return (

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MuntuMark } from '../../brand/Mark';
 import { MuntuLogo } from '../../brand/Logo';
@@ -10,7 +10,7 @@ import { haptic } from '../../lib/haptics';
 import { onlyDigits, phone } from '../../lib/format';
 import { useMuntu } from '../../store/useMuntu';
 import { C, GUTTER, type } from '../../theme/tokens';
-import { Button, Field, Note, Press, Txt } from '../../ui';
+import { M, Button, Field, Note, Press, Txt } from '../../ui';
 import { home } from '../nav';
 
 const hello = () => {
@@ -51,13 +51,13 @@ export function Login() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: C.paper }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Animated.View entering={ZoomIn.duration(900).springify().damping(16)} pointerEvents="none" style={{ position: 'absolute', top: insets.top - 30, right: -120 }}>
+      <Animated.View entering={M.fade(600)} pointerEvents="none" style={{ position: 'absolute', top: insets.top - 30, right: -120 }}>
         <MuntuMark variant="C" color={C.sand} size={320} />
       </Animated.View>
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1, paddingTop: insets.top + 12, paddingHorizontal: GUTTER, paddingBottom: insets.bottom + 12 }}>
         <MuntuLogo size={20} />
         <View style={{ flex: 1, minHeight: 120 }} />
-        <Animated.View entering={FadeInDown.duration(500).delay(120)} style={{ gap: 26, paddingBottom: 8 }}>
+        <Animated.View entering={M.enter(120)} style={{ gap: 26, paddingBottom: 8 }}>
           <View style={{ gap: 10 }}>
             <Txt v="eyebrow" c={C.muted}>
               {hello()}
@@ -108,7 +108,7 @@ export function Login() {
               <Txt style={[type(13, 400), { color: '#9a4c08' }]}>Esqueci a senha</Txt>
             </Press>
           </View>
-          <Animated.View entering={FadeIn.delay(400)}>
+          <Animated.View entering={M.fade(260, 400)}>
             <Txt v="tiny" c={C.faint} align="center">
               Protótipo: 923 membro · 924 recepção · 925 finanças · 926 PT · 927 dono
             </Txt>

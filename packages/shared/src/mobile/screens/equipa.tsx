@@ -1,12 +1,12 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
-import Animated, { FadeInDown, LinearTransition, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { ACT_KIND, ACT_STATE, Activity, CASH_DESKS, DEBTORS, INCOME_TODAY, OCC, OCC_NOW, lotLevel, PT_AGENDA, PT_REQUESTS, Role, ST } from '../../data/mobile';
 import { kn } from '../../lib/format';
 import { useMuntu } from '../../store/useMuntu';
 import { C, GUTTER, type } from '../../theme/tokens';
-import { Avatar, Badge, Button, CountUp, Progress, Reveal, Row, Txt, useToast } from '../../ui';
+import { M, Avatar, Badge, Button, CountUp, Progress, Reveal, Row, Txt, useToast } from '../../ui';
 import { LinkCard, Section, TabScreen } from '../Layout';
 import { useRecoveryTodo } from './rececao';
 
@@ -114,7 +114,7 @@ export function Cobrancas() {
                     {d.d}
                   </Txt>
                   {done ? (
-                    <Animated.View entering={FadeInDown}>
+                    <Animated.View entering={M.enter()}>
                       <Txt v="tiny" c={C.ok}>
                         SMS entregue às {done}
                       </Txt>
@@ -179,7 +179,7 @@ export function Agenda() {
                 {k === 'agend' ? (
                   <Button label="Presente" size="sm" feedback="success" onPress={() => markSession(a.id)} />
                 ) : (
-                  <Animated.View entering={ZoomIn}>
+                  <Animated.View entering={M.fade()}>
                     <Badge label={ST[k as 'entrou' | 'concl'][0]} tone={ST[k as 'entrou' | 'concl'][1]} />
                   </Animated.View>
                 )}
@@ -203,7 +203,7 @@ export function Pedidos() {
           const st = ptRequests[r.id];
           return (
             <Reveal key={r.id} i={i}>
-              <Animated.View layout={LinearTransition} style={{ paddingVertical: 14, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, gap: 10 }}>
+              <Animated.View layout={M.layout()} style={{ paddingVertical: 14, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, gap: 10 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                   <Avatar initials={r.i} />
                   <View style={{ flex: 1, gap: 2 }}>
@@ -221,7 +221,7 @@ export function Pedidos() {
                   </Txt>
                 </View>
                 {st ? (
-                  <Animated.View entering={ZoomIn}>
+                  <Animated.View entering={M.fade()}>
                     <Badge label={ST[st][0]} tone={ST[st][1]} />
                   </Animated.View>
                 ) : (
@@ -245,7 +245,7 @@ function ActivityItem({ a, canApprove, i }: { a: Activity; canApprove: boolean; 
   const [l, tone] = ACT_STATE[a.st];
   return (
     <Reveal i={i}>
-      <Animated.View layout={LinearTransition} style={{ paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.line, gap: 6 }}>
+      <Animated.View layout={M.layout()} style={{ paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.line, gap: 6 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <Txt v="label" c={C.muted}>
             {ACT_KIND[a.tipo]}

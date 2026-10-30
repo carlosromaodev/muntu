@@ -57,11 +57,13 @@ muntu/
 │  ├─ brand/                  Logo, Símbolo e Selo MUNTU (geometria exacta do desenho)
 │  ├─ ui/                     componentes com animação e vibração:
 │  │                          Button, Chip, Segmented, Tabs, Field, Select, Sheet, Toast,
-│  │                          Toggle, Stepper, Progress, Bars, CountUp, QR…
+│  │                          Toggle, Stepper, Progress, Bars, CountUp, QR, Icon, MoneyInput…
+│  │                          motion.ts: as curvas e durações do movimento (uma só fonte)
 │  ├─ data/                   dados do protótipo (mobile.ts e desk.ts, tirados dos desenhos)
 │  ├─ store/                  estado partilhado (zustand): operação, receber turno, criar conta
 │  ├─ mobile/                 TopBar, barra de separadores, ecrãs por papel
-│  │   └─ screens/            auth, rececao, membro, equipa, dono, turno, onboarding, shared
+│  │   └─ screens/            auth, rececao, membro, equipa, dono, turno, onboarding, shared,
+│  │                          ocorrencia, marca
 │  └─ desktop/                Shell (menu lateral e cabeçalho), kit (KPIs, painéis, tabelas)
 │      └─ screens/            recepcao, operacao, dono, equipa, fluxos
 └─ tools/
@@ -74,7 +76,7 @@ muntu/
 - **Telemóvel (iOS, Android e web mobile).** Usa uma pilha nativa do Expo Router.
   - No iOS, desliza-se para voltar; no Android, a transição é lateral.
   - Cada papel tem os seus separadores: `/rececao/entradas`, `/dono/painel`, `/membro/acesso`…
-  - A barra de separadores é numerada como no desenho e o indicador laranja desliza.
+  - A barra de separadores tem os ícones de linha do protótipo e um traço laranja no separador activo.
   - Os ecrãs de detalhe abrem por cima: `/recuperacao`, `/receber-turno/dinheiro`, `/nova-actividade`…
 - **Desktop.** Cada secção do menu lateral é uma rota (`/rececao`, `/membros`, `/painel`, `/tesouraria`…).
   - O destaque do menu acompanha a rota com animação.
@@ -84,13 +86,14 @@ Para mudar rotas, edite o mapa em `tools/gen-routes.mjs` e corra `node tools/gen
 
 ### Experiência nativa
 
-- **Animações.** Feitas com Reanimated:
-  - listas que entram em cascata;
-  - indicadores de separador e controlos segmentados que deslizam;
-  - números de KPI que contam;
-  - barras de gráfico que crescem;
-  - folhas que sobem do fundo e se fecham arrastando para baixo;
-  - confirmações animadas.
+- **Movimento.** Discreto e igual ao dos protótipos (`ui/motion.ts`):
+  - uma só curva, `cubic-bezier(.2,.7,.2,1)`, sem molas nem ressaltos;
+  - entrada dos blocos: aparece e sobe 14 px em 420 ms;
+  - mensagens de confirmação: 380 ms; folhas: 320 ms; mudanças de cor: 200 ms;
+  - botões encolhem para 97 % ao premir; barras de gráfico crescem em 600 ms;
+  - os números só animam quando mudam (não contam a partir de zero);
+  - com "reduzir movimento" ligado no telemóvel, as animações desligam-se.
+  - Na web usam-se só as animações predefinidas do Reanimated: as personalizadas deixam os elementos em posição absoluta depois de animar.
 - **Vibração.** O `expo-haptics` dá resposta ao tocar, seleccionar, ter sucesso, receber um aviso ou um erro.
 - **Face ID e impressão digital.** O `expo-local-authentication` pede confirmação nas aprovações do dono.
 - **Integração com o sistema.**

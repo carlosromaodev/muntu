@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, LinearTransition, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { DENOMS, PENDING_KIND, SHIFT_EXPECTED_CASH, SHIFT_PAYS, SHIFT_PENDING } from '../../data/mobile';
 import { haptic } from '../../lib/haptics';
-import { kn } from '../../lib/format';
+import { kn, knc } from '../../lib/format';
 import { handoverView, useHandover } from '../../store/handover';
 import { useMuntu } from '../../store/useMuntu';
 import { C, GUTTER, TONES, type } from '../../theme/tokens';
-import { Badge, Button, Field, Note, Press, Reveal, Row, TextArea, Txt } from '../../ui';
+import { M, Badge, Button, Field, MoneyInput, Note, Press, Reveal, Row, TextArea, Txt } from '../../ui';
 import { BackLink, Footer, Page, Section, Steps, TopBar } from '../Layout';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -90,7 +90,7 @@ export function ReceberTurno() {
         </View>
         <View style={{ marginHorizontal: GUTTER, marginTop: 8, flexDirection: 'row', flexWrap: 'wrap', borderWidth: 1, borderColor: C.line }}>
           {v.tiles.map((t, i) => (
-            <Animated.View key={t.l} layout={LinearTransition} style={{ width: '50%', padding: 14, gap: 4, borderLeftWidth: i % 2 ? 1 : 0, borderTopWidth: i > 1 ? 1 : 0, borderColor: C.line }}>
+            <Animated.View key={t.l} layout={M.layout()} style={{ width: '50%', padding: 14, gap: 4, borderLeftWidth: i % 2 ? 1 : 0, borderTopWidth: i > 1 ? 1 : 0, borderColor: C.line }}>
               <Txt v="label" c={C.muted}>
                 {t.l}
               </Txt>
@@ -143,7 +143,7 @@ export function ContarDinheiro() {
         <Section first={h.revealed}>
           {DENOMS.map((d, i) => {
             const q = h.q[d.k] ?? 0;
-            const step = d.k === 'coin' ? 100 : 1;
+            const step = 1;
             return (
               <Row key={d.k} first={i === 0} pad={10}>
                 <Txt v="body" style={{ flex: 1 }}>
@@ -172,15 +172,22 @@ export function ContarDinheiro() {
               </Row>
             );
           })}
+          <View style={{ gap: 8, paddingTop: 12, paddingBottom: 14, borderTopWidth: 1, borderTopColor: C.line }}>
+            <Txt v="body">Moedas, cêntimos e outros valores</Txt>
+            <MoneyInput value={h.coin} onChangeText={(t) => (h.setCoin(t), setErr(''))} editable={!h.revealed} placeholder="Ex. 12 434,50" accessibilityLabel="Moedas, cêntimos e outros valores" />
+            <Txt v="small" c={C.muted}>
+              Escreve o valor total em Kz. Aceita milhares e cêntimos.
+            </Txt>
+          </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.ink }}>
             <Txt v="label" c={C.muted}>
               Dinheiro contado
             </Txt>
-            <Txt style={type(28, 300)}>{kn(v.counted)} Kz</Txt>
+            <Txt style={type(24, 300)}>{knc(v.counted)} Kz</Txt>
           </View>
         </Section>
         {h.revealed ? (
-          <Animated.View entering={FadeInDown.springify().damping(16)}>
+          <Animated.View entering={M.enter()}>
             <Section first>
               <View style={{ flexDirection: 'row', backgroundColor: C.sand }}>
                 {[
@@ -191,14 +198,14 @@ export function ContarDinheiro() {
                     <Txt v="label" c={C.muted}>
                       {l as string}
                     </Txt>
-                    <Txt style={type(22, 300)}>{kn(x as number)} Kz</Txt>
+                    <Txt style={type(22, 300)}>{knc(x as number)} Kz</Txt>
                   </View>
                 ))}
               </View>
               <Txt v="tiny" c={C.muted} style={{ marginTop: 8 }}>
                 20 000 inicial + 68 000 entradas em dinheiro − 0 reembolsos − 3 000 saídas autorizadas
               </Txt>
-              <Animated.View entering={ZoomIn.duration(260)} style={{ marginTop: 10, padding: 14, backgroundColor: v.dif === 0 ? C.okBg : C.badBg, gap: 2 }}>
+              <Animated.View entering={M.pop()} style={{ marginTop: 10, padding: 14, backgroundColor: v.dif === 0 ? C.okBg : C.badBg, gap: 2 }}>
                 <Txt v="label" c={v.dif === 0 ? C.ok : C.bad}>
                   {v.dif === 0 ? 'Sem diferença' : 'Diferença por apurar'}
                 </Txt>
@@ -231,7 +238,7 @@ export function ContarDinheiro() {
                     );
                   })}
                   {h.opt === 'reg' || h.opt === 'rev' ? (
-                    <Animated.View entering={FadeInDown} style={{ gap: 8 }}>
+                    <Animated.View entering={M.enter()} style={{ gap: 8 }}>
                       <Txt v="eyebrow" c={C.muted}>
                         Justificação
                       </Txt>
@@ -268,14 +275,27 @@ export function ConferirPagamentos() {
           {SHIFT_PAYS.map((p, i) => (
             <Reveal key={p.k} i={i}>
               <View style={{ paddingVertical: 14, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, gap: 10 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-                  <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                  <View style={{ flex: 1, gap: 3 }}>
                     <Txt v="bodyStrong">{p.l}</Txt>
                     <Txt v="small" c={C.muted}>
                       {p.d}
                     </Txt>
+                    <Txt v="small" c={C.grey}>
+                      Origem · {p.src}
+                    </Txt>
                   </View>
-                  <Txt v="bodyStrong">{kn(p.v)} Kz</Txt>
+                  <View style={{ alignItems: 'flex-end', gap: 2 }}>
+                    <Txt style={[type(11, 400), { color: C.muted }]}>No sistema</Txt>
+                    <Txt style={type(15, 400)}>{kn(p.v)} Kz</Txt>
+                  </View>
+                </View>
+                <View style={{ gap: 6 }}>
+                  <MoneyInput value={h.payV[p.k] ?? ''} onChangeText={(t) => (h.setPayV(p.k, t), setErr(''))} placeholder="Valor contado" accessibilityLabel={`Valor confirmado de ${p.l}`} height={40} size={15} />
+                  {(() => {
+                    const ln = v.payLine(p.k);
+                    return <Txt style={[type(12, 500), { color: ln.tone === 'ok' ? C.ok : ln.tone === 'bad' ? C.bad : C.muted }]}>{ln.l}</Txt>;
+                  })()}
                 </View>
                 <Tri
                   value={h.pays[p.k]}
@@ -407,7 +427,7 @@ export function AssumirTurno() {
         }
       >
         {h.done ? (
-          <Animated.View entering={ZoomIn.springify().damping(14)} style={{ margin: GUTTER, padding: 18, gap: 8, backgroundColor: v.dif ? C.warnBg : C.okBg }}>
+          <Animated.View entering={M.pop()} style={{ margin: GUTTER, padding: 18, gap: 8, backgroundColor: v.dif ? C.warnBg : C.okBg }}>
             <Txt v="label" c={v.dif ? C.warn : C.ok}>
               {v.dif ? 'Turno recebido com ressalva' : 'Turno assumido'}
             </Txt>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#fbfaf7;color:#1d1c1a;font-family:Outfit,system-ui,sans-serif}*{box-sizing:border-box}a{color:#1d1c1a;text-decoration:none}a:hover{color:#9a4c08}button{font-family:inherit}@keyframes bIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}@keyframes bTick{from{transform:translateX(0)}to{transform:translateX(-50%)}}@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}</style>
+</helmet>
+<header style="position:sticky;top:0;z-index:20;background:rgba(251,250,247,.94);backdrop-filter:blur(8px);border-bottom:1px solid #e4e0d6">
+<div style="max-width:1320px;margin:0 auto;height:68px;padding:0 32px;display:flex;align-items:center;gap:32px">
+<a href="#topo" aria-label="MUNTU Ginásio"><dc-import name="Muntu Logo" variant="C" color="#1d1c1a" size="{{ 22 }}" descriptor="Ginásio" hint-size="190px,22px"></dc-import></a>
+<nav style="display:flex;gap:28px;margin-left:auto;flex-wrap:wrap"><a href="#diario" style="font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Diário</a><a href="#produto" style="font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Produto</a><a href="#equipa" style="font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Para quem</a><a href="#demo" style="font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase">Ginásios</a></nav>
+<a href="#demo" style="height:40px;padding:0 18px;display:flex;align-items:center;background:#1d1c1a;color:#fbfaf7;font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap" style-hover="background:#9a4c08;color:#fbfaf7">Pedir demonstração</a>
+</div>
+</header>
+
+<section id="topo" data-screen-label="01 Abertura" style="max-width:1320px;margin:0 auto;padding:48px 32px 0">
+<div style="display:flex;justify-content:space-between;gap:16px;padding-bottom:20px;border-bottom:2px solid #1d1c1a;font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;flex-wrap:wrap"><span>Diário MUNTU</span><span style="color:#6b675f">Nº 01 · Luanda · Outubro 2026</span><span style="color:#6b675f">Gestão de ginásios</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:48px;padding:48px 0 64px;align-items:center">
+<div style="display:flex;flex-direction:column;gap:32px;animation:bIn .7s cubic-bezier(.2,.7,.2,1) both">
+<h1 style="margin:0;font-size:clamp(44px,6.4vw,92px);font-weight:400;line-height:.98;letter-spacing:.08em;text-transform:uppercase;text-wrap:balance">O ginásio inteiro numa só conta</h1>
+<p style="margin:0;max-width:520px;font-size:19px;line-height:1.55;color:#55524b;text-wrap:pretty">MUNTU liga a recepção, as finanças, os treinadores e os membros. Entradas por QR, caixa contado ao cêntimo, cobranças por SMS e a marca de cada ginásio na app dos seus membros.</p>
+<div style="display:flex;gap:10px;flex-wrap:wrap"><a href="#demo" style="height:52px;padding:0 26px;display:flex;align-items:center;background:#c8640c;color:#1d1c1a;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap" style-hover="background:#1d1c1a;color:#fbfaf7">Pedir demonstração</a><a href="#produto" style="height:52px;padding:0 26px;display:flex;align-items:center;border:1px solid #1d1c1a;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;white-space:nowrap" style-hover="background:#1d1c1a;color:#fbfaf7">Ver o produto</a></div>
+</div>
+<div style="position:relative;display:flex;justify-content:center;align-items:center;min-height:620px;background:#c8640c;overflow:hidden">
+<div style="position:absolute;left:-90px;bottom:-110px;opacity:.9;pointer-events:none"><dc-import name="Muntu Mark" variant="C" color="#b45a0b" size="{{ 420 }}" hint-size="420px,420px"></dc-import></div>
+<div style="position:relative;zoom:.68;box-shadow:0 0 0 12px #1d1c1a,0 50px 90px -40px rgba(29,28,26,.7);border-radius:40px;overflow:hidden;animation:bIn .9s .15s cubic-bezier(.2,.7,.2,1) both"><dc-import name="MUNTU Prototipo Mobile" screen="m1" hint-size="390px,844px"></dc-import></div>
+<span style="position:absolute;top:20px;right:22px;font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase">App do membro · ao vivo</span>
+</div>
+</div>
+</section>
+
+<div aria-hidden="true" style="overflow:hidden;border-top:1px solid #1d1c1a;border-bottom:1px solid #1d1c1a;background:#1d1c1a;color:#ebe6d6">
+<div style="display:flex;width:max-content;animation:bTick 38s linear infinite"><sc-for list="{{ ticker }}" as="t" hint-placeholder-count="12"><span style="display:flex;align-items:center;gap:28px;padding:16px 28px 16px 0;font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;white-space:nowrap">{{ t }}<span style="width:6px;height:6px;background:#c8640c"></span></span></sc-for></div>
+</div>
+
+<section id="diario" data-screen-label="02 Diário" style="max-width:1320px;margin:0 auto;padding:80px 32px">
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;padding-bottom:28px">
+<div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f">Diário</span><h2 style="margin:0;font-size:clamp(30px,3.4vw,44px);font-weight:400;letter-spacing:.14em;text-transform:uppercase">Notas do produto</h2></div>
+<div role="tablist" style="display:flex;gap:4px;padding:4px;background:#ebe6d6;flex-wrap:wrap"><sc-for list="{{ cats }}" as="c" hint-placeholder-count="4"><button role="tab" aria-selected="{{ c.on }}" onClick="{{ c.pick }}" style="height:36px;padding:0 16px;border:0;background:{{ c.bg }};color:{{ c.fg }};font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:background .2s ease,color .2s ease">{{ c.l }}</button></sc-for></div>
+</div>
+<sc-if value="{{ hasLead }}" hint-placeholder-val="{{ true }}">
+<a href="#produto" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));border-top:2px solid #1d1c1a;color:#1d1c1a" style-hover="color:#1d1c1a">
+<div style="min-height:380px;background:{{ lead.bg }};color:{{ lead.ink }};padding:32px;display:flex;flex-direction:column;justify-content:space-between;gap:24px;overflow:hidden"><span style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase">{{ lead.cat }}</span><span style="font-size:clamp(80px,11vw,168px);font-weight:300;line-height:.85;letter-spacing:-.02em">{{ lead.big }}</span></div>
+<div style="padding:32px 0 32px 40px;display:flex;flex-direction:column;gap:18px;justify-content:center"><span style="font-size:12px;color:#6b675f">{{ lead.date }} · {{ lead.read }}</span><h3 style="margin:0;font-size:clamp(26px,2.6vw,36px);font-weight:400;line-height:1.2;text-wrap:balance">{{ lead.t }}</h3><p style="margin:0;font-size:16px;line-height:1.6;color:#55524b;max-width:520px;text-wrap:pretty">{{ lead.d }}</p><span style="font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#9a4c08">Ler a nota →</span></div>
+</a>
+</sc-if>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:0 32px;padding-top:12px">
+<sc-for list="{{ posts }}" as="p" hint-placeholder-count="4"><a href="#produto" style="display:flex;flex-direction:column;gap:14px;padding:28px 0;border-top:1px solid #d9d4c4;color:#1d1c1a;animation:bIn .5s cubic-bezier(.2,.7,.2,1) both" style-hover="color:#9a4c08">
+<div style="aspect-ratio:4/3;background:{{ p.bg }};color:{{ p.ink }};padding:20px;display:flex;flex-direction:column;justify-content:space-between"><span style="font-size:9px;font-weight:600;letter-spacing:.22em;text-transform:uppercase">{{ p.cat }}</span><span style="font-size:64px;font-weight:300;line-height:.9">{{ p.big }}</span></div>
+<span style="font-size:12px;color:#6b675f">{{ p.date }} · {{ p.read }}</span>
+<h3 style="margin:0;font-size:20px;font-weight:500;line-height:1.3;text-wrap:balance">{{ p.t }}</h3>
+<p style="margin:0;font-size:14px;line-height:1.55;color:#55524b;text-wrap:pretty">{{ p.d }}</p>
+</a></sc-for>
+</div>
+<sc-if value="{{ empty }}"><p style="margin:0;padding:32px 0;font-size:15px;color:#6b675f">Ainda não há notas nesta categoria.</p></sc-if>
+</section>
+
+<section id="produto" data-screen-label="03 Produto" style="background:#1d1c1a;color:#fbfaf7">
+<div style="max-width:1320px;margin:0 auto;padding:80px 32px;display:flex;flex-direction:column;gap:40px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:32px;align-items:end">
+<div style="display:flex;flex-direction:column;gap:12px"><span style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#c8640c">Produto</span><h2 style="margin:0;font-size:clamp(30px,3.4vw,44px);font-weight:400;letter-spacing:.14em;text-transform:uppercase;line-height:1.1">Uma vista por função</h2></div>
+<p style="margin:0;font-size:16px;line-height:1.6;color:#b5b0a5;max-width:520px">Escolhe uma área para ver o ecrã real da MUNTU, exactamente como a equipa o usa no balcão.</p>
+</div>
+<div role="tablist" style="display:flex;gap:28px;border-bottom:1px solid #34322f;overflow-x:auto"><sc-for list="{{ views }}" as="v" hint-placeholder-count="4"><button role="tab" aria-selected="{{ v.on }}" onClick="{{ v.pick }}" style="height:52px;padding:0;border:0;background:transparent;color:{{ v.fg }};box-shadow:{{ v.bar }};font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;white-space:nowrap">{{ v.l }}</button></sc-for></div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:40px;align-items:start">
+<div style="background:#2a2926;padding:18px;overflow:hidden"><div style="width:100%;aspect-ratio:1440/900;overflow:hidden;position:relative"><div style="position:absolute;top:0;left:0;width:1440px;height:900px;transform-origin:0 0;transform:scale({{ scale }});pointer-events:none"><sc-for list="{{ views }}" as="v" hint-placeholder-count="1"><sc-if value="{{ v.on }}"><dc-import name="MUNTU Prototipo Web" screen="{{ v.s }}" role="{{ v.r }}" hint-size="1440px,900px"></dc-import></sc-if></sc-for></div></div></div>
+<div style="display:flex;flex-direction:column;gap:16px;padding-top:8px"><span style="font-size:44px;font-weight:300;color:#c8640c">{{ cur.n }}</span><h3 style="margin:0;font-size:22px;font-weight:500;line-height:1.3">{{ cur.t }}</h3><p style="margin:0;font-size:15px;line-height:1.6;color:#b5b0a5">{{ cur.d }}</p></div>
+</div>
+</div>
+</section>
+
+<section id="equipa" data-screen-label="04 Para quem" style="max-width:1320px;margin:0 auto;padding:80px 32px">
+<div style="display:flex;flex-direction:column;gap:10px;padding-bottom:32px"><span style="font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#6b675f">Para quem</span><h2 style="margin:0;font-size:clamp(30px,3.4vw,44px);font-weight:400;letter-spacing:.14em;text-transform:uppercase">Cinco perfis, um sistema</h2></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));border-top:2px solid #1d1c1a">
+<sc-for list="{{ roles }}" as="r" hint-placeholder-count="5"><div style="padding:28px 24px 28px 0;display:flex;flex-direction:column;gap:14px;border-bottom:1px solid #d9d4c4"><span style="font-size:12px;font-weight:600;color:#9a4c08">{{ r.n }}</span><span style="font-size:20px;font-weight:500;letter-spacing:.14em;text-transform:uppercase">{{ r.l }}</span><span style="font-size:14px;line-height:1.55;color:#55524b;text-wrap:pretty">{{ r.d }}</span></div></sc-for>
+</div>
+</section>
+
+<section id="demo" data-screen-label="05 Demonstração" style="background:#c8640c">
+<div style="max-width:1320px;margin:0 auto;padding:80px 32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:48px;align-items:center">
+<h2 style="margin:0;font-size:clamp(34px,4.6vw,64px);font-weight:400;line-height:1.02;letter-spacing:.08em;text-transform:uppercase;text-wrap:balance">Leva a MUNTU para o teu ginásio</h2>
+<div style="display:flex;flex-direction:column;gap:18px">
+<sc-if value="{{ form }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px"><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:500">Nome do ginásio<input value="{{ gym }}" onChange="{{ setGym }}" placeholder="Ex. Mwangolé Fit" style="height:44px;border:0;border-bottom:1px solid #1d1c1a;background:transparent;font-family:inherit;font-size:16px;color:#1d1c1a;outline:none;padding:0"></label><label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:500">Telefone<input value="{{ tel }}" onChange="{{ setTel }}" inputMode="tel" placeholder="923 000 000" style="height:44px;border:0;border-bottom:1px solid #1d1c1a;background:transparent;font-family:inherit;font-size:16px;color:#1d1c1a;outline:none;padding:0"></label></div>
+<sc-if value="{{ err }}"><span role="alert" style="font-size:13px;font-weight:500">{{ err }}</span></sc-if>
+<button onClick="{{ send }}" style="align-self:flex-start;height:52px;padding:0 28px;border:0;background:#1d1c1a;color:#fbfaf7;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;white-space:nowrap" style-hover="background:#fbfaf7;color:#1d1c1a">Pedir demonstração</button>
+<span style="font-size:13px;line-height:1.5">Ligamos em 24 horas úteis para marcar uma visita ao teu ginásio.</span>
+</sc-if>
+<sc-if value="{{ sent }}"><div role="status" style="padding:24px;background:#fbfaf7;display:flex;flex-direction:column;gap:8px;animation:bIn .4s ease both"><span style="font-size:20px;font-weight:500">Pedido recebido</span><span style="font-size:14px;line-height:1.5;color:#55524b">{{ sentMsg }}</span></div></sc-if>
+</div>
+</div>
+</section>
+
+<footer style="background:#1d1c1a;color:#b5b0a5">
+<div style="max-width:1320px;margin:0 auto;padding:48px 32px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap"><dc-import name="Muntu Logo" variant="C" color="#ebe6d6" size="{{ 20 }}" descriptor="Ginásio" hint-size="170px,20px"></dc-import><span style="font-size:12px">Luanda, Angola · ©2026 MUNTU</span></div>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { cat: 'Todos', view: 0, w: 1000, gym: '', tel: '', err: '', sent: false };
+  componentDidMount() { const f = () => this.setState({ w: window.innerWidth }); f(); window.addEventListener('resize', f); this.off = () => window.removeEventListener('resize', f); }
+  componentWillUnmount() { this.off && this.off(); }
+  renderVals() {
+    const s = this.state;
+    const P = [
+      { cat:'Produto', big:'0,50', bg:'#1d1c1a', ink:'#c8640c', date:'28 Out 2026', read:'4 min', t:'Fechar o caixa ao cêntimo', d:'A contagem passa a ser feita por notas e moedas, com um campo para cêntimos e valores soltos. O valor esperado só aparece depois de a recepção submeter.' },
+      { cat:'Operações', big:'7', bg:'#ebe6d6', ink:'#1d1c1a', date:'24 Out 2026', read:'3 min', t:'Pendências que passam de turno em turno', d:'Cobranças, facturas e reclamações ficam com responsável e histórico até alguém as resolver.' },
+      { cat:'Produto', big:'Aa', bg:'#1f5f8b', ink:'#fbfaf7', date:'20 Out 2026', read:'3 min', t:'A marca do teu ginásio na app dos membros', d:'Logotipo, nome e cor de destaque, com verificação de contraste antes de aplicar.' },
+      { cat:'Guias', big:'38', bg:'#c8640c', ink:'#1d1c1a', date:'15 Out 2026', read:'5 min', t:'Quem está dentro do ginásio agora', d:'A lotação vem dos check-ins. A equipa vê os membros presentes e o membro vê se é boa hora para ir.' },
+      { cat:'Guias', big:'?', bg:'#fbfaf7', ink:'#1d1c1a', date:'09 Out 2026', read:'6 min', t:'Recuperar membros a partir do motivo', d:'Mensagens prontas para perguntar porque deixou de vir, e uma proposta adequada a cada resposta.' }
+    ];
+    const list = P.filter(p => s.cat === 'Todos' || p.cat === s.cat);
+    const VIEWS = [
+      ['dz','rececao','Ginásio agora','01','Lotação e membros presentes','Quem entrou, a que horas e em que zona está. A lista actualiza com cada passagem na catraca.'],
+      ['d4','rececao','Caixa','02','Caixa contado ao cêntimo','Notas, moedas e cêntimos. Sangrias, reforços e despesas registados no turno.'],
+      ['dk','rececao','Recuperação','03','Conversas para recuperar membros','Mensagens prontas, motivo registado e uma proposta para cada caso.'],
+      ['dp','dono','Marca','04','A marca de cada ginásio','O dono aplica logotipo e cor na app dos membros. A equipa continua com a interface MUNTU.']
+    ];
+    const v = VIEWS[s.view];
+    const innerW = Math.min(1320, s.w) - 64 - 340 - 36;
+    return {
+      ticker: ['Entradas por QR','Caixa ao cêntimo','Cobranças por SMS','Facturas','Troca de turno','Pendências','Reservas de PT','Actividades e desafios','Marca do ginásio','Várias filiais','Recuperação de membros','Indicações'].concat(['Entradas por QR','Caixa ao cêntimo','Cobranças por SMS','Facturas','Troca de turno','Pendências','Reservas de PT','Actividades e desafios','Marca do ginásio','Várias filiais','Recuperação de membros','Indicações']),
+      cats: ['Todos','Produto','Operações','Guias'].map(c => ({ l:c, on: s.cat===c, bg: s.cat===c ? '#1d1c1a' : 'transparent', fg: s.cat===c ? '#fbfaf7' : '#1d1c1a', pick:() => this.setState({ cat:c }) })),
+      lead: list[0] || P[0], hasLead: !!list[0], posts: list.slice(1), empty: !list.length,
+      views: VIEWS.map(([sc,r,l],i) => ({ s:sc, r, l, on: i===s.view, fg: i===s.view ? '#fbfaf7' : '#8a867d', bar: i===s.view ? 'inset 0 -2px 0 #c8640c' : 'none', pick:() => this.setState({ view:i }) })),
+      cur: { n:v[3], t:v[4], d:v[5] }, scale: String(Math.max(.3, innerW / 1440)),
+      roles: [['01','Membro','Entra por QR, reserva PT, vê a lotação e acompanha actividades e desafios.'],['02','Recepção','Inscreve, cobra, emite facturas por SMS, conta o caixa e passa o turno.'],['03','Finanças','Concilia pagamentos, acompanha dívidas e renovações de todas as filiais.'],['04','PT','Gere a agenda, aceita pedidos e propõe actividades para aprovação.'],['05','Dono','Compara filiais, aprova regras, define a marca e vê a equipa em tempo real.']].map(([n,l,d]) => ({ n,l,d })),
+      gym: s.gym, tel: s.tel, err: s.err, form: !s.sent, sent: s.sent,
+      setGym: e => this.setState({ gym: e.target.value, err:'' }), setTel: e => this.setState({ tel: e.target.value, err:'' }),
+      send: () => { if (s.gym.trim().length < 2) return this.setState({ err:'Escreve o nome do ginásio.' }); if (s.tel.replace(/\D/g,'').length < 9) return this.setState({ err:'O telefone precisa de 9 dígitos.' }); this.setState({ sent:true }); },
+      sentMsg: 'Vamos ligar para ' + s.tel + ' para falar sobre o ' + s.gym + '.'
+    };
+  }
+}
+</script>
+</body>
+</html>

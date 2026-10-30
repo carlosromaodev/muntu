@@ -4,6 +4,11 @@ import { ACTIVITIES, Activity, NOTICE_TARGETS, NOTICES, Role } from '../data/mob
 export type Doc = { doc: string; n: string; h: string; v: number; st: string; tone: 'ok' | 'warn' };
 export type SentNotice = { p: 'urgente' | 'normal'; t: string; h: string; to: keyof typeof NOTICE_TARGETS; r: number; n: number };
 export type Outcome = { r: string; m: string };
+/** Ocorrência reportada: id, título, onde/quando, estado (0 Recebida · 1 Em análise · 2 Resolvida). */
+export type Incident = [string, string, string, number];
+/** Marca do ginásio na app dos membros. */
+export type Brand = { c: string; name: string; logo: string };
+export const DEFAULT_BRAND: Brand = { c: '#c8640c', name: 'MWANGOLÉ FIT', logo: '' };
 
 type State = {
   /* sessão */
@@ -67,6 +72,14 @@ type State = {
   toggleEvent: (id: string) => void;
   prefs: Record<string, boolean>;
   togglePref: (k: string) => void;
+
+  /* ocorrências (membros e equipa têm listas próprias) */
+  incidents: { m: Incident[]; s: Incident[] };
+  addIncident: (who: 'm' | 's', i: Incident) => void;
+
+  /* marca do ginásio */
+  brand: Brand;
+  setBrand: (b: Brand) => void;
 };
 
 const now = () => {
@@ -150,6 +163,10 @@ export const useMuntu = create<State>((set, get) => ({
   toggleEvent: (id) => set((s) => ({ joinedEvents: { ...s.joinedEvents, [id]: !s.joinedEvents[id] } })),
   prefs: { sms: true, wa: false, bio: true, fug: true },
   togglePref: (k) => set((s) => ({ prefs: { ...s.prefs, [k]: !s.prefs[k] } })),
+  incidents: { m: [], s: [] },
+  addIncident: (who, i) => set((s) => ({ incidents: { ...s.incidents, [who]: [i, ...s.incidents[who]] } })),
+  brand: DEFAULT_BRAND,
+  setBrand: (brand) => set({ brand }),
 }));
 
 export const unreadCount = (read: Record<string, true>) => NOTICES.filter((n) => !read[n.id]).length;

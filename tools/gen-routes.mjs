@@ -69,6 +69,8 @@ const MOBILE = {
   regras: 'Regras',
   indicacoes: 'Indicacoes',
   importar: 'Importar',
+  ocorrencia: 'Ocorrencia',
+  marca: 'Marca',
 };
 
 /** Desktop (web). As rotas dentro de (app) têm a barra lateral. */
@@ -98,6 +100,7 @@ const DESKTOP = {
   '(app)/gestao': 'DGestao',
   '(app)/rede': 'DRede',
   '(app)/avisos-sms': 'DAvisosSms',
+  '(app)/marca': 'DMarca',
   '(app)/ginasio-agora': 'DGinasioAgora',
 };
 

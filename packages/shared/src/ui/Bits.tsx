@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleProp, View, ViewStyle } from 'react-native';
-import Animated, { FadeIn, FadeInDown, LinearTransition } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
+import { enter, fade, pop } from './motion';
 import { C, Tone, TONES, type } from '../theme/tokens';
 import { Txt } from './Txt';
 
@@ -54,14 +55,14 @@ export function Card({ children, style, pad = 20, tone = 'paper' }: { children: 
 }
 
 /**
- * Aparece com um pequeno deslize vertical. `i` escalona listas
- * (cada item entra 35 ms depois do anterior, até 10 itens).
+ * Aparece com um pequeno deslize vertical (14 px, 420 ms). `i` escalona
+ * ligeiramente os primeiros itens de uma lista (20 ms, até 6).
  */
 export function Reveal({ children, i = 0, style, from = 'down' }: { children: React.ReactNode; i?: number; style?: StyleProp<ViewStyle>; from?: 'down' | 'fade' }) {
-  const delay = Math.min(i, 10) * 35;
-  const entering = from === 'fade' ? FadeIn.duration(260).delay(delay) : FadeInDown.duration(320).delay(delay).springify().damping(18).stiffness(180);
+  const delay = Math.min(i, 6) * 20;
+  const entering = from === 'fade' ? fade(260, delay) : enter(delay);
   return (
-    <Animated.View entering={entering} layout={LinearTransition.springify().damping(20)} style={style}>
+    <Animated.View entering={entering} style={style}>
       {children}
     </Animated.View>
   );
@@ -102,7 +103,7 @@ export function Note({ text, tone = 'neutral', children, style }: { text?: strin
   const map = { bad: [C.badBg, C.bad], ok: [C.okBg, C.ok], warn: [C.warnBg, C.warn], neutral: [C.sand, C.ink], ink: [C.ink, C.sand] } as const;
   const [bg, fg] = map[tone];
   return (
-    <Animated.View entering={FadeInDown.duration(220)} style={[{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingVertical: 12, paddingHorizontal: 14, backgroundColor: bg }, style]}>
+    <Animated.View entering={pop()} style={[{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingVertical: 12, paddingHorizontal: 14, backgroundColor: bg }, style]}>
       {tone === 'bad' || tone === 'ok' ? <Dot color={fg} size={8} style={{ marginTop: 5 }} /> : null}
       <View style={{ flex: 1 }}>
         {text ? <Txt style={[type(13, tone === 'neutral' || tone === 'ink' ? 400 : 500), { color: fg, lineHeight: 18 }]}>{text}</Txt> : null}

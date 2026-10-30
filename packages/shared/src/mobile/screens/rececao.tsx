@@ -1,13 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { CHARGE_MEMBERS, CHECKINS, MEMBERS, OCC, OCC_NOW, lotLevel, PAY_MEANS, PLANS, ST, StKey, RISK, RENEWALS } from '../../data/mobile';
 import { haptic } from '../../lib/haptics';
 import { kn, onlyDigits, phone } from '../../lib/format';
 import { useMuntu } from '../../store/useMuntu';
 import { C, GUTTER, type } from '../../theme/tokens';
-import { Avatar, Badge, Button, Checkbox, Chip, ChipGroup, Field, Note, Press, Reveal, Row, Select, Segmented, Txt, useToast } from '../../ui';
+import { M, Avatar, Badge, Button, Checkbox, Chip, ChipGroup, Field, Note, Press, Reveal, Row, Select, Segmented, Txt, useToast } from '../../ui';
 import { LinkCard, Section, TabScreen } from '../Layout';
 
 const stBadge = (k: StKey) => <Badge label={ST[k][0]} tone={ST[k][1]} />;
@@ -60,7 +60,7 @@ export function Entradas() {
                 {stBadge(c.k)}
               </View>
               {c.k === 'divida' ? (
-                <Animated.View entering={FadeInDown} style={{ flexDirection: 'row', gap: 6, paddingLeft: 56 }}>
+                <Animated.View entering={M.enter()} style={{ flexDirection: 'row', gap: 6, paddingLeft: 56 }}>
                   <Button label={`Cobrar ${kn(c.v)}`} size="sm" style={{ flex: 1, height: 38 }} feedback="press" onPress={() => router.navigate({ pathname: '/rececao/cobrar', params: { m: 'MS', checkin: c.id } } as any)} />
                   <Button
                     label="Não entra"
@@ -181,8 +181,8 @@ export function Inscrever() {
   if (res)
     return (
       <TabScreen role="rececao" eyebrow="Talatona · novo membro" title="Inscrever">
-        <Animated.View entering={FadeIn} style={{ paddingHorizontal: GUTTER, paddingTop: 20, gap: 14 }}>
-          <Animated.View entering={ZoomIn.springify().damping(14)} style={{ backgroundColor: C.okBg, padding: 18, gap: 8 }}>
+        <Animated.View entering={M.fade()} style={{ paddingHorizontal: GUTTER, paddingTop: 20, gap: 14 }}>
+          <Animated.View entering={M.pop()} style={{ backgroundColor: C.okBg, padding: 18, gap: 8 }}>
             <Txt v="label" c={C.ok}>
               Membro inscrito
             </Txt>
@@ -234,7 +234,7 @@ export function Inscrever() {
           <View>
             <Field label="Código de indicação · opcional" placeholder="Ex. KATIA-4822" value={ref} onChangeText={setRef} autoCapitalize="characters" />
             {refMsg ? (
-              <Animated.View entering={FadeInDown}>
+              <Animated.View entering={M.enter()}>
                 <Txt v="small" c={refOk && !selfRef ? C.ok : C.bad} style={{ marginTop: 6 }}>
                   {refMsg}
                 </Txt>
@@ -246,7 +246,7 @@ export function Inscrever() {
       <Section title="Plano">
         {PLANS.map((x, i) => (
           <Press key={x.v} feedback="select" scaleTo={0.99} onPress={() => setPlan(x.v)} accessibilityState={{ selected: plan === x.v }} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderTopWidth: i ? 1 : 0, borderTopColor: C.line }}>
-            <View style={{ width: 18, height: 18, borderWidth: 1.5, borderColor: C.ink, alignItems: 'center', justifyContent: 'center' }}>{plan === x.v ? <Animated.View entering={ZoomIn.duration(140)} style={{ width: 10, height: 10, backgroundColor: C.ink }} /> : null}</View>
+            <View style={{ width: 18, height: 18, borderWidth: 1.5, borderColor: C.ink, alignItems: 'center', justifyContent: 'center' }}>{plan === x.v ? <Animated.View entering={M.fade(140)} style={{ width: 10, height: 10, backgroundColor: C.ink }} /> : null}</View>
             <View style={{ flex: 1 }}>
               <Txt v="bodyStrong">{x.l}</Txt>
               <Txt v="small" c={C.muted}>
@@ -335,8 +335,8 @@ export function Cobrar() {
   return (
     <TabScreen role="rececao" eyebrow="Cobranças e facturas" title="Cobrar">
       {res ? (
-        <Animated.View entering={FadeIn} style={{ paddingHorizontal: GUTTER, paddingTop: 20, gap: 12 }}>
-          <Animated.View entering={ZoomIn.springify().damping(14)} style={{ backgroundColor: payNow ? C.okBg : C.warnBg, padding: 18, gap: 8 }}>
+        <Animated.View entering={M.fade()} style={{ paddingHorizontal: GUTTER, paddingTop: 20, gap: 12 }}>
+          <Animated.View entering={M.pop()} style={{ backgroundColor: payNow ? C.okBg : C.warnBg, padding: 18, gap: 8 }}>
             <Txt v="label" c={payNow ? C.ok : C.warn}>
               {res.title}
             </Txt>
@@ -376,7 +376,7 @@ export function Cobrar() {
               }}
               options={Object.entries(CHARGE_MEMBERS).map(([v, m]) => ({ v, l: m.n + (m.k === 'divida' ? ' · em dívida' : ''), sub: m.d }))}
             />
-            <Animated.View key={mem} entering={FadeIn} style={{ marginTop: 12, backgroundColor: C.sand, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <Animated.View key={mem} entering={M.fade()} style={{ marginTop: 12, backgroundColor: C.sand, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View style={{ flex: 1, gap: 2 }}>
                 <Txt v="bodyStrong">{cm.n}</Txt>
                 <Txt v="small" c={C.muted}>

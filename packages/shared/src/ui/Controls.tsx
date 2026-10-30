@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { LayoutChangeEvent, Platform, StyleProp, TextInput, TextInputProps, View, ViewStyle } from 'react-native';
-import Animated, { interpolateColor, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming, ZoomIn } from 'react-native-reanimated';
+import Animated, { interpolateColor, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
+import { DUR, fade, timing } from './motion';
 import { C, type } from '../theme/tokens';
 import { Press } from './Press';
 import { Txt } from './Txt';
 
-const SPRING = { damping: 18, stiffness: 220, mass: 0.8 };
+const SLIDE = timing(250);
 
 /** Botão-chip seleccionável (filtros, opções). Preto quando activo. */
 export function Chip({ label, on, onPress, size = 'md', style, count }: { label: string; on?: boolean; onPress?: () => void; size?: 'sm' | 'md'; style?: StyleProp<ViewStyle>; count?: number | string }) {
-  const p = useDerivedValue(() => withTiming(on ? 1 : 0, { duration: 160 }), [on]);
+  const p = useDerivedValue(() => withTiming(on ? 1 : 0, timing(DUR.color)), [on]);
   const bg = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(p.value, [0, 1], ['rgba(29,28,26,0)', C.ink]),
     borderColor: interpolateColor(p.value, [0, 1], [C.lineStrong, C.ink]),
@@ -46,8 +47,8 @@ export function Segmented<T extends string>({ options, value, onChange, style, d
   const x = useSharedValue(0);
   const seg = options.length ? (w - 8) / options.length : 0;
   useEffect(() => {
-    x.value = withSpring(idx * seg, SPRING);
-  }, [idx, seg, x]);
+    x.value = w ? withTiming(idx * seg, SLIDE) : idx * seg;
+  }, [idx, seg, w, x]);
   const ind = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
   return (
     <View onLayout={(e: LayoutChangeEvent) => setW(e.nativeEvent.layout.width)} style={[{ flexDirection: 'row', backgroundColor: dark ? C.ink : C.sand, padding: 4 }, style]}>
@@ -75,8 +76,8 @@ export function Tabs<T extends string>({ options, value, onChange, style }: { op
   useEffect(() => {
     const l = lay[value];
     if (l) {
-      x.value = withSpring(l.x, SPRING);
-      w.value = withSpring(l.w, SPRING);
+      x.value = withTiming(l.x, SLIDE);
+      w.value = withTiming(l.w, SLIDE);
     }
   }, [lay, value, x, w]);
   const ind = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }], width: w.value }));
@@ -108,7 +109,7 @@ export function Tabs<T extends string>({ options, value, onChange, style }: { op
 /** Campo de texto sublinhado com rótulo, como nos formulários do desenho. */
 export function Field({ label, prefix, right, error, style, inputStyle, big, ...input }: TextInputProps & { label?: string; prefix?: string; right?: React.ReactNode; error?: string; style?: StyleProp<ViewStyle>; inputStyle?: any; big?: boolean }) {
   const [focus, setFocus] = useState(false);
-  const f = useDerivedValue(() => withTiming(focus ? 1 : 0, { duration: 180 }), [focus]);
+  const f = useDerivedValue(() => withTiming(focus ? 1 : 0, timing(DUR.color)), [focus]);
   const line = useAnimatedStyle(() => ({ backgroundColor: interpolateColor(f.value, [0, 1], [error ? C.bad : C.lineStrong, C.ink]), height: 1 + f.value }));
   return (
     <View style={style}>
@@ -174,7 +175,7 @@ export function Checkbox({ on, onChange, label, sub, style, right }: { on: boole
     <Press feedback="select" scaleTo={0.99} onPress={() => onChange?.(!on)} accessibilityRole="checkbox" accessibilityState={{ checked: on }} style={[{ flexDirection: 'row', alignItems: 'center', gap: 12 }, style]}>
       <View style={{ width: 18, height: 18, borderWidth: 1.5, borderColor: C.ink, backgroundColor: on ? C.ink : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
         {on ? (
-          <Animated.View entering={ZoomIn.duration(140)}>
+          <Animated.View entering={fade(140)}>
             <Txt style={[type(11, 600), { color: C.paper, lineHeight: 13 }]}>✓</Txt>
           </Animated.View>
         ) : null}
@@ -195,12 +196,12 @@ export function Checkbox({ on, onChange, label, sub, style, right }: { on: boole
 }
 
 /** Interruptor rectangular (preto/areia), com o botão a deslizar. */
-export function Toggle({ on, onChange, accent }: { on: boolean; onChange?: (v: boolean) => void; accent?: boolean }) {
-  const p = useDerivedValue(() => withSpring(on ? 1 : 0, SPRING), [on]);
-  const track = useAnimatedStyle(() => ({ backgroundColor: interpolateColor(p.value, [0, 1], [C.lineStrong, accent ? C.ink : C.ink]) }));
+export function Toggle({ on, onChange, accent, color = C.ink }: { on: boolean; onChange?: (v: boolean) => void; accent?: boolean; color?: string }) {
+  const p = useDerivedValue(() => withTiming(on ? 1 : 0, timing(DUR.color)), [on]);
+  const track = useAnimatedStyle(() => ({ backgroundColor: interpolateColor(p.value, [0, 1], [C.lineStrong, color]) }));
   const knob = useAnimatedStyle(() => ({ transform: [{ translateX: 3 + p.value * 16 }], backgroundColor: accent ? interpolateColor(p.value, [0, 1], [C.paper, C.accent]) : C.paper }));
   return (
-    <Press feedback="select" scaleTo={0.95} onPress={() => onChange?.(!on)} accessibilityRole="switch" accessibilityState={{ checked: on }}>
+    <Press feedback="select" scaleTo={1} onPress={() => onChange?.(!on)} accessibilityRole="switch" accessibilityState={{ checked: on }}>
       <Animated.View style={[{ width: 38, height: 22, justifyContent: 'center' }, track]}>
         <Animated.View style={[{ width: 16, height: 16 }, knob]} />
       </Animated.View>
@@ -230,12 +231,32 @@ export function Stepper({ value, onChange, step = 1, min = 0, max = Infinity, fo
 export function Progress({ value, color = C.ink, track = C.line, height = 3, style }: { value: number; color?: string; track?: string; height?: number; style?: StyleProp<ViewStyle> }) {
   const p = useSharedValue(0);
   useEffect(() => {
-    p.value = withTiming(Math.max(0, Math.min(1, value)), { duration: 650 });
+    p.value = withTiming(Math.max(0, Math.min(1, value)), timing(DUR.fill));
   }, [value, p]);
   const bar = useAnimatedStyle(() => ({ width: `${p.value * 100}%` }));
   return (
     <View style={[{ height, backgroundColor: track, overflow: 'hidden' }, style]}>
       <Animated.View style={[{ height: '100%', backgroundColor: color }, bar]} />
+    </View>
+  );
+}
+
+/** Caixa de valor em Kz (contorno preto, "Kz" à direita). Aceita milhares e cêntimos. */
+export function MoneyInput({ value, onChangeText, placeholder, editable = true, height = 44, size = 16, accessibilityLabel, style }: { value: string; onChangeText: (t: string) => void; placeholder?: string; editable?: boolean; height?: number; size?: number; accessibilityLabel?: string; style?: StyleProp<ViewStyle> }) {
+  return (
+    <View style={[{ flexDirection: 'row', alignItems: 'center', gap: 8, height, paddingHorizontal: 12, borderWidth: 1, borderColor: editable ? C.ink : C.line, backgroundColor: '#fff' }, style]}>
+      <TextInput
+        value={value}
+        editable={editable}
+        onChangeText={(t) => onChangeText(t.replace(/[^\d\s,.]/g, ''))}
+        placeholder={placeholder}
+        placeholderTextColor={C.faint}
+        keyboardType="decimal-pad"
+        inputMode="decimal"
+        accessibilityLabel={accessibilityLabel ?? placeholder}
+        style={[type(size, 400), { flex: 1, minWidth: 0, color: C.ink, paddingVertical: 0, fontVariant: ['tabular-nums'] }, Platform.OS === 'web' ? ({ outlineStyle: 'none' } as any) : null]}
+      />
+      <Txt style={[type(size - 3, 400), { color: C.muted }]}>Kz</Txt>
     </View>
   );
 }

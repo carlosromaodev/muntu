@@ -1,14 +1,14 @@
 import React, { useCallback, useState } from 'react';
 import { Platform, RefreshControl, ScrollView, ScrollViewProps, StyleProp, View, ViewStyle } from 'react-native';
 import { usePathname, useRouter } from 'expo-router';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MuntuLogo } from '../brand/Logo';
 import { Role, ROLE_INFO } from '../data/mobile';
 import { haptic } from '../lib/haptics';
 import { useMuntu } from '../store/useMuntu';
 import { C, GUTTER, type } from '../theme/tokens';
-import { Button, Dot, Press, Txt } from '../ui';
+import { Button, Dot, Icon, Press, timing, Txt } from '../ui';
 import { home, HOME_LABEL, TABS } from './nav';
 
 /** Cabeçalho dos separadores: logótipo + papel (toca para abrir o turno). */
@@ -42,7 +42,7 @@ export function TopBar({ role, right, bg = C.paper }: { role?: Role; right?: Rea
 }
 
 /** Título do ecrã: rótulo pequeno + título grande espaçado. */
-export function TitleBlock({ eyebrow, title, size = 30, style, children, border = true, eyebrowColor = C.muted }: { eyebrow?: string; title: string; size?: number; style?: StyleProp<ViewStyle>; children?: React.ReactNode; border?: boolean; eyebrowColor?: string }) {
+export function TitleBlock({ eyebrow, title, size = 30, style, children, border = true, eyebrowColor = C.muted, titleRight }: { eyebrow?: string; title: string; size?: number; style?: StyleProp<ViewStyle>; children?: React.ReactNode; border?: boolean; eyebrowColor?: string; titleRight?: React.ReactNode }) {
   return (
     <View style={[{ paddingHorizontal: GUTTER, paddingTop: 12, paddingBottom: 18, gap: 6, borderBottomWidth: border ? 1 : 0, borderBottomColor: C.line }, style]}>
       {eyebrow ? (
@@ -50,9 +50,12 @@ export function TitleBlock({ eyebrow, title, size = 30, style, children, border 
           {eyebrow}
         </Txt>
       ) : null}
-      <Txt accessibilityRole="header" style={type(size, 400, 0.18, true)} numberOfLines={2} adjustsFontSizeToFit>
-        {title}
-      </Txt>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 }}>
+        <Txt accessibilityRole="header" style={[type(size, 400, 0.18, true), { flexShrink: 1 }]} numberOfLines={2} adjustsFontSizeToFit>
+          {title}
+        </Txt>
+        {titleRight}
+      </View>
       {children}
     </View>
   );
@@ -80,7 +83,7 @@ export function BackLink({ label, onPress, right }: { label: string; onPress?: (
 }
 
 /** Cabeçalho dos ecrãs empilhados: voltar + rótulo + título. */
-export function StackHeader({ back, eyebrow, title, onBack, right, size }: { back: string; eyebrow?: string; title: string; onBack?: () => void; right?: React.ReactNode; size?: number }) {
+export function StackHeader({ back, eyebrow, title, onBack, right, size, children }: { back: string; eyebrow?: string; title: string; onBack?: () => void; right?: React.ReactNode; size?: number; children?: React.ReactNode }) {
   const insets = useSafeAreaInsets();
   return (
     <View style={{ paddingTop: insets.top + 4, paddingHorizontal: GUTTER, paddingBottom: 18, gap: 8, borderBottomWidth: 1, borderBottomColor: C.line, backgroundColor: C.paper }}>
@@ -93,6 +96,7 @@ export function StackHeader({ back, eyebrow, title, onBack, right, size }: { bac
       <Txt accessibilityRole="header" style={type(size ?? 30, 400, 0.18, true)} numberOfLines={2} adjustsFontSizeToFit>
         {title}
       </Txt>
+      {children}
     </View>
   );
 }
@@ -181,7 +185,27 @@ export function Steps({ total, current }: { total: number; current: number }) {
   );
 }
 
-/** Barra de separadores do fundo, com o indicador laranja a deslizar. */
+function TabItem({ label, on, onPress }: { label: string; on: boolean; onPress: () => void }) {
+  const w = useSharedValue(on ? 18 : 0);
+  React.useEffect(() => {
+    w.value = withTiming(on ? 18 : 0, timing(250));
+  }, [on, w]);
+  const bar = useAnimatedStyle(() => ({ width: w.value }));
+  const fg = on ? C.ink : C.stone;
+  return (
+    <Press feedback="select" scaleTo={1} accessibilityRole="tab" accessibilityState={{ selected: on }} accessibilityLabel={label} onPress={onPress} style={{ flex: 1, minWidth: 0, alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, alignItems: 'center' }}>
+        <Animated.View style={[{ height: 2, backgroundColor: C.accent }, bar]} />
+      </View>
+      <Icon name={label} size={22} color={fg} />
+      <Txt numberOfLines={1} style={[type(9, 600, 0.12, true), { color: fg, paddingHorizontal: 2 }]}>
+        {label}
+      </Txt>
+    </Press>
+  );
+}
+
+/** Barra de separadores do fundo: ícone de linha, rótulo e traço laranja no activo. */
 export function RoleTabBar({ role }: { role: Role }) {
   const router = useRouter();
   const path = usePathname();
@@ -189,49 +213,21 @@ export function RoleTabBar({ role }: { role: Role }) {
   const tabs = TABS[role];
   const seg = path.split('/')[2] ?? tabs[0]!.route;
   const found = tabs.findIndex((t) => t.route === seg);
-  const idx = Math.max(0, found);
-  const [w, setW] = useState(0);
-  const x = useSharedValue(0);
-  const cell = tabs.length ? w / tabs.length : 0;
-  React.useEffect(() => {
-    x.value = withSpring(idx * cell, { damping: 20, stiffness: 240, mass: 0.8 });
-  }, [idx, cell, x]);
-  const bar = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
   return (
-    <View onLayout={(e) => setW(e.nativeEvent.layout.width)} accessibilityRole="tablist" style={{ height: 72 + insets.bottom, paddingBottom: insets.bottom, borderTopWidth: 1, borderTopColor: C.line, flexDirection: 'row', backgroundColor: C.paper }}>
-      {w > 0 && found >= 0 ? <Animated.View style={[{ position: 'absolute', top: -1, left: 0, width: cell, height: 3, backgroundColor: C.accent }, bar]} /> : null}
-      {tabs.map((t, i) => {
-        const on = i === found;
-        return (
-          <Press
-            key={t.route}
-            feedback="select"
-            scaleTo={0.94}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: on }}
-            accessibilityLabel={t.label}
-            onPress={() => {
-              if (!on) router.navigate(`/${role}/${t.route}` as any);
-            }}
-            style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 6 }}
-          >
-            <Txt style={[type(12, 300), { opacity: on ? 1 : 0.7 }]}>{`0${i + 1}`}</Txt>
-            <Txt numberOfLines={1} style={[type(9, 600, 0.1, true), { opacity: on ? 1 : 0.7 }]}>
-              {t.label}
-            </Txt>
-          </Press>
-        );
-      })}
+    <View accessibilityRole="tablist" style={{ height: 72 + insets.bottom, paddingBottom: insets.bottom, borderTopWidth: 1, borderTopColor: C.line, flexDirection: 'row', backgroundColor: C.paper }}>
+      {tabs.map((t, i) => (
+        <TabItem key={t.route} label={t.label} on={i === found} onPress={() => i !== found && router.navigate(`/${role}/${t.route}` as any)} />
+      ))}
     </View>
   );
 }
 
 /** Ecrã de separador: cabeçalho com logótipo, título e corpo com scroll. */
-export function TabScreen({ role, eyebrow, title, children, right, topRight, footer, headerExtra }: { role: Role; eyebrow?: string; title: string; children: React.ReactNode; right?: React.ReactNode; topRight?: React.ReactNode; footer?: React.ReactNode; headerExtra?: React.ReactNode }) {
+export function TabScreen({ role, eyebrow, title, children, right, topRight, footer, headerExtra, titleRight }: { role: Role; eyebrow?: string; title: string; children: React.ReactNode; right?: React.ReactNode; topRight?: React.ReactNode; footer?: React.ReactNode; headerExtra?: React.ReactNode; titleRight?: React.ReactNode }) {
   return (
     <View style={{ flex: 1, backgroundColor: C.paper }}>
       <TopBar role={role} right={topRight} />
-      <TitleBlock eyebrow={eyebrow} title={title}>
+      <TitleBlock eyebrow={eyebrow} title={title} titleRight={titleRight}>
         {right}
       </TitleBlock>
       {headerExtra}
@@ -241,10 +237,12 @@ export function TabScreen({ role, eyebrow, title, children, right, topRight, foo
 }
 
 /** Ecrã empilhado: voltar, título e corpo com scroll. */
-export function StackScreen({ back, eyebrow, title, children, footer, onBack, right, size, headerExtra }: { back: string; eyebrow?: string; title: string; children: React.ReactNode; footer?: React.ReactNode; onBack?: () => void; right?: React.ReactNode; size?: number; headerExtra?: React.ReactNode }) {
+export function StackScreen({ back, eyebrow, title, children, footer, onBack, right, size, headerExtra, headerInner }: { back: string; eyebrow?: string; title: string; children: React.ReactNode; footer?: React.ReactNode; onBack?: () => void; right?: React.ReactNode; size?: number; headerExtra?: React.ReactNode; headerInner?: React.ReactNode }) {
   return (
     <View style={{ flex: 1, backgroundColor: C.paper }}>
-      <StackHeader back={back} eyebrow={eyebrow} title={title} onBack={onBack} right={right} size={size} />
+      <StackHeader back={back} eyebrow={eyebrow} title={title} onBack={onBack} right={right} size={size}>
+        {headerInner}
+      </StackHeader>
       {headerExtra}
       <Page footer={footer}>{children}</Page>
     </View>

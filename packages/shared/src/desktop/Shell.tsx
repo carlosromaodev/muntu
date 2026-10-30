@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Platform, ScrollView, useWindowDimensions, View } from 'react-native';
 import { Slot, usePathname, useRouter } from 'expo-router';
-import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { MuntuLogo } from '../brand/Logo';
 import { APPR } from '../data/desk';
 import { NOTICES, OCC, OCC_NOW } from '../data/mobile';
 import { useMuntu } from '../store/useMuntu';
 import { C, type } from '../theme/tokens';
-import { OptionList, Press, Sheet, Txt } from '../ui';
+import { Icon, OptionList, Press, Sheet, timing, Txt } from '../ui';
 import { DEFAULT_ROLE, DRole, DRoute, HOME, NAVS, ROUTES, WHO } from './nav';
 import { useDesk } from './session';
 
@@ -41,7 +41,7 @@ function SideSelect<T extends string>({ label, value, options, onChange }: { lab
   );
 }
 
-function NavItem({ n, label, on, badge, onPress }: { n: number; label: string; on: boolean; badge?: string; onPress: () => void }) {
+function NavItem({ label, on, badge, onPress }: { label: string; on: boolean; badge?: string; onPress: () => void }) {
   return (
     <Press
       feedback="select"
@@ -49,13 +49,22 @@ function NavItem({ n, label, on, badge, onPress }: { n: number; label: string; o
       onPress={onPress}
       accessibilityRole="link"
       accessibilityState={{ selected: on }}
-      style={({ hovered }) => ({ height: 42, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 24, backgroundColor: on ? 'transparent' : hovered ? '#2a2926' : 'transparent' })}
     >
-      <Txt style={[type(13, 300), { width: 32, color: on ? C.ink : '#6b675f' }]}>{String(n).padStart(2, '0')}</Txt>
-      <Txt numberOfLines={1} style={[type(11, 600, 0.16, true), { flex: 1, color: on ? C.ink : C.sidebarInk }]}>
-        {label}
-      </Txt>
-      {badge ? <Txt style={[type(11, 600), { color: on ? C.ink : '#6b675f' }]}>{badge}</Txt> : null}
+      {({ hovered }) => {
+        const fg = on ? C.ink : hovered ? C.paper : '#b5b0a5';
+        return (
+          <View style={{ height: 42, flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 24, backgroundColor: on ? 'transparent' : hovered ? '#2a2926' : 'transparent' }}>
+            {hovered && !on ? <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: C.accent }} /> : null}
+            <View style={{ width: 22, alignItems: 'flex-start' }}>
+              <Icon name={label} desk size={18} color={fg} />
+            </View>
+            <Txt numberOfLines={1} style={[type(11, 600, 0.16, true), { flex: 1, color: fg }]}>
+              {label}
+            </Txt>
+            {badge ? <Txt style={[type(11, 600), { minWidth: 20, textAlign: 'right', color: on ? C.ink : C.accent }]}>{badge}</Txt> : null}
+          </View>
+        );
+      }}
     </Press>
   );
 }
@@ -70,7 +79,7 @@ function Sidebar({ role, route }: { role: DRole; route: string }) {
   const unread = NOTICES.filter((n) => !readNotices[n.id]).length;
   const y = useSharedValue(idx * 42);
   useEffect(() => {
-    y.value = withSpring(Math.max(0, idx) * 42, { damping: 22, stiffness: 260, mass: 0.7 });
+    y.value = withTiming(Math.max(0, idx) * 42, timing(240));
   }, [idx, y]);
   const hl = useAnimatedStyle(() => ({ transform: [{ translateY: y.value }], opacity: idx < 0 ? 0 : 1 }));
   const who = WHO[role];
@@ -88,7 +97,7 @@ function Sidebar({ role, route }: { role: DRole; route: string }) {
         <View>
           <Animated.View pointerEvents="none" style={[{ position: 'absolute', left: 0, right: 0, top: 0, height: 42, backgroundColor: C.accent }, hl]} />
           {nav.map(([r, l], i) => (
-            <NavItem key={r} n={i + 1} label={l} on={i === idx} badge={r === 'avisos' && unread ? String(unread) : r === 'pendencias' ? '7' : ''} onPress={() => i !== idx && router.navigate(`/${r}` as any)} />
+            <NavItem key={r} label={l} on={i === idx} badge={r === 'avisos' && unread ? String(unread) : r === 'pendencias' ? '7' : ''} onPress={() => i !== idx && router.navigate(`/${r}` as any)} />
           ))}
         </View>
       </ScrollView>

@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { BackHandler, Modal, PanResponder, Platform, Pressable, ScrollView, StyleProp, useWindowDimensions, View, ViewStyle } from 'react-native';
-import Animated, { FadeInUp, FadeOutUp, runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { DUR, fadeOut, pop, timing } from './motion';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { C, type } from '../theme/tokens';
 import { haptic } from '../lib/haptics';
@@ -23,11 +24,11 @@ export function Sheet({ open, onClose, title, children, width = 520, style }: { 
     if (open) {
       setMounted(true);
       y.value = Hh;
-      fade.value = withTiming(1, { duration: 200 });
-      y.value = withSpring(0, { damping: 22, stiffness: 240, mass: 0.9 });
+      fade.value = withTiming(1, timing(DUR.color));
+      y.value = withTiming(0, timing(DUR.sheet));
     } else if (mounted) {
-      fade.value = withTiming(0, { duration: 180 });
-      y.value = withTiming(Hh, { duration: 220 }, (done) => {
+      fade.value = withTiming(0, timing(180));
+      y.value = withTiming(Hh, timing(220), (done) => {
         if (done) runOnJS(setMounted)(false);
       });
     }
@@ -54,14 +55,14 @@ export function Sheet({ open, onClose, title, children, width = 520, style }: { 
           if (g.dy > 120 || g.vy > 1.1) {
             haptic('select');
             onClose();
-          } else y.value = withSpring(0, { damping: 22, stiffness: 240 });
+          } else y.value = withTiming(0, timing(DUR.press * 2));
         },
       }),
     [wide, onClose, y],
   );
 
   const back = useAnimatedStyle(() => ({ opacity: fade.value }));
-  const panel = useAnimatedStyle(() => (wide ? { opacity: fade.value, transform: [{ translateY: y.value * 0.08 }, { scale: 0.97 + fade.value * 0.03 }] } : { transform: [{ translateY: y.value }] }));
+  const panel = useAnimatedStyle(() => (wide ? { opacity: fade.value, transform: [{ translateY: (1 - fade.value) * 24 }, { scale: 0.98 + fade.value * 0.02 }] } : { transform: [{ translateY: y.value }] }));
 
   if (!mounted) return null;
   return (
@@ -119,7 +120,7 @@ export function OptionList<T extends string>({ options, value, onPick }: { optio
 }
 
 /** Campo de escolha: mostra o valor e abre uma folha com as opções. */
-export function Select<T extends string>({ label, value, options, onChange, style, big, title }: { label?: string; value: T; options: readonly { v: T; l: string; sub?: string }[]; onChange: (v: T) => void; style?: StyleProp<ViewStyle>; big?: boolean; title?: string }) {
+export function Select<T extends string>({ label, value, options, onChange, style, big, title, placeholder }: { label?: string; value: T; options: readonly { v: T; l: string; sub?: string }[]; onChange: (v: T) => void; style?: StyleProp<ViewStyle>; big?: boolean; title?: string; placeholder?: string }) {
   const [open, setOpen] = useState(false);
   const cur = options.find((o) => o.v === value);
   return (
@@ -130,8 +131,8 @@ export function Select<T extends string>({ label, value, options, onChange, styl
         </Txt>
       ) : null}
       <Press feedback="select" scaleTo={0.99} onPress={() => setOpen(true)} accessibilityLabel={label ?? title} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: big ? 44 : 38, borderBottomWidth: 1, borderBottomColor: C.lineStrong }}>
-        <Txt numberOfLines={1} style={[type(big ? 16 : 15, 400), { flex: 1 }]}>
-          {cur?.l ?? ''}
+        <Txt numberOfLines={1} style={[type(big ? 16 : 15, 400), { flex: 1, color: cur ? C.ink : C.faint }]}>
+          {cur?.l ?? placeholder ?? ''}
         </Txt>
         <Txt style={[type(12, 400), { color: C.ink }]}>⌄</Txt>
       </Press>
@@ -170,7 +171,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       <View pointerEvents="none" style={{ position: 'absolute', top: insets.top + 10, left: 0, right: 0, alignItems: 'center', gap: 8, zIndex: 1000 }}>
         {items.map((t) => (
-          <Animated.View key={t.id} entering={FadeInUp.springify().damping(16)} exiting={FadeOutUp.duration(180)} style={{ backgroundColor: C.ink, paddingVertical: 12, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10, maxWidth: 440, marginHorizontal: 16 }}>
+          <Animated.View key={t.id} entering={pop()} exiting={fadeOut(180)} style={{ backgroundColor: C.ink, paddingVertical: 12, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', gap: 10, maxWidth: 440, marginHorizontal: 16 }}>
             <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: t.tone === 'bad' ? '#e5533d' : t.tone === 'info' ? C.amber : '#5fbf86' }} />
             <Txt style={[type(13, 500), { color: C.paper, flexShrink: 1 }]}>{t.text}</Txt>
           </Animated.View>

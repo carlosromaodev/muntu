@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, LinearTransition, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { ACC, AGE, CON, DEV, LEDGER, PAG, ST } from '../../data/desk';
 import { ACT_KIND, ACT_STATE, ActivityKind, PT_AGENDA, PT_REQUESTS } from '../../data/mobile';
 import { haptic } from '../../lib/haptics';
 import { kn } from '../../lib/format';
 import { useMuntu } from '../../store/useMuntu';
 import { C, type } from '../../theme/tokens';
-import { Avatar, Button, Chip, ChipGroup, Field, Note, Press, Progress, Segmented, Select, Tabs, TextArea, Txt, useToast } from '../../ui';
+import { M, Avatar, Button, Chip, ChipGroup, Field, Note, Press, Progress, Segmented, Select, Tabs, TextArea, Txt, useToast } from '../../ui';
 import { Cols, DPage, KpiRow, Muted, PageHead, Panel, Status, Strong, Table, Tag } from '../kit';
 import { useDRole } from '../Shell';
 import { useDesk } from '../session';
@@ -35,7 +35,7 @@ export function DAgenda() {
           {PT_AGENDA.map((a, i) => {
             const done = !!ptMarked[a.id] || a.k === 'concl';
             return (
-              <Animated.View key={a.id} entering={FadeInDown.delay(i * 40)} style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.line }}>
+              <Animated.View key={a.id} entering={M.enter(i * 40)} style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.line }}>
                 <Txt tabular style={[type(22, 300), { width: 70 }]}>
                   {a.h}
                 </Txt>
@@ -44,7 +44,7 @@ export function DAgenda() {
                   <Muted size={12}>{a.d}</Muted>
                 </View>
                 {done ? (
-                  <Animated.View entering={ZoomIn}>
+                  <Animated.View entering={M.fade()}>
                     <Tag l={ptMarked[a.id] ? 'Presente' : 'Concluída'} c={ptMarked[a.id] ? C.ok : C.grey} bg={ptMarked[a.id] ? C.okBg : C.sand} />
                   </Animated.View>
                 ) : (
@@ -58,7 +58,7 @@ export function DAgenda() {
           {PT_REQUESTS.map((r, i) => {
             const st = ptRequests[r.id];
             return (
-              <Animated.View key={r.id} layout={LinearTransition} style={{ paddingVertical: 14, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, gap: 10 }}>
+              <Animated.View key={r.id} layout={M.layout()} style={{ paddingVertical: 14, borderTopWidth: i ? 1 : 0, borderTopColor: C.line, gap: 10 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                   <View>
                     <Strong>{r.n}</Strong>
@@ -115,7 +115,7 @@ export function DActividades() {
   const group = (title: string, list: typeof activities, approve: boolean) => (
     <Panel title={title}>
       {list.map((a, i) => (
-        <Animated.View key={a.id} entering={FadeInDown.delay(i * 30)} layout={LinearTransition} style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: C.line }}>
+        <Animated.View key={a.id} entering={M.enter(i * 30)} layout={M.layout()} style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: C.line }}>
           <Muted size={12}>{ACT_KIND[a.tipo]}</Muted>
           <View style={{ flex: 1.6 }}>
             <Strong size={13}>{a.t}</Strong>
@@ -300,7 +300,7 @@ export function DRecuperacao() {
           ) : null}
         </View>
         {cur ? (
-          <Animated.View key={cur.id} entering={FadeIn} style={{ backgroundColor: C.canvas, borderTopWidth: 1, borderBottomWidth: 1, borderColor: C.line, padding: 16, gap: 12, minHeight: 460 }}>
+          <Animated.View key={cur.id} entering={M.fade()} style={{ backgroundColor: C.canvas, borderTopWidth: 1, borderBottomWidth: 1, borderColor: C.line, padding: 16, gap: 12, minHeight: 460 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <Avatar initials={cur.n.split(' ').map((w) => w[0]).slice(0, 2).join('')} size={36} />
               <View style={{ flex: 1 }}>
@@ -314,7 +314,7 @@ export function DRecuperacao() {
             </View>
             <View style={{ flex: 1, gap: 8, justifyContent: 'flex-end' }}>
               {thread.map((m, i) => (
-                <Animated.View key={i} entering={FadeInDown.springify().damping(16)} style={{ alignSelf: m.me ? 'flex-end' : 'flex-start', maxWidth: '80%', backgroundColor: m.me ? (m.auto ? C.sand : C.ink) : '#fff', borderWidth: m.me ? 0 : 1, borderColor: C.line, padding: 12, gap: 4 }}>
+                <Animated.View key={i} entering={M.enter()} style={{ alignSelf: m.me ? 'flex-end' : 'flex-start', maxWidth: '80%', backgroundColor: m.me ? (m.auto ? C.sand : C.ink) : '#fff', borderWidth: m.me ? 0 : 1, borderColor: C.line, padding: 12, gap: 4 }}>
                   <Txt style={[type(13, 400), { color: m.me && !m.auto ? C.paper : C.ink }]}>{m.t}</Txt>
                   <Txt style={[type(10, 400), { color: m.me && !m.auto ? C.sand : C.muted }]}>{m.h}</Txt>
                 </Animated.View>
@@ -340,7 +340,7 @@ export function DRecuperacao() {
             {!reason ? <Muted size={12}>Pergunta o motivo com uma mensagem pronta ou marca-o depois de falares com o cliente.</Muted> : null}
             <ChipGroup size="sm" options={Object.keys(OFF).map((x) => [x, x] as const)} value={reason} onChange={(v) => setWhy({ ...why, [cur.id]: v })} />
             {reason ? (
-              <Animated.View entering={FadeInDown} style={{ gap: 8 }}>
+              <Animated.View entering={M.enter()} style={{ gap: 8 }}>
                 <Strong size={13}>2 · Proposta</Strong>
                 {OFF[reason]!.map(([k, l, d]) => {
                   const on = off[cur.id] === k;
@@ -447,7 +447,7 @@ export function DTesouraria() {
               </Panel>
             </View>
             {selL ? (
-              <Animated.View key={selL.id} entering={FadeIn} style={{ flex: 1 }}>
+              <Animated.View key={selL.id} entering={M.fade()} style={{ flex: 1 }}>
                 <Panel title="Movimento">
                   <Txt style={type(26, 300)}>{`${selL.v > 0 ? '+' : ''}${kz(selL.v)}`}</Txt>
                   <Status l={ST[selL.st]!.l} c={ST[selL.st]!.c} />
@@ -474,7 +474,7 @@ export function DTesouraria() {
         <View style={{ paddingHorizontal: 40, gap: 16 }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
             {accs.map((a, i) => (
-              <Animated.View key={a.id} entering={FadeInDown.delay(i * 30)} layout={LinearTransition} style={{ width: '31.8%', backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 20, gap: 8 }}>
+              <Animated.View key={a.id} entering={M.enter(i * 30)} layout={M.layout()} style={{ width: '31.8%', backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 20, gap: 8 }}>
                 <Muted size={11}>{a.t}</Muted>
                 <Strong>{a.n}</Strong>
                 <Txt style={type(26, 300)}>{kn(a.v)}</Txt>
@@ -484,7 +484,7 @@ export function DTesouraria() {
             ))}
           </View>
           {trf ? (
-            <Animated.View entering={FadeInDown}>
+            <Animated.View entering={M.enter()}>
               <Panel title="Transferência entre contas">
                 <View style={{ flexDirection: 'row', gap: 16, alignItems: 'flex-end' }}>
                   <Select style={{ flex: 1 }} label="De" value={de} onChange={setDe} options={accs.map((a) => ({ v: a.id, l: a.n }))} />

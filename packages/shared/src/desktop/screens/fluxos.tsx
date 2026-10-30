@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { ScrollView, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, LinearTransition, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { MuntuLogo } from '../../brand/Logo';
 import { DENOMS, PENDING_KIND, SHIFT_EXPECTED_CASH, SHIFT_PAYS, SHIFT_PENDING } from '../../data/mobile';
 import { haptic } from '../../lib/haptics';
-import { kn, onlyDigits, phone } from '../../lib/format';
+import { kn, knc, onlyDigits, phone } from '../../lib/format';
 import { handoverView, useHandover } from '../../store/handover';
 import { IMPORT_KINDS, onboardingCounts, useOnboarding } from '../../store/onboarding';
 import { useMuntu } from '../../store/useMuntu';
 import { C, TONES, type } from '../../theme/tokens';
-import { Avatar, Button, Checkbox, Chip, Field, Note, Press, Select, TextArea, Txt } from '../../ui';
+import { M, Avatar, Button, Checkbox, Chip, Field, MoneyInput, Note, Press, Select, TextArea, Txt } from '../../ui';
 import { Muted, Strong, Tag } from '../kit';
 
 const TONE = { ok: [C.ok, C.okBg], warn: [C.warn, C.warnBg], bad: [C.bad, C.badBg], neutral: [C.grey, C.sand] } as const;
@@ -96,7 +96,7 @@ export function DReceberTurno() {
           </Press>
         </View>
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 40, gap: 20, maxWidth: 820 }}>
-          <Animated.View key={step} entering={FadeInDown.duration(260)} style={{ gap: 20 }}>
+          <Animated.View key={step} entering={M.enter()} style={{ gap: 20 }}>
             {step === 0 ? (
               <>
                 <View style={{ flexDirection: 'row', borderWidth: 1, borderColor: C.line }}>
@@ -118,7 +118,7 @@ export function DReceberTurno() {
                 <View>
                   {DENOMS.map((d) => {
                     const q = h.q[d.k] ?? 0;
-                    const st = d.k === 'coin' ? 100 : 1;
+                    const st = 1;
                     return (
                       <View key={d.k} style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 10, borderTopWidth: 1, borderTopColor: C.line }}>
                         <Txt style={[type(14, 400), { flex: 1 }]}>{d.l}</Txt>
@@ -137,19 +137,24 @@ export function DReceberTurno() {
                       </View>
                     );
                   })}
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.ink }}>
+                  <View style={{ gap: 8, paddingTop: 12, paddingBottom: 14, borderTopWidth: 1, borderTopColor: C.line }}>
+                    <Txt style={type(14, 400)}>Moedas, cêntimos e outros valores</Txt>
+                    <MoneyInput value={h.coin} onChangeText={(x) => (h.setCoin(x), setErr(''))} editable={!h.revealed} placeholder="Ex. 12 434,50" accessibilityLabel="Moedas, cêntimos e outros valores" />
+                    <Muted size={12}>Escreve o valor total em Kz. Aceita milhares e cêntimos.</Muted>
+                  </View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16, borderTopWidth: 1, borderTopColor: C.ink }}>
                     <Strong>Dinheiro contado</Strong>
-                    <Txt style={type(26, 300)}>{kn(v.counted)} Kz</Txt>
+                    <Txt style={type(26, 300)}>{knc(v.counted)} Kz</Txt>
                   </View>
                 </View>
                 {h.revealed ? (
-                  <Animated.View entering={FadeInDown} style={{ gap: 12 }}>
+                  <Animated.View entering={M.enter()} style={{ gap: 12 }}>
                     <View style={{ flexDirection: 'row', gap: 12 }}>
                       <View style={{ flex: 1, backgroundColor: C.sand, padding: 16 }}>
                         <Muted size={12}>Saldo esperado</Muted>
                         <Txt style={type(24, 300)}>{kn(SHIFT_EXPECTED_CASH)} Kz</Txt>
                       </View>
-                      <Animated.View entering={ZoomIn} style={{ flex: 1, padding: 16, backgroundColor: v.dif === 0 ? C.okBg : C.badBg }}>
+                      <Animated.View entering={M.fade()} style={{ flex: 1, padding: 16, backgroundColor: v.dif === 0 ? C.okBg : C.badBg }}>
                         <Txt style={[type(12, 500), { color: v.dif === 0 ? C.ok : C.bad }]}>{v.dif === 0 ? 'Sem diferença' : 'Diferença por apurar'}</Txt>
                         <Txt style={[type(24, 300), { color: v.dif === 0 ? C.ok : C.bad }]}>{v.difL}</Txt>
                       </Animated.View>
@@ -196,16 +201,27 @@ export function DReceberTurno() {
               <>
                 <Txt style={type(26, 400, 0.16, true)}>Pagamentos</Txt>
                 <Muted>Confere cada meio com o registo e os comprovativos. Pagamentos por confirmar não contam como dinheiro em caixa.</Muted>
-                {SHIFT_PAYS.map((p) => (
-                  <View key={p.k} style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.line }}>
-                    <View style={{ flex: 1 }}>
+                {SHIFT_PAYS.map((p) => {
+                  const ln = v.payLine(p.k);
+                  return (
+                  <View key={p.k} style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 20, paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.line }}>
+                    <View style={{ flex: 1, minWidth: 0, gap: 3 }}>
                       <Strong>{p.l}</Strong>
                       <Muted size={12}>{p.d}</Muted>
+                      <Txt style={[type(12, 400), { color: C.grey }]}>Origem · {p.src}</Txt>
                     </View>
-                    <Strong>{kn(p.v)} Kz</Strong>
+                    <View style={{ width: 130, alignItems: 'flex-end', gap: 2 }}>
+                      <Muted size={11}>No sistema</Muted>
+                      <Txt style={type(15, 400)}>{kn(p.v)} Kz</Txt>
+                    </View>
+                    <View style={{ width: 200, gap: 6 }}>
+                      <MoneyInput value={h.payV[p.k] ?? ''} onChangeText={(x) => (h.setPayV(p.k, x), setErr(''))} placeholder="Valor contado" accessibilityLabel={`Valor confirmado de ${p.l}`} height={40} size={15} />
+                      <Txt style={[type(12, 500), { color: ln.tone === 'ok' ? C.ok : ln.tone === 'bad' ? C.bad : C.muted }]}>{ln.l}</Txt>
+                    </View>
                     <Tri value={h.pays[p.k]} onPick={(k) => (h.setPay(p.k, k), setErr(''))} options={p.k === 'pen' ? [['pend', 'Fica pendente', TONES.warn.fg], ['ok', 'Confirmado', TONES.ok.fg], ['prob', 'Problema', TONES.bad.fg]] : [['ok', 'Conferido', TONES.ok.fg], ['pend', 'Sem comprovativo', TONES.warn.fg], ['prob', 'Problema', TONES.bad.fg]]} />
                   </View>
-                ))}
+                  );
+                })}
                 {err ? <Note tone="bad" text={err} /> : null}
                 <Button label="Continuar" size="lg" style={{ alignSelf: 'flex-start' }} onPress={() => (v.payDone ? go(3) : fail('Confere todos os meios.'))} />
               </>
@@ -229,7 +245,7 @@ export function DReceberTurno() {
               <>
                 <Txt style={type(26, 400, 0.16, true)}>Assumir turno</Txt>
                 {h.done ? (
-                  <Animated.View entering={ZoomIn.springify().damping(16)} style={{ gap: 14 }}>
+                  <Animated.View entering={M.pop()} style={{ gap: 14 }}>
                     <View style={{ padding: 20, backgroundColor: v.dif ? C.warnBg : C.okBg, gap: 8 }}>
                       <Txt style={[type(11, 600, 0.2, true), { color: v.dif ? C.warn : C.ok }]}>{v.dif ? 'Turno recebido com ressalva' : 'Turno assumido'}</Txt>
                       <Txt style={type(14, 400)}>Registado às 14:03 pela hora do servidor. {v.dif ? `A diferença de ${kn(Math.abs(v.dif))} Kz fica associada ao turno da manhã${h.opt === 'rev' ? ' e foi enviada ao dono.' : ', com a tua justificação.'}` : 'Sem diferenças.'}</Txt>
@@ -321,7 +337,7 @@ export function DCriarConta() {
         </Press>
       </View>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 48, gap: 24, maxWidth: 780 }}>
-        <Animated.View key={n} entering={FadeInDown.duration(280)} style={{ gap: 24 }}>
+        <Animated.View key={n} entering={M.enter()} style={{ gap: 24 }}>
           <View style={{ gap: 8 }}>
             <Txt style={[type(10, 600, 0.22, true), { color: C.muted }]}>Passo {n} de 5</Txt>
             <Txt style={type(30, 400, 0.18, true)}>{NT[n - 1]}</Txt>
@@ -346,7 +362,7 @@ export function DCriarConta() {
               </View>
               <Txt style={[type(10, 600, 0.22, true), { color: C.muted }]}>Filiais</Txt>
               {o.fils.map((f, i) => (
-                <Animated.View key={i} entering={FadeInDown} layout={LinearTransition} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <Animated.View key={i} entering={M.enter()} layout={M.layout()} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                   <Muted size={12}>{String(i + 1).padStart(2, '0')}</Muted>
                   <Field style={{ flex: 1 }} value={f} onChangeText={(x) => o.set({ fils: o.fils.map((y, j) => (j === i ? x : y)) })} />
                   {o.fils.length > 1 ? <Button label="Remover" kind="ghost" size="xs" onPress={() => o.set({ fils: o.fils.filter((_, j) => j !== i) })} /> : null}
@@ -359,11 +375,11 @@ export function DCriarConta() {
               {IMPORT_KINDS.map((k) => {
                 const ld = !!o.imported[k.k];
                 return (
-                  <Animated.View key={k.k} layout={LinearTransition} style={{ flex: 1, borderWidth: 1, borderColor: ld ? C.ink : C.line, backgroundColor: ld ? '#fff' : 'transparent', padding: 18, gap: 10 }}>
+                  <Animated.View key={k.k} layout={M.layout()} style={{ flex: 1, borderWidth: 1, borderColor: ld ? C.ink : C.line, backgroundColor: ld ? '#fff' : 'transparent', padding: 18, gap: 10 }}>
                     <Strong>{k.l}</Strong>
                     <Muted size={12}>{k.d}</Muted>
                     {ld ? (
-                      <Animated.View entering={FadeInDown} style={{ gap: 8 }}>
+                      <Animated.View entering={M.enter()} style={{ gap: 8 }}>
                         <Txt style={type(12, 400)}>{`${k.f}${onboardingCounts(o).slug}.xlsx · ${k.lines}`}</Txt>
                         <View style={{ flexDirection: 'row', gap: 8 }}>
                           {[

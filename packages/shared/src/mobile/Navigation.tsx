@@ -32,7 +32,7 @@ export function MobileStack() {
   );
 }
 
-/** Separadores de um papel, com a barra numerada do desenho. */
+/** Separadores de um papel, com a barra de ícones do desenho. */
 export function RoleTabs({ role }: { role: Role }) {
   const cur = useMuntu((s) => s.role);
   const signIn = useMuntu((s) => s.signIn);
@@ -40,7 +40,7 @@ export function RoleTabs({ role }: { role: Role }) {
     if (cur !== role) signIn(role);
   }, [cur, role, signIn]);
   return (
-    <Tabs tabBar={() => <RoleTabBar role={role} />} screenOptions={{ headerShown: false, animation: 'shift', sceneStyle: { backgroundColor: C.paper } }}>
+    <Tabs tabBar={() => <RoleTabBar role={role} />} screenOptions={{ headerShown: false, animation: 'fade', sceneStyle: { backgroundColor: C.paper } }}>
       {TABS[role].map((t) => (
         <Tabs.Screen key={t.route} name={t.route} options={{ title: t.label }} />
       ))}

@@ -1,13 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, LinearTransition, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { CHALLENGES, CLASSES, EVENTS, INCLUDED, OCC, OCC_NOW, lotLevel, PAY_METHODS, PAYMENTS, PT_DAYS, PT_HOURS, REFERRAL_STATE, REFERRALS_MINE, TRAINERS, WEEK_DAYS, WEEK_NUMS } from '../../data/mobile';
 import { haptic } from '../../lib/haptics';
 import { kn, phone } from '../../lib/format';
 import { useMuntu } from '../../store/useMuntu';
+import { inkFor } from '../../lib/color';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { BrandMark } from './marca';
 import { C, GUTTER, type } from '../../theme/tokens';
-import { Avatar, Badge, Button, Chip, Dot, Field, Note, Press, Progress, QR, qrCells, Reveal, Row, Segmented, Toggle, Txt, useToast } from '../../ui';
+import { M, Avatar, Badge, Button, Chip, Dot, Field, Note, Press, Progress, QR, qrCells, Reveal, Row, Segmented, Toggle, Txt, useToast } from '../../ui';
 import { Footer, LinkCard, Page, Section, StackScreen, TabScreen, TitleBlock, TopBar } from '../Layout';
 
 const CELLS = qrCells();
@@ -15,10 +18,12 @@ const CELLS = qrCells();
 /** m1 · O teu acesso (QR dinâmico). */
 export function Acesso() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const brand = useMuntu((s) => s.brand);
+  const ink = inkFor(brand.c);
   const now = OCC[OCC_NOW]!;
   const [secs, setSecs] = useState(24);
   const [seed, setSeed] = useState(0);
-  const pulse = useSharedValue(1);
   useEffect(() => {
     const t = setInterval(() => {
       setSecs((s) => {
@@ -30,17 +35,27 @@ export function Acesso() {
         return s - 1;
       });
     }, 1000);
-    pulse.value = withRepeat(withSequence(withTiming(0.97, { duration: 900 }), withTiming(1, { duration: 900 })), -1);
     return () => clearInterval(t);
-  }, [pulse]);
-  const qrStyle = useAnimatedStyle(() => ({ transform: [{ scale: pulse.value }] }));
+  }, []);
   return (
     <View style={{ flex: 1, backgroundColor: C.paper }}>
-      <TopBar role="membro" bg={C.accent} right={<Txt style={type(10, 600, 0.2, true)}>MWANGOLÉ FIT</Txt>} />
-      <TitleBlock eyebrow="Olá, Kátia" eyebrowColor={C.ink} title="O teu acesso" style={{ backgroundColor: C.accent, borderBottomWidth: 0 }} />
+      <View style={{ backgroundColor: brand.c, paddingTop: insets.top + 12, paddingHorizontal: GUTTER, paddingBottom: 28, gap: 24 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12, minHeight: 32 }}>
+          <BrandMark logo={brand.logo} name={brand.name} color={ink} h={32} w={150} size={13} />
+          <Txt style={[type(9, 600, 0.22, true), { color: ink, opacity: 0.8 }]}>com MUNTU</Txt>
+        </View>
+        <View style={{ gap: 6 }}>
+          <Txt v="eyebrow" c={ink}>
+            Olá, Kátia
+          </Txt>
+          <Txt accessibilityRole="header" style={[type(30, 400, 0.18, true), { color: ink }]}>
+            O teu acesso
+          </Txt>
+        </View>
+      </View>
       <Page>
         <View style={{ alignItems: 'center', paddingTop: 24, gap: 14 }}>
-          <Animated.View key={seed} entering={FadeIn.duration(400)} style={[{ padding: 14, backgroundColor: '#fff', borderWidth: 1, borderColor: C.line }, qrStyle]}>
+          <Animated.View key={seed} entering={M.fade(400)} style={[{ padding: 14, backgroundColor: '#fff', borderWidth: 1, borderColor: C.line }]}>
             <QR size={168} cells={seed ? qrCells(seed) : CELLS} />
           </Animated.View>
           <Txt v="label" c={C.muted}>
@@ -97,7 +112,7 @@ export function ActividadesMembro() {
       {tab === 'aulas' ? (
         <>
           {offer && day === 0 ? (
-            <Animated.View entering={FadeInDown} exiting={FadeIn} style={{ marginHorizontal: GUTTER, marginTop: 14, backgroundColor: C.accent, padding: 14, gap: 10 }}>
+            <Animated.View entering={M.enter()} exiting={M.fadeOut()} style={{ marginHorizontal: GUTTER, marginTop: 14, backgroundColor: C.accent, padding: 14, gap: 10 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
                 <Txt v="label" style={{ flex: 1 }}>
                   Vagou um lugar para ti
@@ -179,7 +194,7 @@ export function ActividadesMembro() {
             const people = d.people + (!d.auto && j && d.id !== 'd1' ? 1 : 0) - (!d.auto && !j && d.id === 'd1' ? 1 : 0);
             return (
               <Reveal key={d.id} i={i}>
-                <Animated.View layout={LinearTransition} style={{ borderWidth: 1, borderColor: j ? C.ink : C.line, backgroundColor: j ? '#fff' : 'transparent', padding: 16, gap: 10, marginBottom: 10 }}>
+                <Animated.View layout={M.layout()} style={{ borderWidth: 1, borderColor: j ? C.ink : C.line, backgroundColor: j ? '#fff' : 'transparent', padding: 16, gap: 10, marginBottom: 10 }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
                     <Txt style={[type(16, 500), { flex: 1 }]}>{d.t}</Txt>
                     <Badge label={j ? 'A participar' : 'Aberto'} tone={j ? 'ok' : 'warn'} />
@@ -257,7 +272,7 @@ export function ReservarPT() {
   if (sent)
     return (
       <TabScreen role="membro" eyebrow="Personal trainer · 4 semanas" title="Reservar PT">
-        <Animated.View entering={ZoomIn.springify().damping(14)} style={{ margin: GUTTER, backgroundColor: C.okBg, padding: 18, gap: 10 }}>
+        <Animated.View entering={M.pop()} style={{ margin: GUTTER, backgroundColor: C.okBg, padding: 18, gap: 10 }}>
           <Txt v="label" c={C.ok}>
             Pedido enviado
           </Txt>
@@ -436,7 +451,7 @@ export function Pagamento() {
           <Section title="Meio de pagamento">
             {PAY_METHODS.map((m, i) => (
               <Press key={m.v} feedback="select" scaleTo={0.99} onPress={() => setMeio(m.v)} accessibilityState={{ selected: meio === m.v }} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderTopWidth: i ? 1 : 0, borderTopColor: C.line }}>
-                <View style={{ width: 18, height: 18, borderWidth: 1.5, borderColor: C.ink, alignItems: 'center', justifyContent: 'center' }}>{meio === m.v ? <Animated.View entering={ZoomIn.duration(140)} style={{ width: 10, height: 10, backgroundColor: C.ink }} /> : null}</View>
+                <View style={{ width: 18, height: 18, borderWidth: 1.5, borderColor: C.ink, alignItems: 'center', justifyContent: 'center' }}>{meio === m.v ? <Animated.View entering={M.fade(140)} style={{ width: 10, height: 10, backgroundColor: C.ink }} /> : null}</View>
                 <View>
                   <Txt v="bodyStrong">{m.l}</Txt>
                   <Txt v="small" c={C.muted}>
@@ -453,7 +468,7 @@ export function Pagamento() {
           ) : null}
         </>
       ) : (
-        <Animated.View entering={FadeInDown} style={{ padding: GUTTER, gap: 12 }}>
+        <Animated.View entering={M.enter()} style={{ padding: GUTTER, gap: 12 }}>
           {st === 'waiting' ? (
             <View style={{ backgroundColor: C.sand, padding: 18, gap: 10 }}>
               <Txt v="label">{meio === 'express' ? 'A aguardar confirmação' : 'Pronto'}</Txt>
@@ -461,7 +476,7 @@ export function Pagamento() {
               {meio === 'express' ? <Progress value={1} color={C.accent} /> : null}
             </View>
           ) : (
-            <Animated.View entering={ZoomIn.springify().damping(14)} style={{ backgroundColor: C.okBg, padding: 18, gap: 8 }}>
+            <Animated.View entering={M.pop()} style={{ backgroundColor: C.okBg, padding: 18, gap: 8 }}>
               <Txt v="label" c={C.ok}>
                 Pagamento confirmado
               </Txt>
@@ -507,11 +522,22 @@ export function ContaMembro() {
           ))}
         </View>
         <Section first>
+          <Press onPress={() => router.push('/ocorrencia')} style={({ hovered }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 15, backgroundColor: hovered ? C.canvas : 'transparent' })}>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Txt v="body">Reportar ocorrência</Txt>
+              <Txt v="small" c={C.muted}>
+                Equipamento, limpeza, segurança ou atendimento
+              </Txt>
+            </View>
+            <Txt v="body" c={C.muted}>
+              →
+            </Txt>
+          </Press>
           {[
             ['Telemóvel', '923 481 220'],
             ['Email', 'katia.muondo@gmail.com'],
-          ].map(([k, v], i) => (
-            <Row key={k} first={i === 0}>
+          ].map(([k, v]) => (
+            <Row key={k}>
               <Txt v="body" style={{ flex: 1 }}>
                 {k}
               </Txt>

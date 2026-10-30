@@ -1,21 +1,55 @@
 import React, { useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, LinearTransition, ZoomIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { CX_HIST, FIL, LEDGER, ST } from '../../data/desk';
-import { NOTICES, OCC, OCC_NOW, STAFF } from '../../data/mobile';
+import { NOTICES, OCC, OCC_NOW, PRESENT, STAFF } from '../../data/mobile';
 import { haptic } from '../../lib/haptics';
-import { kn } from '../../lib/format';
+import { initials, kn, knc, pKz } from '../../lib/format';
 import { useMuntu } from '../../store/useMuntu';
 import { C, type } from '../../theme/tokens';
-import { Avatar, Bars, Button, Chip, ChipGroup, Field, Note, Press, Select, Tabs, TextArea, Txt, useToast } from '../../ui';
+import { M, Avatar, Bars, Button, Chip, ChipGroup, Field, MoneyInput, Note, Press, Select, Tabs, TextArea, Txt, useToast } from '../../ui';
 import { Cols, DPage, KpiRow, Muted, PageHead, Panel, Status, Strong, Table, Tag } from '../kit';
 import { useDRole } from '../Shell';
 import { useDesk } from '../session';
 
 const kz = (v: number) => `${v < 0 ? '−' : ''}${kn(v)},00 Kz`;
-const NOTAS = [5000, 2000, 1000, 500, 200, 100, 50];
+const NOTAS = [5000, 2000, 1000, 500, 200];
+const MOEDAS = [100, 50, 20, 10, 5, 1];
+const QUICK: [string, number][] = [['+0,50', 0.5], ['+1', 1], ['+5', 5], ['+10', 10], ['+100', 100]];
 const FORML = { sangria: 'Sangria · para o cofre', reforco: 'Reforço de troco', despesa: 'Despesa paga em dinheiro' } as const;
+
+/** Valor com cêntimos: 12 434,50 Kz. */
+const kz2c = (v: number) => `${v < 0 ? '−' : ''}${knc(v)}${Math.round(Math.abs(v) * 100) % 100 ? '' : ',00'} Kz`;
+
+/** Linha de contagem: denominação, − quantidade +, subtotal. */
+function CountRow({ label, q, ro, onSet, sub }: { label: string; q: number; ro: boolean; onSet: (q: number) => void; sub: string }) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 6, borderTopWidth: 1, borderTopColor: C.line }}>
+      <Txt tabular style={[type(15, 500), { flex: 1 }]}>{label}</Txt>
+      <View style={{ width: 132, height: 38, flexDirection: 'row', borderWidth: 1, borderColor: ro ? C.line : C.ink, opacity: ro ? 0.4 : 1 }}>
+        <Press feedback="select" disabled={ro} accessibilityLabel="Menos" onPress={() => onSet(q - 1)} style={({ hovered }) => ({ width: 36, alignItems: 'center', justifyContent: 'center', backgroundColor: hovered ? C.sand : 'transparent' })}>
+          <Txt style={type(17, 400)}>−</Txt>
+        </Press>
+        <TextInput
+          editable={!ro}
+          value={String(q)}
+          onChangeText={(t) => onSet(parseInt(t.replace(/\D/g, ''), 10) || 0)}
+          keyboardType="number-pad"
+          accessibilityLabel={`Quantidade de ${label}`}
+          selectTextOnFocus
+          style={[type(15, 400), { flex: 1, minWidth: 0, textAlign: 'center', color: C.ink, borderLeftWidth: 1, borderRightWidth: 1, borderColor: C.line, outlineStyle: 'none' } as any]}
+        />
+        <Press feedback="select" disabled={ro} accessibilityLabel="Mais" onPress={() => onSet(q + 1)} style={({ hovered }) => ({ width: 36, alignItems: 'center', justifyContent: 'center', backgroundColor: hovered ? C.sand : 'transparent' })}>
+          <Txt style={type(17, 400)}>+</Txt>
+        </Press>
+      </View>
+      <Txt tabular style={[type(14, 400), { width: 120, textAlign: 'right', color: sub === '—' ? C.faint : C.ink }]}>
+        {sub}
+      </Txt>
+    </View>
+  );
+}
 
 /** d4 · Caixa (turno actual e histórico). */
 export function DCaixa() {
@@ -30,9 +64,17 @@ export function DCaixa() {
   const [val, setVal] = useState('');
   const [mot, setMot] = useState('');
   const [just, setJust] = useState('');
+  const [avulso, setAvulso] = useState('');
   const [passado, setPassado] = useState(false);
   const revealed = close !== 'count';
-  const cash = NOTAS.reduce((a, v) => a + (parseInt(notas[v] ?? '', 10) || 0) * v, 0);
+  const qOf = (v: number) => parseInt(notas[v] ?? '', 10) || 0;
+  const setN = (v: number, q: number) => setNotas((n) => ({ ...n, [v]: String(Math.max(0, q)) }));
+  const notasSum = NOTAS.reduce((a, v) => a + qOf(v) * v, 0);
+  const moedasSum = MOEDAS.reduce((a, v) => a + qOf(v) * v, 0);
+  const avN = pKz(avulso);
+  const pieces = Object.values(notas).reduce((a, x) => a + (parseInt(x, 10) || 0), 0);
+  const cash = notasSum + moedasSum + avN;
+  const addAv = (x: number) => setAvulso((cur) => (Math.round((pKz(cur) + x) * 100) / 100).toFixed(2).replace('.', ','));
   const movEff = movs.reduce((a, m) => a + m.v, 0);
   const exp = 88000 + movEff;
   const dif = cash - exp;
@@ -59,7 +101,7 @@ export function DCaixa() {
       {tab === 'atual' ? (
         <>
           <View style={{ flexDirection: 'row', gap: 16, paddingHorizontal: 40, paddingBottom: 20 }}>
-            <Animated.View layout={LinearTransition} style={{ flex: 1.4, padding: 22, gap: 14, backgroundColor: !revealed ? C.sand : dif === 0 ? C.okBg : C.accent }}>
+            <Animated.View layout={M.layout()} style={{ flex: 1.4, padding: 22, gap: 14, backgroundColor: !revealed ? C.sand : dif === 0 ? C.okBg : C.accent }}>
               <Txt style={type(13, 500)}>Kz · Diferença do turno</Txt>
               <Txt style={type(44, 300)}>{revealed ? kn(dif) : '••••'}</Txt>
               <Txt style={type(10, 600, 0.18, true)}>{revealed ? (dif === 0 ? 'Caixa certo' : 'Precisa de justificação') : 'Oculta até fechar'}</Txt>
@@ -69,7 +111,7 @@ export function DCaixa() {
               [String(turnoMovs.length).padStart(2, '0'), 'Movimentos do turno'],
               ['96 500,00', 'Kz · Electrónico conciliado'],
             ].map(([v, l], i) => (
-              <Animated.View key={l} entering={FadeInDown.delay(40 * (i + 1))} style={{ flex: 1, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 22, gap: 8, justifyContent: 'space-between' }}>
+              <Animated.View key={l} entering={M.enter(40 * (i + 1))} style={{ flex: 1, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 22, gap: 8, justifyContent: 'space-between' }}>
                 <Txt style={type(32, 300)}>{v}</Txt>
                 <Txt style={[type(13, 500), { color: C.grey }]}>{l}</Txt>
               </Animated.View>
@@ -88,7 +130,7 @@ export function DCaixa() {
               }
             >
               {form ? (
-                <Animated.View entering={FadeInDown} style={{ backgroundColor: C.canvas, padding: 14, gap: 12 }}>
+                <Animated.View entering={M.enter()} style={{ backgroundColor: C.canvas, padding: 14, gap: 12 }}>
                   <Strong>{FORML[form]}</Strong>
                   <View style={{ flexDirection: 'row', gap: 16 }}>
                     <Field style={{ flex: 1 }} label="Valor (Kz)" value={val} onChangeText={setVal} keyboardType="number-pad" />
@@ -104,37 +146,47 @@ export function DCaixa() {
             </Panel>
             <Panel title="Contagem do dinheiro" i={1}>
               <Muted>{revealed ? 'O valor esperado só aparece depois da contagem. Diferenças precisam de justificação.' : 'Conte o caixa sem ver o valor esperado. Só depois de fechar vê a diferença.'}</Muted>
-              <View style={{ flexDirection: 'row', paddingBottom: 6 }}>
-                {['Nota', 'Quantidade', 'Subtotal'].map((h, i) => (
-                  <Txt key={h} style={[type(12, 500), { color: C.muted, flex: 1, textAlign: i === 2 ? 'right' : 'left' }]}>
-                    {h}
-                  </Txt>
-                ))}
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <Txt style={[type(12, 500), { color: C.muted }]}>Denominação · Kz</Txt>
+                <Txt style={[type(12, 500), { color: C.muted }]}>{pieces} peças contadas</Txt>
               </View>
-              {NOTAS.map((v) => {
-                const q = parseInt(notas[v] ?? '', 10) || 0;
-                return (
-                  <View key={v} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 8, borderTopWidth: 1, borderTopColor: C.line }}>
-                    <Txt style={[type(14, 400), { flex: 1 }]}>{kn(v)} Kz</Txt>
-                    <View style={{ flex: 1 }}>
-                      <TextInput
-                        editable={!revealed}
-                        value={notas[v]}
-                        onChangeText={(t) => setNotas({ ...notas, [v]: t.replace(/\D/g, '') })}
-                        keyboardType="number-pad"
-                        accessibilityLabel={`Notas de ${kn(v)}`}
-                        style={[type(14, 400), { width: 80, borderBottomWidth: 1, borderBottomColor: revealed ? C.line : C.ink, paddingVertical: 4, color: C.ink, outlineStyle: 'none' } as any]}
-                      />
-                    </View>
-                    <Txt tabular style={[type(14, 400), { flex: 1, textAlign: 'right' }]}>
-                      {kz(q * v)}
-                    </Txt>
+              {(
+                [
+                  ['Notas', NOTAS, notasSum],
+                  ['Moedas', MOEDAS, moedasSum],
+                ] as const
+              ).map(([title, list, sum]) => (
+                <View key={title}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: 12, paddingBottom: 8 }}>
+                    <Txt style={type(11, 600, 0.2, true)}>{title}</Txt>
+                    <Txt tabular style={[type(13, 400), { color: C.muted }]}>{kz(sum)}</Txt>
                   </View>
-                );
-              })}
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderTopWidth: 1, borderTopColor: C.ink }}>
-                <Strong>Dinheiro contado</Strong>
-                <Strong>{kz(cash)}</Strong>
+                  {list.map((v) => (
+                    <CountRow key={v} label={kn(v)} q={qOf(v)} ro={revealed} onSet={(q) => setN(v, q)} sub={qOf(v) ? kz(qOf(v) * v) : '—'} />
+                  ))}
+                </View>
+              ))}
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: 12, paddingBottom: 8 }}>
+                <Txt style={type(11, 600, 0.2, true)}>Cêntimos e valores avulsos</Txt>
+                <Txt tabular style={[type(13, 400), { color: C.muted }]}>{avN ? kz2c(avN) : '—'}</Txt>
+              </View>
+              <View style={{ gap: 10, paddingTop: 12, paddingBottom: 6, borderTopWidth: 1, borderTopColor: C.line }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <MoneyInput style={{ flex: 1 }} height={42} size={17} value={avulso} onChangeText={setAvulso} editable={!revealed} placeholder="0,00" accessibilityLabel="Valor avulso com cêntimos" />
+                  <Button label="Limpar" kind="outline" size="sm" disabled={revealed} onPress={() => setAvulso('')} />
+                </View>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                  {QUICK.map(([l, x]) => (
+                    <Press key={l} feedback="select" disabled={revealed} onPress={() => addAv(x)} style={({ hovered }) => ({ height: 32, paddingHorizontal: 12, borderWidth: 1, borderColor: hovered ? C.ink : C.lineStrong, backgroundColor: C.paper, justifyContent: 'center' })}>
+                      <Txt tabular style={type(13, 400)}>{l} Kz</Txt>
+                    </Press>
+                  ))}
+                </View>
+                <Muted size={12}>Para moedas soltas, cêntimos ou um valor que não encaixa nas denominações.</Muted>
+              </View>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 14, borderTopWidth: 2, borderTopColor: C.ink }}>
+                <Txt style={type(11, 600, 0.18, true)}>Dinheiro contado</Txt>
+                <Strong>{kz2c(cash)}</Strong>
               </View>
               {[
                 ['Multicaixa Express', 64500],
@@ -148,7 +200,7 @@ export function DCaixa() {
                 </View>
               ))}
               {revealed ? (
-                <Animated.View entering={FadeInDown} style={{ flexDirection: 'row', gap: 12 }}>
+                <Animated.View entering={M.enter()} style={{ flexDirection: 'row', gap: 12 }}>
                   <View style={{ flex: 1, backgroundColor: C.canvas, padding: 12 }}>
                     <Muted size={12}>Dinheiro esperado</Muted>
                     <Strong size={18}>{kz(exp)}</Strong>
@@ -166,7 +218,7 @@ export function DCaixa() {
               ) : close === 'revealed' && dif === 0 ? (
                 <Note tone="ok" text="Sem diferença. Caixa fechado às 14:02." />
               ) : close === 'revealed' ? (
-                <Animated.View entering={FadeInDown} style={{ gap: 10 }}>
+                <Animated.View entering={M.enter()} style={{ gap: 10 }}>
                   <Txt style={[type(10, 600, 0.22, true), { color: C.muted }]}>Justificação · obrigatória</Txt>
                   <TextArea value={just} onChangeText={setJust} placeholder="Explique o que aconteceu" />
                   <Button label="Pedir aprovação ao dono" disabled={!just.trim()} onPress={() => (setClose('pending'), toast('Pedido enviado ao dono', 'info'))} />
@@ -249,7 +301,7 @@ export function DPendencias() {
     <DPage>
       <PageHead title="Pendências" sub="Passam de turno em turno até alguém as resolver" actions={[{ label: showNew ? 'Fechar' : 'Nova pendência', onPress: () => setShowNew(!showNew) }]} />
       {showNew ? (
-        <Animated.View entering={FadeInDown} style={{ marginHorizontal: 40, marginBottom: 20, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 20, flexDirection: 'row', gap: 16, alignItems: 'flex-end' }}>
+        <Animated.View entering={M.enter()} style={{ marginHorizontal: 40, marginBottom: 20, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 20, flexDirection: 'row', gap: 16, alignItems: 'flex-end' }}>
           <Field style={{ flex: 2 }} label="Pendência" value={nt} onChangeText={setNt} placeholder="O que fica por fazer" />
           <Select style={{ flex: 1 }} label="Tipo" value={nk} onChange={setNk} options={Object.entries(QK).map(([v, x]) => ({ v, l: x[0] }))} />
           <Button
@@ -285,7 +337,7 @@ export function DPendencias() {
           {list.map((q, i) => {
             const on = q.id === cur?.id;
             return (
-              <Animated.View key={q.id} entering={FadeInDown.delay(i * 25)} layout={LinearTransition}>
+              <Animated.View key={q.id} entering={M.enter(i * 25)} layout={M.layout()}>
                 <Press feedback="select" scaleTo={1} onPress={() => setSel(q.id)} style={({ hovered }) => ({ paddingVertical: 14, paddingHorizontal: 20, borderTopWidth: 1, borderTopColor: C.line, backgroundColor: on ? '#fff' : hovered ? C.canvas : 'transparent', borderLeftWidth: 3, borderLeftColor: on ? C.accent : 'transparent', gap: 6 })}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <Tag l={QK[q.k]![0]} c={QK[q.k]![1]} bg={QK[q.k]![2]} />
@@ -307,7 +359,7 @@ export function DPendencias() {
           ) : null}
         </Panel>
         {cur ? (
-          <Animated.View key={cur.id} entering={FadeIn.duration(220)}>
+          <Animated.View key={cur.id} entering={M.fade(220)}>
             <Panel>
               <Tag l={QK[cur.k]![0]} c={QK[cur.k]![1]} bg={QK[cur.k]![2]} />
               <Txt style={type(20, 500)}>{cur.t}</Txt>
@@ -329,7 +381,7 @@ export function DPendencias() {
               </View>
               <Strong size={13}>Histórico</Strong>
               {hist.map((h, i) => (
-                <Animated.View key={i} entering={FadeInDown} style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+                <Animated.View key={i} entering={M.enter()} style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
                   <View style={{ width: 6, height: 6, backgroundColor: C.ink }} />
                   <Txt style={[type(13, 400), { flex: 1 }]}>
                     {h.t} · {h.w}
@@ -389,7 +441,7 @@ export function DAvisos() {
           const rd = !!readNotices[a.id];
           const s = ST[a.p === 'urgente' ? 'divida' : 'congelado']!;
           return (
-            <Animated.View key={a.id} entering={FadeInDown.delay(i * 50)} layout={LinearTransition}>
+            <Animated.View key={a.id} entering={M.enter(i * 50)} layout={M.layout()}>
             <View style={{ backgroundColor: rd ? 'transparent' : C.paper, borderWidth: 1, borderColor: rd ? C.line : C.lineStrong, padding: 20, gap: 12, opacity: rd ? 0.6 : 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <Avatar initials={a.de.split(' ').map((w) => w[0]).join('')} size={32} bg={C.ink} fg={C.paper} />
@@ -413,6 +465,89 @@ export function DAvisos() {
   );
 }
 
+/** Minutos desde a entrada (relógio da maquete: 09:41). */
+const sinceMin = (h: string) => 9 * 60 + 41 - (parseInt(h.slice(0, 2), 10) * 60 + parseInt(h.slice(3), 10));
+const durL = (m: number) => (m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, '0')}`);
+
+/** Membros presentes: filtro por zona, pesquisa e tempo dentro. */
+function PresentTable({ now }: { now: number }) {
+  const [q, setQ] = useState('');
+  const [zone, setZone] = useState('Todos');
+  const ql = q.trim().toLowerCase();
+  const rows = PRESENT.filter((p) => (zone === 'Todos' || p.z.startsWith(zone)) && (!ql || p.n.toLowerCase().includes(ql)));
+  const COLS = [{ l: 'Membro', flex: 2 }, { l: 'Plano', flex: 1.4 }, { l: 'Entrou', w: 90 }, { l: 'Zona', flex: 1.2 }, { l: 'Há', w: 100, right: true }] as const;
+  const cell = (c: (typeof COLS)[number]) => ({ flex: 'flex' in c ? c.flex : undefined, width: 'w' in c ? c.w : undefined, minWidth: 0 });
+  return (
+    <Animated.View entering={M.enter(80)} style={{ marginHorizontal: 40, marginBottom: 20, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 20, paddingVertical: 20, paddingHorizontal: 28, borderBottomWidth: 1, borderBottomColor: C.line, flexWrap: 'wrap' }}>
+        <View style={{ gap: 4, flexShrink: 1 }}>
+          <Txt style={type(15, 600)}>Membros presentes</Txt>
+          <Muted size={12}>{`${PRESENT.length} de ${now} com check-in nesta lista · saem da lista ao passar na catraca`}</Muted>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <View style={{ flexDirection: 'row', gap: 4, padding: 4, backgroundColor: C.sand }}>
+            {['Todos', 'Musculação', 'Cardio', 'Aula'].map((z) => {
+              const on = zone === z;
+              const n = z === 'Todos' ? PRESENT.length : PRESENT.filter((p) => p.z.startsWith(z)).length;
+              return (
+                <Press key={z} feedback="select" scaleTo={1} onPress={() => setZone(z)} accessibilityState={{ selected: on }} style={{ height: 32, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: on ? C.ink : 'transparent' }}>
+                  <Txt style={[type(10, 600, 0.12, true), { color: on ? C.paper : C.ink }]}>{z === 'Aula' ? 'Aulas' : z}</Txt>
+                  <Txt style={[type(10, 400), { color: on ? C.paper : C.ink, opacity: 0.7 }]}>{n}</Txt>
+                </Press>
+              );
+            })}
+          </View>
+          <View style={{ width: 220, height: 40, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, borderWidth: 1, borderColor: C.lineStrong, backgroundColor: '#fff' }}>
+            <View style={{ width: 11, height: 11, borderWidth: 1.5, borderColor: C.muted, borderRadius: 6 }} />
+            <TextInput value={q} onChangeText={setQ} placeholder="Procurar membro" placeholderTextColor={C.faint} accessibilityLabel="Procurar membro presente" style={[type(14, 400), { flex: 1, minWidth: 0, color: C.ink, outlineStyle: 'none' } as any]} />
+          </View>
+        </View>
+      </View>
+      <View style={{ flexDirection: 'row', gap: 16, paddingVertical: 10, paddingHorizontal: 28, borderBottomWidth: 1, borderBottomColor: C.line }}>
+        {COLS.map((c) => (
+          <Txt key={c.l} style={[type(12, 500), { color: C.muted, textAlign: 'right' in c ? 'right' : 'left' }, cell(c)]}>
+            {c.l}
+          </Txt>
+        ))}
+      </View>
+      {rows.map((p) => {
+        const m = sinceMin(p.h);
+        return (
+          <Press key={p.n} feedback={false} scaleTo={1} accessibilityRole="text" style={({ hovered }) => ({ flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 10, paddingHorizontal: 28, borderBottomWidth: 1, borderBottomColor: C.line, backgroundColor: hovered ? '#fff' : 'transparent' })}>
+            <View style={[cell(COLS[0]), { flexDirection: 'row', alignItems: 'center', gap: 12 }]}>
+              <View>
+                <Avatar initials={initials(p.n)} size={32} />
+                <View style={{ position: 'absolute', right: -2, bottom: -2, width: 9, height: 9, borderRadius: 5, backgroundColor: C.ok }} />
+              </View>
+              <Txt numberOfLines={1} style={[type(14, 500), { flexShrink: 1 }]}>
+                {p.n}
+              </Txt>
+              {p.pt ? (
+                <View style={{ paddingVertical: 2, paddingHorizontal: 6, backgroundColor: C.ink }}>
+                  <Txt style={[type(9, 600, 0.12, true), { color: C.paper }]}>{p.pt}</Txt>
+                </View>
+              ) : null}
+            </View>
+            <Txt numberOfLines={1} style={[type(14, 400), { color: C.grey }, cell(COLS[1])]}>
+              {p.pl}
+            </Txt>
+            <Txt tabular style={[type(14, 400), cell(COLS[2])]}>
+              {p.h}
+            </Txt>
+            <Txt numberOfLines={1} style={[type(14, 400), { color: C.grey }, cell(COLS[3])]}>
+              {p.z}
+            </Txt>
+            <Txt tabular style={[type(14, 400), { textAlign: 'right', color: m > 75 ? '#9a4c08' : C.grey }, cell(COLS[4])]}>
+              {durL(m)}
+            </Txt>
+          </Press>
+        );
+      })}
+      {!rows.length ? <Txt style={[type(14, 400), { color: C.muted, paddingVertical: 20, paddingHorizontal: 28 }]}>Ninguém com esse nome dentro do ginásio.</Txt> : null}
+    </Animated.View>
+  );
+}
+
 /** dz · Ginásio agora (lotação ao vivo). */
 export function DGinasioAgora() {
   const now = OCC[OCC_NOW]!;
@@ -422,7 +557,7 @@ export function DGinasioAgora() {
     <DPage>
       <PageHead title="Ginásio agora" sub="Talatona · actualizado às 09:41 pelos check-ins" />
       <Cols flex={[0.6, 1.4]}>
-        <Animated.View entering={FadeInDown} style={{ backgroundColor: C.ink, padding: 24, gap: 18 }}>
+        <Animated.View entering={M.enter()} style={{ backgroundColor: C.ink, padding: 24, gap: 18 }}>
           <Txt style={[type(12, 500), { color: C.sand }]}>Pessoas dentro agora</Txt>
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10 }}>
             <Txt style={[type(96, 300), { color: C.paper, lineHeight: 92 }]}>{now}</Txt>
@@ -430,7 +565,7 @@ export function DGinasioAgora() {
           </View>
           <View style={{ flexDirection: 'row', gap: 2 }}>
             {Array.from({ length: 24 }, (_, i) => (
-              <Animated.View key={i} entering={ZoomIn.delay(i * 20)} style={{ flex: 1, height: 12, backgroundColor: i < segs ? C.accent : '#3a3834' }} />
+              <View key={i} style={{ flex: 1, height: 12, backgroundColor: i < segs ? C.accent : '#3a3834' }} />
             ))}
           </View>
           <Txt style={[type(12, 400), { color: C.sand }]}>{Math.round((now / 120) * 100)}% da lotação · máximo 120 pessoas</Txt>
@@ -450,6 +585,7 @@ export function DGinasioAgora() {
           <Muted size={12}>Pico habitual às 19:00 · 92 pessoas. Os valores futuros são a média das últimas 4 semanas.</Muted>
         </Panel>
       </Cols>
+      <PresentTable now={now} />
       <View style={{ paddingHorizontal: 40 }}>
         <Panel title="Equipa presente">
           <View style={{ flexDirection: 'row', gap: 12 }}>

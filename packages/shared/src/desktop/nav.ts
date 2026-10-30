@@ -23,16 +23,17 @@ export const ROUTES = {
   gestao: 'Gestão',
   rede: 'Rede',
   'avisos-sms': 'Avisos SMS',
+  marca: 'Marca',
   'ginasio-agora': 'Ginásio agora',
 } as const;
 export type DRoute = keyof typeof ROUTES;
 
-/** Menu lateral de cada papel (igual ao desenho "MUNTU Desktop v8"). */
+/** Menu lateral de cada papel (igual ao "MUNTU Protótipo Web"). */
 export const NAVS: Record<DRole, [DRoute, string][]> = {
   rececao: [['rececao', 'Recepção'], ['inscricao', 'Inscrição'], ['membros', 'Membros'], ['cobrar', 'Cobrar'], ['caixa', 'Caixa'], ['pendencias', 'Pendências'], ['recuperacao', 'Recuperação'], ['avisos', 'Avisos']],
   financas: [['tesouraria', 'Tesouraria'], ['caixa', 'Caixa'], ['cobrar', 'Facturas'], ['recuperacao', 'Renovações'], ['avisos', 'Avisos']],
   pt: [['agenda', 'Agenda'], ['actividades', 'Actividades'], ['recuperacao', 'Clientes em risco'], ['avisos', 'Avisos']],
-  dono: [['painel', 'Painel'], ['pendencias', 'Pendências'], ['equipa', 'Equipa'], ['actividades', 'Actividades'], ['receitas-perdidas', 'Receitas perdidas'], ['recuperacao', 'Recuperação'], ['filiais', 'Filiais'], ['planos', 'Planos'], ['gestao', 'Gestão'], ['rede', 'Rede'], ['avisos-sms', 'Avisos SMS']],
+  dono: [['painel', 'Painel'], ['pendencias', 'Pendências'], ['equipa', 'Equipa'], ['actividades', 'Actividades'], ['receitas-perdidas', 'Receitas perdidas'], ['recuperacao', 'Recuperação'], ['filiais', 'Filiais'], ['planos', 'Planos'], ['gestao', 'Gestão'], ['marca', 'Marca'], ['rede', 'Rede'], ['avisos-sms', 'Avisos SMS']],
 };
 
 /** Papel por omissão quando se abre um ecrã directamente pelo endereço. */
@@ -47,6 +48,7 @@ export const DEFAULT_ROLE: Partial<Record<DRoute, DRole>> = {
   gestao: 'dono',
   rede: 'dono',
   'avisos-sms': 'dono',
+  marca: 'dono',
   actividades: 'dono',
 };
 
