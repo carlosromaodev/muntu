@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { LayoutChangeEvent, Platform, StyleProp, TextInput, TextInputProps, View, ViewStyle } from 'react-native';
-import Animated, { interpolateColor, useAnimatedStyle, useDerivedValue, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { DUR, fade, timing } from './motion';
 import { C, type } from '../theme/tokens';
 import { Press } from './Press';
@@ -8,9 +8,18 @@ import { Txt } from './Txt';
 
 const SLIDE = timing(250);
 
+/** Valor 0→1 que segue `on` com a curva da MUNTU (sem dependências de hook, que o nativo ignora). */
+function useTimed(on: boolean, ms: number = DUR.color) {
+  const v = useSharedValue(on ? 1 : 0);
+  useEffect(() => {
+    v.value = withTiming(on ? 1 : 0, timing(ms));
+  }, [on, ms, v]);
+  return v;
+}
+
 /** Botão-chip seleccionável (filtros, opções). Preto quando activo. */
 export function Chip({ label, on, onPress, size = 'md', style, count }: { label: string; on?: boolean; onPress?: () => void; size?: 'sm' | 'md'; style?: StyleProp<ViewStyle>; count?: number | string }) {
-  const p = useDerivedValue(() => withTiming(on ? 1 : 0, timing(DUR.color)), [on]);
+  const p = useTimed(!!on);
   const bg = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(p.value, [0, 1], ['rgba(29,28,26,0)', C.ink]),
     borderColor: interpolateColor(p.value, [0, 1], [C.lineStrong, C.ink]),
@@ -109,7 +118,7 @@ export function Tabs<T extends string>({ options, value, onChange, style }: { op
 /** Campo de texto sublinhado com rótulo, como nos formulários do desenho. */
 export function Field({ label, prefix, right, error, style, inputStyle, big, ...input }: TextInputProps & { label?: string; prefix?: string; right?: React.ReactNode; error?: string; style?: StyleProp<ViewStyle>; inputStyle?: any; big?: boolean }) {
   const [focus, setFocus] = useState(false);
-  const f = useDerivedValue(() => withTiming(focus ? 1 : 0, timing(DUR.color)), [focus]);
+  const f = useTimed(focus);
   const line = useAnimatedStyle(() => ({ backgroundColor: interpolateColor(f.value, [0, 1], [error ? C.bad : C.lineStrong, C.ink]), height: 1 + f.value }));
   return (
     <View style={style}>
@@ -197,7 +206,7 @@ export function Checkbox({ on, onChange, label, sub, style, right }: { on: boole
 
 /** Interruptor rectangular (preto/areia), com o botão a deslizar. */
 export function Toggle({ on, onChange, accent, color = C.ink }: { on: boolean; onChange?: (v: boolean) => void; accent?: boolean; color?: string }) {
-  const p = useDerivedValue(() => withTiming(on ? 1 : 0, timing(DUR.color)), [on]);
+  const p = useTimed(!!on);
   const track = useAnimatedStyle(() => ({ backgroundColor: interpolateColor(p.value, [0, 1], [C.lineStrong, color]) }));
   const knob = useAnimatedStyle(() => ({ transform: [{ translateX: 3 + p.value * 16 }], backgroundColor: accent ? interpolateColor(p.value, [0, 1], [C.paper, C.accent]) : C.paper }));
   return (
