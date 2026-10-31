@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { KeyboardAvoidingView, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, ScrollView, TextInput, useWindowDimensions, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Animated from 'react-native-reanimated';
 import { MuntuLogo } from '../../brand/Logo';
@@ -11,7 +11,7 @@ import { kn, onlyDigits, phone } from '../../lib/format';
 import { useMuntu } from '../../store/useMuntu';
 import { C, type } from '../../theme/tokens';
 import { M as Mo, Avatar, Button, Checkbox, Chip, ChipGroup, Field, Note, Press, QR, qrCells, Select, Tabs, TextArea, Txt, useToast } from '../../ui';
-import { Cols, DPage, KpiRow, Muted, PageHead, Panel, Status, Strong, Table, Tag } from '../kit';
+import { Cols, DPage, fit, GUT, KpiRow, Muted, PageHead, Panel, Status, Strong, Table, Tag } from '../kit';
 import { HOME, DRole } from '../nav';
 
 const kz = (v: number) => `${v < 0 ? '−' : ''}${kn(v)},00 Kz`;
@@ -23,6 +23,8 @@ const LOGIN_ROLE: Record<string, DRole> = { '924': 'rececao', '925': 'financas',
 export function DLogin() {
   const router = useRouter();
   const signIn = useMuntu((s) => s.signIn);
+  const winW = useWindowDimensions().width;
+  const art = winW >= 880; // painel laranja com o selo só em janelas largas
   const [tel, setTel] = useState('924 310 115');
   const [pw, setPw] = useState('');
   const [show, setShow] = useState(false);
@@ -44,8 +46,9 @@ export function DLogin() {
     setErr(m);
   };
   return (
-    <View style={{ flex: 1, flexDirection: 'row', backgroundColor: C.paper, minWidth: 1024 }}>
-      <View style={{ flex: 1, paddingHorizontal: 48, paddingVertical: 40, justifyContent: 'space-between', maxWidth: 560 }}>
+    <View style={{ flex: 1, flexDirection: 'row', backgroundColor: C.paper }}>
+      <ScrollView style={{ flex: 1, maxWidth: art ? 560 : undefined }} contentContainerStyle={{ flexGrow: 1, alignItems: art ? 'stretch' : 'center' }} keyboardShouldPersistTaps="handled">
+      <View style={{ flexGrow: 1, width: '100%', maxWidth: art ? undefined : 520, paddingHorizontal: winW < 640 ? 24 : 48, paddingVertical: winW < 640 ? 28 : 40, gap: 40, justifyContent: 'space-between' }}>
         <MuntuLogo size={22} />
         <Animated.View entering={Mo.enter()} style={{ gap: 26, maxWidth: 380 }}>
           <View style={{ gap: 10 }}>
@@ -84,13 +87,16 @@ export function DLogin() {
           <Txt style={[type(13, 400), { color: '#9a4c08' }]}>Criar conta na MUNTU →</Txt>
         </Press>
       </View>
+      </ScrollView>
+      {art ? (
       <View style={{ flex: 1.2, backgroundColor: C.accent, padding: 40, justifyContent: 'space-between' }}>
         <Txt style={[type(10, 600, 0.22, true), { alignSelf: 'flex-end' }]}>Gestão de ginásios · Angola</Txt>
         <Animated.View entering={Mo.fade(600)} style={{ alignSelf: 'center' }}>
-          <MuntuSelo size={300} color={C.ink} grayColor={C.accentDeep} markColor={C.ink} />
+          <MuntuSelo size={winW < 1100 ? 240 : 300} color={C.ink} grayColor={C.accentDeep} markColor={C.ink} />
         </Animated.View>
         <Txt style={type(10, 600, 0.22, true)}>Copyright ©2026</Txt>
       </View>
+      ) : null}
     </View>
   );
 }
@@ -215,13 +221,13 @@ export function DInscricao() {
       <PageHead title="Nova inscrição" sub="Talatona · Uma tarefa, um ecrã">
         <View />
       </PageHead>
-      <View style={{ position: 'absolute', right: 40, top: 32, alignItems: 'flex-end' }}>
+      <View style={{ position: 'absolute', right: GUT, top: 32, alignItems: 'flex-end' }}>
         <Txt tabular style={type(36, 300)}>
           {timer}
         </Txt>
         <Muted size={11}>Meta 03:00</Muted>
       </View>
-      <View style={{ flexDirection: 'row', gap: 8, paddingHorizontal: 40, paddingBottom: 20 }}>
+      <View style={{ flexDirection: 'row', gap: 8, paddingHorizontal: GUT, paddingBottom: 20 }}>
         {steps.map((l, i) => (
           <View key={l} style={{ flex: 1, gap: 8 }}>
             <Animated.View layout={Mo.layout()} style={{ height: 3, backgroundColor: i < step ? C.ink : i === step ? C.accent : C.line }} />
@@ -231,7 +237,7 @@ export function DInscricao() {
           </View>
         ))}
       </View>
-      <View style={{ paddingHorizontal: 40 }}>
+      <View style={{ paddingHorizontal: GUT }}>
         <Panel i={0} style={{ minHeight: 340 }}>
           {step === 0 ? (
             <Animated.View key="s0" entering={Mo.enter()} style={{ gap: 20 }}>
@@ -443,7 +449,7 @@ export function DMembros() {
                 <Status l={ST[M.st]!.l} c={ST[M.st]!.c} />
                 <Muted>{M.plano}</Muted>
               </View>
-              <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 6 }}>
                 {acts.map(([l, primary, fn]) => (
                   <Button key={l} label={l} kind={primary ? 'solid' : 'outline'} size="sm" onPress={fn} />
                 ))}
@@ -451,15 +457,15 @@ export function DMembros() {
             </View>
           </View>
           {(BAN as any)[M.st] ? <Note tone={M.st === 'divida' || M.st === 'bloq' ? 'bad' : 'neutral'} text={(BAN as any)[M.st]} /> : null}
-          <View style={{ flexDirection: 'row', gap: 12 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
             {[
               [M.d, isRede ? 'Visitas restantes' : M.st === 'congelado' ? 'Dias em pausa' : 'Dias restantes'],
               [prox, 'Próxima mensalidade'],
               [M.e, 'Entradas este mês'],
               [appL, 'Área do cliente'],
             ].map(([v, l]) => (
-              <View key={l} style={{ flex: 1, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 16, gap: 6 }}>
-                <Txt numberOfLines={1} adjustsFontSizeToFit style={type(28, 300)}>
+              <View key={l} style={{ flexGrow: 1, flexBasis: 260, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 16, gap: 6 }}>
+                <Txt numberOfLines={1} adjustsFontSizeToFit style={type(fit(String(v), 28, 7), 300)}>
                   {v}
                 </Txt>
                 <Muted size={12}>{l}</Muted>

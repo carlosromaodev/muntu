@@ -11,7 +11,7 @@ import { IMPORT_KINDS, useOnboarding } from '../../store/onboarding';
 import { useMuntu } from '../../store/useMuntu';
 import { C, type } from '../../theme/tokens';
 import { M as Mo, Avatar, Bars, Button, Checkbox, Chip, ChipGroup, Field, Note, Press, Progress, Select, Stepper, Tabs, TextArea, Toggle, Txt, useToast } from '../../ui';
-import { Cols, DPage, KpiRow, Muted, PageHead, Panel, Status, Strong, Table, Tag } from '../kit';
+import { Cols, DPage, GUT, KpiRow, Muted, PageHead, Panel, Status, Strong, Table, Tag, useInner, Wrap } from '../kit';
 import { useDesk } from '../session';
 import { BrandMark, BrandPreview, useBrandDraft } from '../../mobile/screens/marca';
 
@@ -54,13 +54,13 @@ export function DPainel() {
           { v: kn(rnd(1180000 * F * (all ? 1 : FIL[filial].r / 2302000))), l: 'Kz · Recuperado por SMS' },
         ]}
       />
-      <View style={{ paddingHorizontal: 40, paddingBottom: 20 }}>
+      <View style={{ paddingHorizontal: GUT, paddingBottom: 20 }}>
         <Panel title={`Aprovações · ${open} pendentes`}>
           {APPR.map((a, i) => {
             const st = approvals[a.id];
             return (
-              <Animated.View key={a.id} layout={Mo.layout()} style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.line }}>
-                <View style={{ flex: 1, gap: 2 }}>
+              <Animated.View key={a.id} layout={Mo.layout()} style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 16, rowGap: 10, paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.line }}>
+                <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 260, gap: 2 }}>
                   <Muted size={12}>{a.k}</Muted>
                   <Txt style={type(14, 400)}>{a.t}</Txt>
                 </View>
@@ -193,11 +193,12 @@ export function DPlanos() {
   return (
     <DPage>
       <PageHead title="Planos e regras" sub="Rede Mwangolé Fit · 3 filiais" actions={[{ label: 'Novo plano', onPress: () => toast('Novo plano · rascunho criado', 'info') }]} />
-      <View style={{ paddingHorizontal: 40, flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
+      <View style={{ paddingHorizontal: GUT }}>
+        <Wrap min={260} max={3}>
         {PLANOS.map((p, i) => {
           const on = edit === p.id;
           return (
-            <Animated.View key={p.id} entering={Mo.enter(i * 40)} layout={Mo.layout()} style={{ width: '31.8%', minWidth: 260, backgroundColor: on ? C.canvas : C.paper, borderWidth: 1, borderColor: C.line, padding: 24, gap: 10 }}>
+            <Animated.View key={p.id} entering={Mo.enter(i * 40)} layout={Mo.layout()} style={{ flex: 1, backgroundColor: on ? C.canvas : C.paper, borderWidth: 1, borderColor: C.line, padding: 24, gap: 10 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Muted size={12}>{String(i + 1).padStart(2, '0')}</Muted>
                 <Tag l={p.scope} c={C.ink} bg={C.sand} />
@@ -229,6 +230,7 @@ export function DPlanos() {
             </Animated.View>
           );
         })}
+        </Wrap>
       </View>
     </DPage>
   );
@@ -258,7 +260,7 @@ export function DRede() {
           { v: String(env), l: 'Visitas enviadas' },
         ]}
       />
-      <View style={{ paddingHorizontal: 40, paddingBottom: 20 }}>
+      <View style={{ paddingHorizontal: GUT, paddingBottom: 20 }}>
         <Tabs options={[{ v: 'parc', l: 'Parceiros' }, { v: 'vis', l: 'Visitas' }, { v: 'liq', l: 'Liquidações' }, { v: 'reg', l: 'Regras' }]} value={tab} onChange={setTab} />
       </View>
       {tab === 'parc' ? (
@@ -314,19 +316,19 @@ export function DRede() {
           </Animated.View>
         </Cols>
       ) : tab === 'vis' ? (
-        <View style={{ paddingHorizontal: 40 }}>
+        <View style={{ paddingHorizontal: GUT }}>
           <Panel title="Visitas">
             <Table cols={[{ l: 'Hora', w: 100 }, { l: 'Membro' }, { l: 'Direcção', flex: 1.5 }, { l: 'Plano' }, { l: 'Valor', align: 'right' }, { l: 'Estado', w: 170 }]} rows={VIS.map(visRow)} render={(v) => [<Muted>{v.h}</Muted>, <Strong>{v.n}</Strong>, v.dir, <Muted>{v.p}</Muted>, v.v, <Status l={v.s.l} c={v.s.c} why={v.why} />]} />
           </Panel>
         </View>
       ) : tab === 'liq' ? (
-        <View style={{ paddingHorizontal: 40 }}>
+        <View style={{ paddingHorizontal: GUT }}>
           <Panel title="Liquidações">
             <Table cols={[{ l: 'Mês' }, { l: 'Parceiro', flex: 1.5 }, { l: 'Receb.', align: 'right' }, { l: 'Envia.', align: 'right' }, { l: 'Saldo', align: 'right', flex: 1.3 }, { l: 'Estado', w: 140 }, { l: 'Data', w: 60 }]} rows={LIQ} render={(l) => [l[0] as string, <Strong>{l[1]}</Strong>, String(l[2]), String(l[3]), sgn(((l[2] as number) - (l[3] as number)) * PV), <Status l={ST[l[4] as string]!.l} c={ST[l[4] as string]!.c} />, <Muted>{l[5]}</Muted>]} />
           </Panel>
         </View>
       ) : (
-        <View style={{ paddingHorizontal: 40, maxWidth: 820 }}>
+        <View style={{ paddingHorizontal: GUT, maxWidth: 820 }}>
           <Panel title="Regras da rede">
             {REDE_REG.map(([n, v]) => (
               <View key={n} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderTopWidth: 1, borderTopColor: C.line }}>
@@ -412,7 +414,7 @@ export function DAvisosSms() {
           </Panel>
         </Animated.View>
       </Cols>
-      <View style={{ paddingHorizontal: 40 }}>
+      <View style={{ paddingHorizontal: GUT }}>
         <Panel title="Registo de envios" right={<ChipGroup size="sm" options={Object.keys(LF).map((k) => [k, k] as const)} value={logF} onChange={setLogF} />}>
           <Table
             cols={[{ l: 'Hora', w: 60 }, { l: 'Membro' }, { l: 'Telefone' }, { l: 'Aviso' }, { l: 'Canal', w: 90 }, { l: 'Estado', w: 170 }, { l: '', w: 90 }]}
@@ -503,7 +505,8 @@ export function DReceitasPerdidas() {
   return (
     <DPage>
       <PageHead title="Receitas perdidas" sub="Rede Mwangolé Fit · Outubro" />
-      <View style={{ flexDirection: 'row', gap: 16, paddingHorizontal: 40, paddingBottom: 20 }}>
+      <View style={{ paddingHorizontal: GUT, paddingBottom: 20 }}>
+        <Wrap min={200}>
         {(
           [
             ['pot', 'Kz · por rever', C.ink, 'Indícios ainda não confirmados'],
@@ -517,11 +520,12 @@ export function DReceitasPerdidas() {
             <Muted size={12}>{d}</Muted>
           </Animated.View>
         ))}
+        </Wrap>
       </View>
-      <View style={{ paddingHorizontal: 40, paddingBottom: 20 }}>
+      <View style={{ paddingHorizontal: GUT, paddingBottom: 20 }}>
         <Tabs options={(['pot', 'conf', 'res'] as const).map((k) => ({ v: k, l: { pot: 'Por rever', conf: 'Confirmadas', res: 'Resolvidas' }[k], n: LOST.filter((x) => st(x) === k).length }))} value={tab} onChange={setTab} />
       </View>
-      <View style={{ paddingHorizontal: 40 }}>
+      <View style={{ paddingHorizontal: GUT }}>
         <Panel>
           <Muted>Indícios para rever. Uma suspeita só passa a perda depois de confirmada.</Muted>
           <Table
@@ -576,7 +580,8 @@ export function DFiliais() {
   return (
     <DPage>
       <PageHead title="Filiais" sub="Rede Mwangolé Fit · 3 filiais" actions={[{ label: show ? 'Fechar' : 'Nova filial', onPress: () => (setShow(!show), setDone(false)) }]} />
-      <View style={{ flexDirection: 'row', gap: 16, paddingHorizontal: 40, paddingBottom: 20 }}>
+      <View style={{ paddingHorizontal: GUT, paddingBottom: 20 }}>
+        <Wrap min={250}>
         {cards.map((f, i) => {
           const pct = Math.round((f.r / f.e) * 100);
           return (
@@ -604,6 +609,7 @@ export function DFiliais() {
             </Animated.View>
           );
         })}
+        </Wrap>
       </View>
       <Cols flex={[1.4, 1]}>
         <Panel title="Comparar · últimos 90 dias">
@@ -662,7 +668,7 @@ export function DGestao() {
   const kzN = (x: number) => (x ? `${kn(x)} Kz` : 'Nenhum');
   const set = (k: keyof typeof v) => (x: number) => (setV({ ...v, [k]: x }), setSaved(false));
   const rule = (n: string, d: string, tiers: [string, React.ReactNode][]) => (
-    <Panel title={n} style={{ flex: 1, minWidth: 380 }}>
+    <Panel key={n} title={n} style={{ flex: 1 }}>
       <Muted size={12}>{d}</Muted>
       {tiers.map(([who, r], i) => (
         <View key={who} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 10, borderTopWidth: i ? 1 : 0, borderTopColor: C.line }}>
@@ -675,12 +681,12 @@ export function DGestao() {
   return (
     <DPage>
       <PageHead title="Gestão" sub="Configuração do ginásio" />
-      <View style={{ paddingHorizontal: 40, paddingBottom: 20 }}>
+      <View style={{ paddingHorizontal: GUT, paddingBottom: 20 }}>
         <Tabs options={[{ v: 'reg', l: 'Regras de aprovação' }, { v: 'cof', l: 'Cofre de documentos', n: docs.length }, { v: 'imp', l: 'Importar dados' }, { v: 'ind', l: 'Indicações' }]} value={tab} onChange={setTab} />
       </View>
       {tab === 'reg' ? (
-        <View style={{ paddingHorizontal: 40, gap: 16 }}>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
+        <View style={{ paddingHorizontal: GUT, gap: 16 }}>
+          <Wrap min={340} max={2}>
             {rule('Descontos', 'Acima do limite vai para o nível seguinte', [
               ['Recepção até', <Stepper value={v.dRec} step={5} max={50} onChange={set('dRec')} format={(x) => `${x}%`} />],
               ['Gestor até', <Stepper value={v.dGes} step={5} max={100} onChange={set('dGes')} format={(x) => `${x}%`} />],
@@ -695,14 +701,14 @@ export function DGestao() {
               ['Acima disso', <Muted>Dono</Muted>],
             ])}
             {rule('Alteração de preços', 'Membros avisados por SMS 30 dias antes', [['Quem aprova', <Muted>Só o dono · Face ID</Muted>]])}
-          </View>
+          </Wrap>
           <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
             <Button label="Guardar regras" onPress={() => (setSaved(true), haptic('success'))} />
             {saved ? <Txt style={[type(13, 500), { color: C.ok }]}>Regras guardadas ✓</Txt> : null}
           </View>
         </View>
       ) : tab === 'cof' ? (
-        <View style={{ paddingHorizontal: 40 }}>
+        <View style={{ paddingHorizontal: GUT }}>
           <Panel right={<Button label="Carregar documento" size="sm" onPress={() => (setExtra(extra + 1), setCat('Todos'), toast('Documento guardado no cofre'))} />} title="Cofre de documentos">
             <ChipGroup size="sm" options={['Todos', 'Contratos', 'Comprovativos', 'Manutenção', 'Licenças'].map((c) => [c, c] as const)} value={cat} onChange={setCat} />
             <Note tone="bad" text="Licença de actividade da Kilamba expira em 21 dias." />
@@ -714,8 +720,8 @@ export function DGestao() {
           </Panel>
         </View>
       ) : tab === 'imp' ? (
-        <View style={{ paddingHorizontal: 40, gap: 16 }}>
-          <View style={{ flexDirection: 'row', gap: 16 }}>
+        <View style={{ paddingHorizontal: GUT, gap: 16 }}>
+          <Wrap min={280}>
             {IMPORT_KINDS.map((k) => {
               const ld = !!ob.imported[k.k];
               return (
@@ -749,8 +755,8 @@ export function DGestao() {
                 </Panel>
               );
             })}
-          </View>
-          <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+          </Wrap>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
             <Button label={impDone ? 'Importado ✓' : 'Confirmar importação'} disabled={impDone || !Object.keys(ob.imported).length} onPress={() => (setImpDone(true), haptic('success'))} />
             <Muted size={12}>{impDone ? 'Membros importados. Podes enviar as credenciais em Avisos SMS.' : 'Nada é gravado antes de confirmares.'}</Muted>
           </View>
@@ -809,10 +815,10 @@ export function DGestao() {
 }
 
 /** Linha de formulário do desktop: rótulo e ajuda à esquerda, controlo à direita. */
-function FormRow({ title, help, children, last }: { title: string; help: string; children: React.ReactNode; last?: boolean }) {
+function FormRow({ title, help, children, last, stack }: { title: string; help: string; children: React.ReactNode; last?: boolean; stack?: boolean }) {
   return (
-    <View style={{ flexDirection: 'row', gap: 24, paddingVertical: 24, paddingHorizontal: 28, borderBottomWidth: last ? 0 : 1, borderBottomColor: C.line }}>
-      <View style={{ width: 180, gap: 4 }}>
+    <View style={{ flexDirection: stack ? 'column' : 'row', gap: stack ? 14 : 24, paddingVertical: 24, paddingHorizontal: stack ? 20 : 28, borderBottomWidth: last ? 0 : 1, borderBottomColor: C.line }}>
+      <View style={{ width: stack ? undefined : 180, gap: 4 }}>
         <Txt style={type(15, 600)}>{title}</Txt>
         <Muted size={12}>{help}</Muted>
       </View>
@@ -830,17 +836,20 @@ const WHERE: [string, string][] = [
 /** dp (dono) · Marca do ginásio. */
 export function DMarca() {
   const b = useBrandDraft();
+  const w = useInner();
+  const side = w >= 980; // pré-visualização ao lado do formulário
+  const st = side ? w - 440 < 600 : w < 620; // rótulos por cima dos campos
   return (
     <DPage>
       <PageHead title="Marca do ginásio" sub="Logotipo, nome e cor que os teus membros vêem na app" actions={[{ label: 'Repor padrão', kind: 'outline', onPress: b.reset }, { label: 'Aplicar marca', onPress: b.save }]} />
       {b.saved ? (
-        <Animated.View entering={Mo.pop()} style={{ marginHorizontal: 40, marginBottom: 16 }}>
+        <Animated.View entering={Mo.pop()} style={{ marginHorizontal: GUT, marginBottom: 16 }}>
           <Note tone="ok" text="Aplicado na app dos membros de todas as filiais." />
         </Animated.View>
       ) : null}
-      <View style={{ flexDirection: 'row', gap: 20, paddingHorizontal: 40, paddingBottom: 24, alignItems: 'flex-start' }}>
-        <Animated.View entering={Mo.enter()} style={{ flex: 1, minWidth: 0, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line }}>
-          <FormRow title="Logotipo" help="PNG ou SVG com fundo transparente. Sem logotipo, mostramos o nome.">
+      <View style={{ flexDirection: side ? 'row' : 'column', gap: 20, paddingHorizontal: GUT, paddingBottom: 24, alignItems: side ? 'flex-start' : 'stretch' }}>
+        <Animated.View entering={Mo.enter()} style={{ flex: side ? 1 : undefined, minWidth: 0, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line }}>
+          <FormRow stack={st} title="Logotipo" help="PNG ou SVG com fundo transparente. Sem logotipo, mostramos o nome.">
             {b.d.logo ? (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderWidth: 1, borderColor: C.line, backgroundColor: '#fff' }}>
                 <View style={{ width: 88, height: 60, backgroundColor: b.c, alignItems: 'center', justifyContent: 'center' }}>
@@ -856,11 +865,11 @@ export function DMarca() {
               </Press>
             )}
           </FormRow>
-          <FormRow title="Nome na app" help="Até 22 caracteres.">
+          <FormRow stack={st} title="Nome na app" help="Até 22 caracteres.">
             <Field big value={b.d.name} onChangeText={b.setName} maxLength={22} autoCapitalize="characters" accessibilityLabel="Nome na app" inputStyle={{ letterSpacing: 2.2 }} />
           </FormRow>
-          <FormRow title="Cor de destaque" help="A interface da equipa mantém as cores MUNTU." last>
-            <View style={{ flexDirection: 'row', gap: 10 }}>
+          <FormRow stack={st} title="Cor de destaque" help="A interface da equipa mantém as cores MUNTU." last>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
               {BRAND_SWATCHES.map(([col, l]) => {
                 const on = b.c === col;
                 return (
@@ -870,7 +879,7 @@ export function DMarca() {
                 );
               })}
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 14 }}>
               <View style={{ width: 160 }}>
                 <Field value={b.hex} onChangeText={b.setHex} autoCapitalize="none" autoCorrect={false} placeholder="#c8640c" accessibilityLabel="Cor em hexadecimal" />
               </View>
@@ -881,7 +890,7 @@ export function DMarca() {
             </View>
           </FormRow>
         </Animated.View>
-        <Animated.View entering={Mo.enter(60)} style={{ width: 420, gap: 20 }}>
+        <Animated.View entering={Mo.enter(60)} style={{ width: side ? 420 : undefined, gap: 20 }}>
           <View style={{ backgroundColor: C.canvas, borderWidth: 1, borderColor: C.line, paddingVertical: 28, gap: 18 }}>
             <Txt style={[type(10, 600, 0.22, true), { color: C.muted, textAlign: 'center' }]}>Pré-visualização · app do membro</Txt>
             <BrandPreview b={b} width={260} />

@@ -9,7 +9,7 @@ import { kn } from '../../lib/format';
 import { useMuntu } from '../../store/useMuntu';
 import { C, type } from '../../theme/tokens';
 import { M, Avatar, Button, Chip, ChipGroup, Field, Note, Press, Progress, Segmented, Select, Tabs, TextArea, Txt, useToast } from '../../ui';
-import { Cols, DPage, KpiRow, Muted, PageHead, Panel, Status, Strong, Table, Tag } from '../kit';
+import { Cols, DPage, GUT, KpiRow, Muted, PageHead, Panel, Status, Strong, Table, Tag, Wrap } from '../kit';
 import { useDRole } from '../Shell';
 import { useDesk } from '../session';
 
@@ -115,9 +115,9 @@ export function DActividades() {
   const group = (title: string, list: typeof activities, approve: boolean) => (
     <Panel title={title}>
       {list.map((a, i) => (
-        <Animated.View key={a.id} entering={M.enter(i * 30)} layout={M.layout()} style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 12, borderTopWidth: 1, borderTopColor: C.line }}>
+        <Animated.View key={a.id} entering={M.enter(i * 30)} layout={M.layout()} style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 16, rowGap: 8, paddingVertical: 12, borderTopWidth: 1, borderTopColor: C.line }}>
           <Muted size={12}>{ACT_KIND[a.tipo]}</Muted>
-          <View style={{ flex: 1.6 }}>
+          <View style={{ flexGrow: 1.6, flexShrink: 1, flexBasis: 200 }}>
             <Strong size={13}>{a.t}</Strong>
             <Muted size={11}>
               {a.when} · {a.meta}
@@ -414,11 +414,11 @@ export function DTesouraria() {
           { v: kn(porPagar), l: 'Kz · A pagar' },
         ]}
       />
-      <View style={{ paddingHorizontal: 40, paddingBottom: 20 }}>
+      <View style={{ paddingHorizontal: GUT, paddingBottom: 20 }}>
         <Tabs options={[{ v: 'mov', l: 'Movimentos' }, { v: 'contas', l: 'Contas' }, { v: 'rec', l: 'A receber' }, { v: 'pag', l: 'A pagar' }, { v: 'con', l: 'Conciliação' }]} value={tab} onChange={setTab} />
       </View>
       {tab === 'mov' ? (
-        <View style={{ paddingHorizontal: 40, gap: 16 }}>
+        <View style={{ paddingHorizontal: GUT, gap: 16 }}>
           <View style={{ flexDirection: 'row', gap: 32, flexWrap: 'wrap' }}>
             <View style={{ gap: 6 }}>
               <Muted size={11}>Período</Muted>
@@ -471,10 +471,10 @@ export function DTesouraria() {
           </View>
         </View>
       ) : tab === 'contas' ? (
-        <View style={{ paddingHorizontal: 40, gap: 16 }}>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
+        <View style={{ paddingHorizontal: GUT, gap: 16 }}>
+          <Wrap min={220} max={3}>
             {accs.map((a, i) => (
-              <Animated.View key={a.id} entering={M.enter(i * 30)} layout={M.layout()} style={{ width: '31.8%', backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 20, gap: 8 }}>
+              <Animated.View key={a.id} entering={M.enter(i * 30)} layout={M.layout()} style={{ flex: 1, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 20, gap: 8 }}>
                 <Muted size={11}>{a.t}</Muted>
                 <Strong>{a.n}</Strong>
                 <Txt style={type(26, 300)}>{kn(a.v)}</Txt>
@@ -482,7 +482,7 @@ export function DTesouraria() {
                 <Button label="Transferir" kind="outline" size="xs" style={{ alignSelf: 'flex-start' }} onPress={() => (setTrf(true), setDe(a.id), setPara(a.id === 'cof' ? 'bai' : 'cof'), setTrfMsg(''))} />
               </Animated.View>
             ))}
-          </View>
+          </Wrap>
           {trf ? (
             <Animated.View entering={M.enter()}>
               <Panel title="Transferência entre contas">
@@ -540,7 +540,7 @@ export function DTesouraria() {
           </Panel>
         </Cols>
       ) : tab === 'pag' ? (
-        <View style={{ paddingHorizontal: 40 }}>
+        <View style={{ paddingHorizontal: GUT }}>
           <Panel title="Contas a pagar">
             <Table
               cols={[{ l: 'Descrição', flex: 1.6 }, { l: 'Categoria' }, { l: 'Vencimento' }, { l: 'Valor', align: 'right' }, { l: 'Estado', w: 120 }, { l: '', w: 90 }]}
@@ -550,7 +550,7 @@ export function DTesouraria() {
           </Panel>
         </View>
       ) : (
-        <View style={{ paddingHorizontal: 40 }}>
+        <View style={{ paddingHorizontal: GUT }}>
           <Panel title="Conciliação bancária">
             <Table
               cols={[{ l: 'Data', w: 60 }, { l: 'Origem', flex: 1.3 }, { l: 'Referência' }, { l: 'Sistema', align: 'right' }, { l: 'Extracto', align: 'right' }, { l: 'Diferença', align: 'right' }, { l: 'Estado', w: 170 }, { l: '', w: 140 }]}

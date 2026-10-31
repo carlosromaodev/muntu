@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, TextInput, View } from 'react-native';
+import { ScrollView, TextInput, useWindowDimensions, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import Animated from 'react-native-reanimated';
 import { MuntuLogo } from '../../brand/Logo';
@@ -42,6 +42,9 @@ export function DReceberTurno() {
   const [busy, setBusy] = useState(false);
   const fail = (m: string) => (haptic('error'), setErr(m));
   const go = (n: number) => (setStep(n), setErr(''));
+  const { width } = useWindowDimensions();
+  const narrow = width < 900; // passos em faixa horizontal por cima do conteúdo
+  const pad = width < 640 ? 20 : width < 1100 ? 28 : 40;
   const badge = (doneS: boolean, warn: boolean) => (doneS ? (warn ? { l: 'Com ressalva', t: 'warn' as const } : { l: 'Feito', t: 'ok' as const }) : { l: 'Por fazer', t: 'neutral' as const });
   const steps = [
     ['Resumo', null],
@@ -60,16 +63,39 @@ export function DReceberTurno() {
     setTimeout(() => (setBusy(false), setPw(''), h.finish(), haptic(v.dif ? 'warning' : 'success')), 900);
   };
   return (
-    <View style={{ flex: 1, backgroundColor: C.paper, minWidth: 1024 }}>
-      <View style={{ height: 64, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 32, borderBottomWidth: 1, borderBottomColor: C.line }}>
+    <View style={{ flex: 1, backgroundColor: C.paper }}>
+      <View style={{ height: 64, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: pad, borderBottomWidth: 1, borderBottomColor: C.line }}>
         <MuntuLogo size={22} />
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <Txt style={[type(10, 600, 0.22, true), { color: C.muted }]}>Recepção · Talatona</Txt>
+          {width < 520 ? null : <Txt style={[type(10, 600, 0.22, true), { color: C.muted }]}>Recepção · Talatona</Txt>}
           <Avatar initials="TL" size={30} bg={C.ink} fg={C.paper} />
         </View>
       </View>
-      <View style={{ flex: 1, flexDirection: 'row' }}>
-        <View style={{ width: 340, backgroundColor: C.canvas, borderRightWidth: 1, borderRightColor: C.line, padding: 40, gap: 24 }}>
+      <View style={{ flex: 1, flexDirection: narrow ? 'column' : 'row' }}>
+        {narrow ? (
+          <View style={{ backgroundColor: C.canvas, borderBottomWidth: 1, borderBottomColor: C.line, paddingTop: 20, paddingHorizontal: pad, gap: 14 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-end', justifyContent: 'space-between', gap: 10 }}>
+              <View style={{ gap: 6 }}>
+                <Txt style={[type(10, 600, 0.22, true), { color: C.muted }]}>Quinta-feira · Turno da tarde</Txt>
+                <Txt style={type(26, 400, 0.16, true)}>Receber turno</Txt>
+              </View>
+              <Press onPress={h.toggleExc} feedback="select">
+                <Txt style={[type(13, 400), { color: '#9a4c08' }]}>{h.exc ? 'Anular recebimento sem conferência' : 'A Celma já saiu? Receber sem ela →'}</Txt>
+              </Press>
+            </View>
+            <Txt style={[type(12, 400), { color: C.grey }]}>Manhã · 07:00–14:00 · entregue por Celma Bento · {h.exc ? 'já saiu' : 'confirmou às 14:01'}</Txt>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 4 }}>
+              {steps.map(([l, b], i) => (
+                <Press key={l} feedback="select" scaleTo={1} onPress={() => go(i)} accessibilityState={{ selected: step === i }} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 12, paddingHorizontal: 10, borderBottomWidth: 3, borderBottomColor: step === i ? C.accent : 'transparent' }}>
+                  <Txt style={type(12, 300)}>0{i}</Txt>
+                  <Txt style={type(11, 600, 0.14, true)}>{l}</Txt>
+                  {b && b.t !== 'neutral' ? <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: TONE[b.t][0] }} /> : null}
+                </Press>
+              ))}
+            </ScrollView>
+          </View>
+        ) : (
+        <View style={{ width: width < 1100 ? 300 : 340, backgroundColor: C.canvas, borderRightWidth: 1, borderRightColor: C.line, padding: pad, gap: 24 }}>
           <View style={{ gap: 10 }}>
             <Txt style={[type(10, 600, 0.22, true), { color: C.muted }]}>Quinta-feira · Turno da tarde</Txt>
             <Txt style={type(34, 400, 0.18, true)}>Receber turno</Txt>
@@ -95,13 +121,14 @@ export function DReceberTurno() {
             <Txt style={[type(13, 400), { color: '#9a4c08' }]}>{h.exc ? 'Anular' : 'Receber sem ela →'}</Txt>
           </Press>
         </View>
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 40, gap: 20, maxWidth: 820 }}>
+        )}
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: pad, gap: 20, maxWidth: 820 }}>
           <Animated.View key={step} entering={M.enter()} style={{ gap: 20 }}>
             {step === 0 ? (
               <>
-                <View style={{ flexDirection: 'row', borderWidth: 1, borderColor: C.line }}>
-                  {v.tiles.map((t, i) => (
-                    <View key={t.l} style={{ flex: 1, padding: 16, gap: 6, borderLeftWidth: i ? 1 : 0, borderLeftColor: C.line }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', borderTopWidth: 1, borderLeftWidth: 1, borderColor: C.line }}>
+                  {v.tiles.map((t) => (
+                    <View key={t.l} style={{ flexGrow: 1, flexBasis: 150, padding: 16, gap: 6, borderRightWidth: 1, borderBottomWidth: 1, borderColor: C.line }}>
                       <Txt style={[type(10, 600, 0.22, true), { color: C.muted }]}>{t.l}</Txt>
                       <Txt style={[type(18, 400), { color: t.tone === 'ok' ? C.ok : t.tone === 'warn' ? C.warn : C.ink }]}>{t.v}</Txt>
                     </View>
@@ -149,12 +176,12 @@ export function DReceberTurno() {
                 </View>
                 {h.revealed ? (
                   <Animated.View entering={M.enter()} style={{ gap: 12 }}>
-                    <View style={{ flexDirection: 'row', gap: 12 }}>
-                      <View style={{ flex: 1, backgroundColor: C.sand, padding: 16 }}>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+                      <View style={{ flexGrow: 1, flexBasis: 200, backgroundColor: C.sand, padding: 16 }}>
                         <Muted size={12}>Saldo esperado</Muted>
                         <Txt style={type(24, 300)}>{kn(SHIFT_EXPECTED_CASH)} Kz</Txt>
                       </View>
-                      <Animated.View entering={M.fade()} style={{ flex: 1, padding: 16, backgroundColor: v.dif === 0 ? C.okBg : C.badBg }}>
+                      <Animated.View entering={M.fade()} style={{ flexGrow: 1, flexBasis: 200, padding: 16, backgroundColor: v.dif === 0 ? C.okBg : C.badBg }}>
                         <Txt style={[type(12, 500), { color: v.dif === 0 ? C.ok : C.bad }]}>{v.dif === 0 ? 'Sem diferença' : 'Diferença por apurar'}</Txt>
                         <Txt style={[type(24, 300), { color: v.dif === 0 ? C.ok : C.bad }]}>{v.difL}</Txt>
                       </Animated.View>
@@ -204,8 +231,8 @@ export function DReceberTurno() {
                 {SHIFT_PAYS.map((p) => {
                   const ln = v.payLine(p.k);
                   return (
-                  <View key={p.k} style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 20, paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.line }}>
-                    <View style={{ flex: 1, minWidth: 0, gap: 3 }}>
+                  <View key={p.k} style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start', columnGap: 20, rowGap: 12, paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.line }}>
+                    <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 220, minWidth: 0, gap: 3 }}>
                       <Strong>{p.l}</Strong>
                       <Muted size={12}>{p.d}</Muted>
                       <Txt style={[type(12, 400), { color: C.grey }]}>Origem · {p.src}</Txt>
@@ -229,9 +256,9 @@ export function DReceberTurno() {
               <>
                 <Txt style={type(26, 400, 0.16, true)}>Pendências</Txt>
                 {SHIFT_PENDING.map((p) => (
-                  <View key={p.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.line }}>
+                  <View key={p.id} style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 16, rowGap: 10, paddingVertical: 14, borderTopWidth: 1, borderTopColor: C.line }}>
                     <Tag l={PENDING_KIND[p.k]![0]} c={TONE[PENDING_KIND[p.k]![1] as 'ok'][0]} bg={TONE[PENDING_KIND[p.k]![1] as 'ok'][1]} />
-                    <View style={{ flex: 1 }}>
+                    <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 220 }}>
                       <Strong>{p.t}</Strong>
                       <Muted size={12}>{p.d}</Muted>
                     </View>
@@ -299,6 +326,9 @@ export function DCriarConta() {
   const [n, setN] = useState(1);
   const [err, setErr] = useState('');
   const [sent, setSent] = useState(false);
+  const { width } = useWindowDimensions();
+  const narrow = width < 900; // faixa laranja por cima em vez da coluna
+  const pad = width < 640 ? 20 : width < 1100 ? 32 : 48;
   const fail = (m: string) => (haptic('error'), setErr(m));
   const next = () => {
     if (n === 1) {
@@ -318,8 +348,23 @@ export function DCriarConta() {
   };
   const cta = n === 3 ? (Object.keys(o.imported).length ? 'Rever e confirmar' : 'Continuar sem importar') : n === 5 ? (sent ? 'Entrar no painel' : total ? `Enviar a ${kn(total)} pessoas` : 'Continuar sem enviar') : 'Continuar';
   return (
-    <View style={{ flex: 1, flexDirection: 'row', backgroundColor: C.paper, minWidth: 1024 }}>
-      <View style={{ width: 360, backgroundColor: C.accent, padding: 40, gap: 28 }}>
+    <View style={{ flex: 1, flexDirection: narrow ? 'column' : 'row', backgroundColor: C.paper }}>
+      {narrow ? (
+        <View style={{ backgroundColor: C.accent, paddingTop: 20, paddingHorizontal: pad, paddingBottom: 18, gap: 16 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+            <MuntuLogo size={20} descriptorColor={C.ink} descriptorInk={C.sand2} />
+            <Press onPress={() => router.replace('/')}>
+              <Txt style={type(12, 400)}>← Já tenho conta</Txt>
+            </Press>
+          </View>
+          <View style={{ flexDirection: 'row', gap: 4 }}>
+            {NT.map((l, i) => (
+              <Press key={l} feedback="select" scaleTo={1} onPress={() => i + 1 <= n && setN(i + 1)} accessibilityLabel={`Passo ${i + 1} · ${l}`} style={{ flex: 1, height: 4, backgroundColor: i + 1 <= n ? C.ink : 'rgba(29,28,26,.25)' }} />
+            ))}
+          </View>
+        </View>
+      ) : (
+      <View style={{ width: width < 1100 ? 300 : 360, backgroundColor: C.accent, padding: width < 1100 ? 32 : 40, gap: 28 }}>
         <MuntuLogo size={22} descriptorColor={C.ink} descriptorInk={C.sand2} />
         <Txt style={type(34, 400, 0.18, true)}>Criar conta</Txt>
         <View>
@@ -336,7 +381,8 @@ export function DCriarConta() {
           <Txt style={type(12, 400)}>← Já tenho conta</Txt>
         </Press>
       </View>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 48, gap: 24, maxWidth: 780 }}>
+      )}
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: pad, gap: 24, maxWidth: 780 }}>
         <Animated.View key={n} entering={M.enter()} style={{ gap: 24 }}>
           <View style={{ gap: 8 }}>
             <Txt style={[type(10, 600, 0.22, true), { color: C.muted }]}>Passo {n} de 5</Txt>
@@ -344,21 +390,21 @@ export function DCriarConta() {
           </View>
           {n === 1 ? (
             <View style={{ gap: 20 }}>
-              <View style={{ flexDirection: 'row', gap: 32 }}>
-                <Field style={{ flex: 1 }} label="Nome do responsável" value={o.nome} onChangeText={(x) => (o.set({ nome: x }), setErr(''))} />
-                <Field style={{ flex: 1 }} label="Telemóvel" value={o.tel} onChangeText={(x) => (o.set({ tel: phone(x) }), setErr(''))} />
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 32, rowGap: 20 }}>
+                <Field style={{ flexGrow: 1, flexBasis: 240 }} label="Nome do responsável" value={o.nome} onChangeText={(x) => (o.set({ nome: x }), setErr(''))} />
+                <Field style={{ flexGrow: 1, flexBasis: 240 }} label="Telemóvel" value={o.tel} onChangeText={(x) => (o.set({ tel: phone(x) }), setErr(''))} />
               </View>
-              <View style={{ flexDirection: 'row', gap: 32 }}>
-                <Field style={{ flex: 1 }} label="Email" value={o.email} placeholder="Para facturas da MUNTU" onChangeText={(x) => o.set({ email: x })} />
-                <Field style={{ flex: 1 }} label="Senha" value={o.pw} placeholder="Mínimo 8 caracteres" secureTextEntry onChangeText={(x) => (o.set({ pw: x }), setErr(''))} />
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 32, rowGap: 20 }}>
+                <Field style={{ flexGrow: 1, flexBasis: 240 }} label="Email" value={o.email} placeholder="Para facturas da MUNTU" onChangeText={(x) => o.set({ email: x })} />
+                <Field style={{ flexGrow: 1, flexBasis: 240 }} label="Senha" value={o.pw} placeholder="Mínimo 8 caracteres" secureTextEntry onChangeText={(x) => (o.set({ pw: x }), setErr(''))} />
               </View>
             </View>
           ) : n === 2 ? (
             <View style={{ gap: 20 }}>
-              <View style={{ flexDirection: 'row', gap: 32 }}>
-                <Field style={{ flex: 2 }} label="Nome do ginásio" value={o.gym} onChangeText={(x) => (o.set({ gym: x }), setErr(''))} />
-                <Field style={{ flex: 1 }} label="NIF" value={o.nif} onChangeText={(x) => o.set({ nif: x })} />
-                <Select style={{ flex: 1 }} label="Cidade" value={o.city} onChange={(x) => o.set({ city: x })} options={['Luanda', 'Benguela', 'Huambo', 'Lobito', 'Lubango', 'Cabinda'].map((x) => ({ v: x, l: x }))} />
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 32, rowGap: 20 }}>
+                <Field style={{ flexGrow: 2, flexBasis: 260 }} label="Nome do ginásio" value={o.gym} onChangeText={(x) => (o.set({ gym: x }), setErr(''))} />
+                <Field style={{ flexGrow: 1, flexBasis: 140 }} label="NIF" value={o.nif} onChangeText={(x) => o.set({ nif: x })} />
+                <Select style={{ flexGrow: 1, flexBasis: 140 }} label="Cidade" value={o.city} onChange={(x) => o.set({ city: x })} options={['Luanda', 'Benguela', 'Huambo', 'Lobito', 'Lubango', 'Cabinda'].map((x) => ({ v: x, l: x }))} />
               </View>
               <Txt style={[type(10, 600, 0.22, true), { color: C.muted }]}>Filiais</Txt>
               {o.fils.map((f, i) => (
@@ -371,11 +417,11 @@ export function DCriarConta() {
               <Button label="+ Adicionar filial" kind="outline" size="sm" style={{ alignSelf: 'flex-start' }} onPress={() => o.set({ fils: [...o.fils, ''] })} />
             </View>
           ) : n === 3 ? (
-            <View style={{ flexDirection: 'row', gap: 16 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
               {IMPORT_KINDS.map((k) => {
                 const ld = !!o.imported[k.k];
                 return (
-                  <Animated.View key={k.k} layout={M.layout()} style={{ flex: 1, borderWidth: 1, borderColor: ld ? C.ink : C.line, backgroundColor: ld ? '#fff' : 'transparent', padding: 18, gap: 10 }}>
+                  <Animated.View key={k.k} layout={M.layout()} style={{ flexGrow: 1, flexBasis: 220, borderWidth: 1, borderColor: ld ? C.ink : C.line, backgroundColor: ld ? '#fff' : 'transparent', padding: 18, gap: 10 }}>
                     <Strong>{k.l}</Strong>
                     <Muted size={12}>{k.d}</Muted>
                     {ld ? (
@@ -447,7 +493,7 @@ export function DCriarConta() {
             </View>
           )}
           {err ? <Note tone="bad" text={err} /> : null}
-          <View style={{ flexDirection: 'row', gap: 10 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
             {n > 1 ? <Button label="Voltar" kind="outline" size="lg" onPress={() => (setN(n - 1), setErr(''))} /> : null}
             <Button label={cta} size="lg" onPress={next} feedback="press" />
           </View>

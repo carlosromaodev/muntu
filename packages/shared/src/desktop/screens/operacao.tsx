@@ -9,7 +9,7 @@ import { initials, kn, knc, pKz } from '../../lib/format';
 import { useMuntu } from '../../store/useMuntu';
 import { C, type } from '../../theme/tokens';
 import { M, Avatar, Bars, Button, Chip, ChipGroup, Field, MoneyInput, Note, Press, Select, Tabs, TextArea, Txt, useToast } from '../../ui';
-import { Cols, DPage, KpiRow, Muted, PageHead, Panel, Status, Strong, Table, Tag } from '../kit';
+import { Cols, DPage, fit, GUT, kpiLayout, KpiRow, Muted, PageHead, Panel, Status, Strong, Table, Tag, useInner } from '../kit';
 import { useDRole } from '../Shell';
 import { useDesk } from '../session';
 
@@ -58,6 +58,7 @@ export function DCaixa() {
   const hasT = true;
   const [tab, setTab] = useState('atual');
   const [notas, setNotas] = useState<Record<number, string>>({ 5000: '12', 2000: '8', 1000: '6', 500: '4', 200: '5', 100: '8', 50: '4' });
+  const kl = kpiLayout(useInner(), 3, true);
   const [close, setClose] = useState<'count' | 'revealed' | 'pending'>('count');
   const [movs, setMovs] = useState<{ h: string; d: string; m: string; v: number }[]>([]);
   const [form, setForm] = useState<keyof typeof FORML | null>(null);
@@ -95,13 +96,13 @@ export function DCaixa() {
   return (
     <DPage>
       <PageHead title="Caixa" sub="Talatona · Turno da manhã · Celma Bento" />
-      <View style={{ paddingHorizontal: 40, paddingBottom: 20 }}>
+      <View style={{ paddingHorizontal: GUT, paddingBottom: 20 }}>
         <Tabs options={[{ v: 'atual', l: hasT ? 'Turno actual' : 'Caixa de hoje' }, { v: 'hist', l: hasT ? 'Histórico de turnos' : 'Histórico' }]} value={tab} onChange={setTab} />
       </View>
       {tab === 'atual' ? (
         <>
-          <View style={{ flexDirection: 'row', gap: 16, paddingHorizontal: 40, paddingBottom: 20 }}>
-            <Animated.View layout={M.layout()} style={{ flex: 1.4, padding: 22, gap: 14, backgroundColor: !revealed ? C.sand : dif === 0 ? C.okBg : C.accent }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16, paddingHorizontal: GUT, paddingBottom: 20 }}>
+            <Animated.View layout={M.layout()} style={{ flex: kl.oneRow ? 1.4 : undefined, width: kl.oneRow ? undefined : '100%', padding: 22, gap: 14, backgroundColor: !revealed ? C.sand : dif === 0 ? C.okBg : C.accent }}>
               <Txt style={type(13, 500)}>Kz · Diferença do turno</Txt>
               <Txt style={type(44, 300)}>{revealed ? kn(dif) : '••••'}</Txt>
               <Txt style={type(10, 600, 0.18, true)}>{revealed ? (dif === 0 ? 'Caixa certo' : 'Precisa de justificação') : 'Oculta até fechar'}</Txt>
@@ -111,13 +112,13 @@ export function DCaixa() {
               [String(turnoMovs.length).padStart(2, '0'), 'Movimentos do turno'],
               ['96 500,00', 'Kz · Electrónico conciliado'],
             ].map(([v, l], i) => (
-              <Animated.View key={l} entering={M.enter(40 * (i + 1))} style={{ flex: 1, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 22, gap: 8, justifyContent: 'space-between' }}>
-                <Txt style={type(32, 300)}>{v}</Txt>
+              <Animated.View key={l} entering={M.enter(40 * (i + 1))} style={{ flex: kl.oneRow ? 1 : undefined, width: kl.tileW, minWidth: 0, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 22, gap: 8, justifyContent: 'space-between' }}>
+                <Txt numberOfLines={1} style={type(fit(v, 32, 8), 300)}>{v}</Txt>
                 <Txt style={[type(13, 500), { color: C.grey }]}>{l}</Txt>
               </Animated.View>
             ))}
           </View>
-          <Cols flex={[1, 1]}>
+          <Cols flex={[1, 1]} min={440}>
             <Panel
               title="Movimentos do turno"
               i={0}
@@ -229,10 +230,10 @@ export function DCaixa() {
             </Panel>
           </Cols>
           {close === 'pending' || (close === 'revealed' && dif === 0) ? (
-            <View style={{ paddingHorizontal: 40 }}>
+            <View style={{ paddingHorizontal: GUT }}>
               <Panel title="Passagem de turno">
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
-                  <View style={{ flex: 1, gap: 4 }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 20 }}>
+                  <View style={{ flexGrow: 1, flexShrink: 1, flexBasis: 280, gap: 4 }}>
                     <Txt style={type(14, 400)}>
                       Fundo de troco a entregar ao turno da tarde: <Txt style={type(14, 600)}>20 000,00 Kz</Txt>
                     </Txt>
@@ -245,7 +246,7 @@ export function DCaixa() {
           ) : null}
         </>
       ) : (
-        <View style={{ paddingHorizontal: 40 }}>
+        <View style={{ paddingHorizontal: GUT }}>
           <Panel title="Histórico de turnos">
             <Table
               cols={[{ l: 'Data', w: 60 }, { l: 'Filial' }, { l: 'Operador' }, { l: 'Turno' }, { l: 'Horário' }, { l: 'Esperado', align: 'right' }, { l: 'Contado', align: 'right' }, { l: 'Diferença', align: 'right' }, { l: 'Estado', w: 160 }]}
@@ -301,9 +302,9 @@ export function DPendencias() {
     <DPage>
       <PageHead title="Pendências" sub="Passam de turno em turno até alguém as resolver" actions={[{ label: showNew ? 'Fechar' : 'Nova pendência', onPress: () => setShowNew(!showNew) }]} />
       {showNew ? (
-        <Animated.View entering={M.enter()} style={{ marginHorizontal: 40, marginBottom: 20, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 20, flexDirection: 'row', gap: 16, alignItems: 'flex-end' }}>
-          <Field style={{ flex: 2 }} label="Pendência" value={nt} onChangeText={setNt} placeholder="O que fica por fazer" />
-          <Select style={{ flex: 1 }} label="Tipo" value={nk} onChange={setNk} options={Object.entries(QK).map(([v, x]) => ({ v, l: x[0] }))} />
+        <Animated.View entering={M.enter()} style={{ marginHorizontal: GUT, marginBottom: 20, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line, padding: 20, flexDirection: 'row', flexWrap: 'wrap', gap: 16, alignItems: 'flex-end' }}>
+          <Field style={{ flexGrow: 2, flexBasis: 260 }} label="Pendência" value={nt} onChangeText={setNt} placeholder="O que fica por fazer" />
+          <Select style={{ flexGrow: 1, flexBasis: 180 }} label="Tipo" value={nk} onChange={setNk} options={Object.entries(QK).map(([v, x]) => ({ v, l: x[0] }))} />
           <Button
             label="Criar"
             disabled={nt.trim().length < 3}
@@ -424,7 +425,7 @@ export function DAvisos() {
   return (
     <DPage>
       <PageHead title="Avisos" sub={`${un ? `${un} por ler` : 'Tudo lido'} · enviados pela gestão`} actions={[{ label: 'Marcar todos como lidos', kind: 'outline', onPress: () => NOTICES.forEach((n) => markRead(n.id)) }]} />
-      <View style={{ paddingHorizontal: 40, paddingBottom: 20, flexDirection: 'row' }}>
+      <View style={{ paddingHorizontal: GUT, paddingBottom: 20, flexDirection: 'row' }}>
         <ChipGroup
           size="sm"
           options={[
@@ -436,7 +437,7 @@ export function DAvisos() {
           onChange={setF}
         />
       </View>
-      <View style={{ paddingHorizontal: 40, gap: 12, maxWidth: 900 }}>
+      <View style={{ paddingHorizontal: GUT, gap: 12, maxWidth: 900 }}>
         {list.map((a, i) => {
           const rd = !!readNotices[a.id];
           const s = ST[a.p === 'urgente' ? 'divida' : 'congelado']!;
@@ -475,17 +476,19 @@ function PresentTable({ now }: { now: number }) {
   const [zone, setZone] = useState('Todos');
   const ql = q.trim().toLowerCase();
   const rows = PRESENT.filter((p) => (zone === 'Todos' || p.z.startsWith(zone)) && (!ql || p.n.toLowerCase().includes(ql)));
-  const COLS = [{ l: 'Membro', flex: 2 }, { l: 'Plano', flex: 1.4 }, { l: 'Entrou', w: 90 }, { l: 'Zona', flex: 1.2 }, { l: 'Há', w: 100, right: true }] as const;
-  const cell = (c: (typeof COLS)[number]) => ({ flex: 'flex' in c ? c.flex : undefined, width: 'w' in c ? c.w : undefined, minWidth: 0 });
+  const slim = useInner() < 700; // janelas estreitas: sem as colunas Plano e Zona
+  const ALL = [{ l: 'Membro', flex: 2 }, { l: 'Plano', flex: 1.4 }, { l: 'Entrou', w: 70 }, { l: 'Zona', flex: 1.2 }, { l: 'Há', w: 90, right: true }] as const;
+  const COLS = ALL.filter((c) => !slim || (c.l !== 'Plano' && c.l !== 'Zona'));
+  const cell = (c: (typeof ALL)[number]) => ({ flex: 'flex' in c ? c.flex : undefined, width: 'w' in c ? c.w : undefined, minWidth: 0 });
   return (
-    <Animated.View entering={M.enter(80)} style={{ marginHorizontal: 40, marginBottom: 20, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 20, paddingVertical: 20, paddingHorizontal: 28, borderBottomWidth: 1, borderBottomColor: C.line, flexWrap: 'wrap' }}>
+    <Animated.View entering={M.enter(80)} style={{ marginHorizontal: GUT, marginBottom: 20, backgroundColor: C.paper, borderWidth: 1, borderColor: C.line }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 20, paddingVertical: 20, paddingHorizontal: slim ? 18 : 28, borderBottomWidth: 1, borderBottomColor: C.line, flexWrap: 'wrap' }}>
         <View style={{ gap: 4, flexShrink: 1 }}>
           <Txt style={type(15, 600)}>Membros presentes</Txt>
           <Muted size={12}>{`${PRESENT.length} de ${now} com check-in nesta lista · saem da lista ao passar na catraca`}</Muted>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <View style={{ flexDirection: 'row', gap: 4, padding: 4, backgroundColor: C.sand }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 12, flexGrow: slim ? 1 : 0 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, padding: 4, backgroundColor: C.sand }}>
             {['Todos', 'Musculação', 'Cardio', 'Aula'].map((z) => {
               const on = zone === z;
               const n = z === 'Todos' ? PRESENT.length : PRESENT.filter((p) => p.z.startsWith(z)).length;
@@ -497,13 +500,13 @@ function PresentTable({ now }: { now: number }) {
               );
             })}
           </View>
-          <View style={{ width: 220, height: 40, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, borderWidth: 1, borderColor: C.lineStrong, backgroundColor: '#fff' }}>
+          <View style={{ flexBasis: 220, flexGrow: slim ? 1 : 0, height: 40, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, borderWidth: 1, borderColor: C.lineStrong, backgroundColor: '#fff' }}>
             <View style={{ width: 11, height: 11, borderWidth: 1.5, borderColor: C.muted, borderRadius: 6 }} />
             <TextInput value={q} onChangeText={setQ} placeholder="Procurar membro" placeholderTextColor={C.faint} accessibilityLabel="Procurar membro presente" style={[type(14, 400), { flex: 1, minWidth: 0, color: C.ink, outlineStyle: 'none' } as any]} />
           </View>
         </View>
       </View>
-      <View style={{ flexDirection: 'row', gap: 16, paddingVertical: 10, paddingHorizontal: 28, borderBottomWidth: 1, borderBottomColor: C.line }}>
+      <View style={{ flexDirection: 'row', gap: 16, paddingVertical: 10, paddingHorizontal: slim ? 18 : 28, borderBottomWidth: 1, borderBottomColor: C.line }}>
         {COLS.map((c) => (
           <Txt key={c.l} style={[type(12, 500), { color: C.muted, textAlign: 'right' in c ? 'right' : 'left' }, cell(c)]}>
             {c.l}
@@ -513,8 +516,8 @@ function PresentTable({ now }: { now: number }) {
       {rows.map((p) => {
         const m = sinceMin(p.h);
         return (
-          <Press key={p.n} feedback={false} scaleTo={1} accessibilityRole="text" style={({ hovered }) => ({ flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 10, paddingHorizontal: 28, borderBottomWidth: 1, borderBottomColor: C.line, backgroundColor: hovered ? '#fff' : 'transparent' })}>
-            <View style={[cell(COLS[0]), { flexDirection: 'row', alignItems: 'center', gap: 12 }]}>
+          <Press key={p.n} feedback={false} scaleTo={1} accessibilityRole="text" style={({ hovered }) => ({ flexDirection: 'row', alignItems: 'center', gap: 16, paddingVertical: 10, paddingHorizontal: slim ? 18 : 28, borderBottomWidth: 1, borderBottomColor: C.line, backgroundColor: hovered ? '#fff' : 'transparent' })}>
+            <View style={[cell(ALL[0]), { flexDirection: 'row', alignItems: 'center', gap: 12 }]}>
               <View>
                 <Avatar initials={initials(p.n)} size={32} />
                 <View style={{ position: 'absolute', right: -2, bottom: -2, width: 9, height: 9, borderRadius: 5, backgroundColor: C.ok }} />
@@ -528,16 +531,20 @@ function PresentTable({ now }: { now: number }) {
                 </View>
               ) : null}
             </View>
-            <Txt numberOfLines={1} style={[type(14, 400), { color: C.grey }, cell(COLS[1])]}>
-              {p.pl}
-            </Txt>
-            <Txt tabular style={[type(14, 400), cell(COLS[2])]}>
+            {slim ? null : (
+              <Txt numberOfLines={1} style={[type(14, 400), { color: C.grey }, cell(ALL[1])]}>
+                {p.pl}
+              </Txt>
+            )}
+            <Txt tabular style={[type(14, 400), cell(ALL[2])]}>
               {p.h}
             </Txt>
-            <Txt numberOfLines={1} style={[type(14, 400), { color: C.grey }, cell(COLS[3])]}>
-              {p.z}
-            </Txt>
-            <Txt tabular style={[type(14, 400), { textAlign: 'right', color: m > 75 ? '#9a4c08' : C.grey }, cell(COLS[4])]}>
+            {slim ? null : (
+              <Txt numberOfLines={1} style={[type(14, 400), { color: C.grey }, cell(ALL[3])]}>
+                {p.z}
+              </Txt>
+            )}
+            <Txt tabular style={[type(14, 400), { textAlign: 'right', color: m > 75 ? '#9a4c08' : C.grey }, cell(ALL[4])]}>
               {durL(m)}
             </Txt>
           </Press>
@@ -586,11 +593,11 @@ export function DGinasioAgora() {
         </Panel>
       </Cols>
       <PresentTable now={now} />
-      <View style={{ paddingHorizontal: 40 }}>
+      <View style={{ paddingHorizontal: GUT }}>
         <Panel title="Equipa presente">
-          <View style={{ flexDirection: 'row', gap: 12 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
             {staff.map((p) => (
-              <View key={p.i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderWidth: 1, borderColor: C.line, minWidth: 220 }}>
+              <View key={p.i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderWidth: 1, borderColor: C.line, flexGrow: 1, flexBasis: 220 }}>
                 <Avatar initials={p.i} size={32} />
                 <View>
                   <Strong size={13}>{p.n}</Strong>

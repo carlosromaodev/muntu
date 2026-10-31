@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Platform, ScrollView, useWindowDimensions, View } from 'react-native';
 import { Slot, usePathname, useRouter } from 'expo-router';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -10,9 +10,9 @@ import { C, type } from '../theme/tokens';
 import { Icon, OptionList, Press, Sheet, timing, Txt } from '../ui';
 import { DEFAULT_ROLE, DRole, DRoute, HOME, NAVS, ROUTES, WHO } from './nav';
 import { useDesk } from './session';
+import { DeskLayoutProvider, GUT, GUT_PX, RAIL_W, sizeOf } from './layout';
 
-const RAIL = 256;
-const MIN_W = 1024;
+const DRAWER_W = 280;
 
 /** Papel activo no desktop: o da sessão, ou o adequado ao ecrã aberto pelo endereço. */
 export function useDRole(): DRole {
@@ -53,7 +53,7 @@ function NavItem({ label, on, badge, onPress }: { label: string; on: boolean; ba
       {({ hovered }) => {
         const fg = on ? C.ink : hovered ? C.paper : '#b5b0a5';
         return (
-          <View style={{ height: 42, flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 24, backgroundColor: on ? 'transparent' : hovered ? '#2a2926' : 'transparent' }}>
+          <View style={{ height: 42, flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 22, backgroundColor: on ? 'transparent' : hovered ? '#2a2926' : 'transparent' }}>
             {hovered && !on ? <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, backgroundColor: C.accent }} /> : null}
             <View style={{ width: 22, alignItems: 'flex-start' }}>
               <Icon name={label} desk size={18} color={fg} />
@@ -70,7 +70,7 @@ function NavItem({ label, on, badge, onPress }: { label: string; on: boolean; ba
 }
 
 /** Barra lateral escura: filial/turno, menu do papel, lotação ao vivo e utilizador. */
-function Sidebar({ role, route }: { role: DRole; route: string }) {
+function Sidebar({ role, route, width }: { role: DRole; route: string; width: number }) {
   const router = useRouter();
   const { filial, turno, setFilial, setTurno } = useDesk();
   const { readNotices, signOut } = useMuntu();
@@ -85,7 +85,7 @@ function Sidebar({ role, route }: { role: DRole; route: string }) {
   const who = WHO[role];
   const now = OCC[OCC_NOW]!;
   return (
-    <View accessibilityLabel="Navegação" style={{ width: RAIL, backgroundColor: C.sidebar, height: '100%' }}>
+    <View accessibilityLabel="Navegação" style={{ width, backgroundColor: C.sidebar, height: '100%' }}>
       <View style={{ paddingTop: 28, paddingHorizontal: 24, paddingBottom: 22 }}>
         <MuntuLogo size={20} color={C.paper} descriptorColor="#4a4640" descriptorInk="#d9d4c4" />
       </View>
@@ -144,31 +144,42 @@ function Sidebar({ role, route }: { role: DRole; route: string }) {
 }
 
 /** Cabeçalho do conteúdo: caminho, pesquisa e aprovações (dono). */
-function TopBar({ role, route }: { role: DRole; route: string }) {
+function TopBar({ role, route, onMenu, compact }: { role: DRole; route: string; onMenu?: () => void; compact: boolean }) {
   const router = useRouter();
   const approvals = useMuntu((s) => s.approvals);
   const open = APPR.filter((a) => !approvals[a.id]).length;
   return (
-    <View style={{ height: 64, flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: 40, backgroundColor: C.paper, borderBottomWidth: 1, borderBottomColor: C.line }}>
-      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 12, flexShrink: 1 }}>
-        <Txt numberOfLines={1} style={[type(10, 600, 0.22, true), { color: C.muted }]}>
-          {role === 'dono' ? 'Rede Mwangolé Fit' : 'Mwangolé Fit · Talatona'}
-        </Txt>
-        <Txt style={{ color: '#c9c3b1' }}>/</Txt>
+    <View style={{ height: 64, flexDirection: 'row', alignItems: 'center', gap: compact ? 12 : 16, paddingHorizontal: GUT, backgroundColor: C.paper, borderBottomWidth: 1, borderBottomColor: C.line }}>
+      {onMenu ? (
+        <Press feedback="select" onPress={onMenu} accessibilityLabel="Abrir menu" style={({ hovered }) => ({ width: 40, height: 40, marginLeft: -8, alignItems: 'center', justifyContent: 'center', gap: 4, backgroundColor: hovered ? C.sand : 'transparent' })}>
+          {[0, 1, 2].map((i) => (
+            <View key={i} style={{ width: 18, height: 1.5, backgroundColor: C.ink }} />
+          ))}
+        </Press>
+      ) : null}
+      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 12, flexShrink: 1, minWidth: 0 }}>
+        {compact ? null : (
+          <>
+            <Txt numberOfLines={1} style={[type(10, 600, 0.22, true), { color: C.muted, flexShrink: 1 }]}>
+              {role === 'dono' ? 'Rede Mwangolé Fit' : 'Mwangolé Fit · Talatona'}
+            </Txt>
+            <Txt style={{ color: '#c9c3b1' }}>/</Txt>
+          </>
+        )}
         <Txt numberOfLines={1} style={type(10, 600, 0.22, true)}>
           {(NAVS[role].find(([r]) => r === route)?.[1] ?? ROUTES[route as DRoute]) || ''}
         </Txt>
       </View>
       <View style={{ flex: 1 }} />
-      <Press feedback="select" scaleTo={0.99} accessibilityLabel="Pesquisar membro" onPress={() => router.navigate('/membros')} style={({ hovered }) => ({ flexBasis: 380, flexShrink: 1, minWidth: 180, height: 40, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 14, backgroundColor: hovered ? '#e0d9c5' : C.sand })}>
+      <Press feedback="select" scaleTo={0.99} accessibilityLabel="Pesquisar membro" onPress={() => router.navigate('/membros')} style={({ hovered }) => ({ flexBasis: 380, flexShrink: 1, minWidth: compact ? 40 : 180, height: 40, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 14, backgroundColor: hovered ? '#e0d9c5' : C.sand })}>
         <Txt numberOfLines={1} style={[type(10, 600, 0.18, true), { color: C.grey, flexShrink: 1 }]}>
-          Pesquisar · nome, telefone, NIF
+          {compact ? 'Pesquisar' : 'Pesquisar · nome, telefone, NIF'}
         </Txt>
-        <Txt style={type(10, 600)}>⌘K</Txt>
+        {compact ? null : <Txt style={type(10, 600)}>⌘K</Txt>}
       </Press>
       {role === 'dono' ? (
         <Press feedback="select" onPress={() => router.navigate('/painel')} style={{ height: 40, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 4 }}>
-          <Txt style={type(10, 600, 0.18, true)}>Aprovações</Txt>
+          {compact ? null : <Txt style={type(10, 600, 0.18, true)}>Aprovações</Txt>}
           <View style={{ minWidth: 24, height: 24, backgroundColor: C.accent, alignItems: 'center', justifyContent: 'center' }}>
             <Txt style={type(12, 500)}>{String(open)}</Txt>
           </View>
@@ -199,20 +210,56 @@ export function DesktopShell() {
     return () => window.removeEventListener('keydown', h);
   }, [router]);
 
-  const body = (
-    <View style={{ flexDirection: 'row', width: Math.max(width, MIN_W), height, backgroundColor: C.canvas }}>
-      <Sidebar role={role} route={route} />
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <TopBar role={role} route={route} />
-        <Slot />
+  const size = sizeOf(width);
+  const drawer = RAIL_W[size] === 0;
+  const rail = drawer ? 0 : RAIL_W[size];
+  const [menu, setMenu] = useState(false);
+  useEffect(() => setMenu(false), [path, drawer]);
+  const layout = { size, window: width, content: width - rail, gut: GUT_PX[size], drawer };
+
+  return (
+    <DeskLayoutProvider value={layout}>
+      <View style={{ flexDirection: 'row', width, height, backgroundColor: C.canvas, overflow: 'hidden' }}>
+        {drawer ? null : <Sidebar role={role} route={route} width={rail} />}
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <TopBar role={role} route={route} compact={size === 'sm'} onMenu={drawer ? () => setMenu(true) : undefined} />
+          <Slot />
+        </View>
+        {drawer ? <Drawer open={menu} onClose={() => setMenu(false)} role={role} route={route} height={height} /> : null}
       </View>
-    </View>
+    </DeskLayoutProvider>
   );
-  return width < MIN_W ? (
-    <ScrollView horizontal style={{ flex: 1 }} contentContainerStyle={{ width: MIN_W }}>
-      {body}
-    </ScrollView>
-  ) : (
-    body
+}
+
+/** Menu lateral em gaveta para janelas estreitas: desliza da esquerda sobre o conteúdo. */
+function Drawer({ open, onClose, role, route, height }: { open: boolean; onClose: () => void; role: DRole; route: string; height: number }) {
+  const x = useSharedValue(0);
+  const [mounted, setMounted] = useState(open);
+  useEffect(() => {
+    if (open) setMounted(true);
+    x.value = withTiming(open ? 1 : 0, timing(open ? 260 : 200));
+    if (!open) {
+      const t = setTimeout(() => setMounted(false), 220);
+      return () => clearTimeout(t);
+    }
+  }, [open, x]);
+  useEffect(() => {
+    if (!open || Platform.OS !== 'web' || typeof window === 'undefined') return;
+    const h = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [open, onClose]);
+  const panel = useAnimatedStyle(() => ({ transform: [{ translateX: (x.value - 1) * DRAWER_W }] }));
+  const shade = useAnimatedStyle(() => ({ opacity: x.value * 0.45 }));
+  if (!mounted) return null;
+  return (
+    <View style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, zIndex: 50 }}>
+      <Animated.View style={[{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0, backgroundColor: C.ink }, shade]}>
+        <Press feedback={false} scaleTo={1} onPress={onClose} accessibilityLabel="Fechar menu" style={{ flex: 1 }} />
+      </Animated.View>
+      <Animated.View style={[{ position: 'absolute', left: 0, top: 0, height, width: DRAWER_W }, panel]}>
+        <Sidebar role={role} route={route} width={DRAWER_W} />
+      </Animated.View>
+    </View>
   );
 }
