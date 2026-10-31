@@ -8,6 +8,7 @@ import { CountersService } from '../core/counters.service.js';
 import { OutboxService } from '../core/outbox.service.js';
 import { DATABASE, type Database } from '../db/database.js';
 import { incidentEvents, incidents, members } from '../db/schema.js';
+import { TasksService } from '../tasks/tasks.service.js';
 
 export const MEMBER_TYPES = ['Equipamento', 'Limpeza', 'Segurança', 'Atendimento', 'Lesão', 'Outro'] as const;
 export const STAFF_TYPES = ['Equipamento', 'Instalações', 'Segurança', 'Membro', 'Acidente', 'Sistema', 'Outro'] as const;
@@ -23,6 +24,7 @@ export class IncidentsService {
     private readonly audit: AuditService,
     private readonly counters: CountersService,
     private readonly outbox: OutboxService,
+    private readonly tasks: TasksService,
   ) {}
 
   async create(ctx: AuthCtx, input: IncidentInput) {
@@ -46,6 +48,8 @@ export class IncidentsService {
         // RN-60 · urgente: recepção e gestor avisados de imediato.
         for (const target of [`filial:${input.branchId}:rececao`, `filial:${input.branchId}:gerente`, 'perfil:dono']) await this.outbox.enqueue(tx, ctx.orgId, 'push', target, 'ocorrencia.urgente', { code, type: input.type, zone: input.zone, hurt: !!input.hurt });
       }
+      // RN-64 · ocorrências da equipa ficam nas pendências até serem resolvidas.
+      if (isStaff) await this.tasks.createInTx(tx, ctx, { branchId: input.branchId, kind: 'ocorrencia', title: `${code} · ${input.type} · ${input.zone}`, detail: desc, originType: 'incident', originId: id });
       await this.audit.record(tx, ctx, 'ocorrencia.criada', 'incident', id, { code, type: input.type, urgency });
       const message = urgent ? 'Marcada como urgente. A recepção e o gestor foram avisados agora.' : isStaff ? `Encaminhada a ${input.routeTo ?? 'manutencao'}. Fica nas pendências até ser resolvida.` : 'A equipa responde em até 24 horas. Recebes um SMS quando houver novidades.';
       return { id, code, urgency, status: 'recebida', mensagem: message };
@@ -79,6 +83,7 @@ export class IncidentsService {
         const [m] = await tx.select({ phone: members.phone, name: members.name }).from(members).where(eq(members.userId, inc.reporterUserId));
         if (m) await this.outbox.enqueue(tx, ctx.orgId, 'sms', m.phone, 'ocorrencia.estado', { nome: m.name, code: inc.code, status }, `oc:${id}:${status}`);
       }
+      if (status === 'resolvida') await this.tasks.resolveByOrigin(tx, ctx, 'incident', id, note?.trim() || `Ocorrência ${inc.code} resolvida.`);
       await this.audit.record(tx, ctx, 'ocorrencia.estado', 'incident', id, { status, note: note ?? null }, { status: inc.status });
       return { id, code: inc.code, status };
     });

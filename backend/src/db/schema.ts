@@ -336,8 +336,10 @@ export const outbox = pgTable('outbox', {
   template: text('template').notNull(),
   payload: jsonb('payload').$type<Record<string, unknown>>().notNull(),
   dedupeKey: text('dedupe_key'),
-  status: text('status').$type<'pendente' | 'enviado' | 'falhou'>().notNull().default('pendente'),
+  status: text('status').$type<'pendente' | 'enviado' | 'falhou' | 'cancelado'>().notNull().default('pendente'),
   attempts: integer('attempts').notNull().default(0),
+  nextAttemptAt: ts('next_attempt_at').notNull().defaultNow(),
+  lastError: text('last_error'),
   createdAt: ts('created_at').notNull().defaultNow(),
   sentAt: ts('sent_at'),
 });
@@ -352,5 +354,115 @@ export const auditLog = pgTable('audit_log', {
   before: jsonb('before'),
   after: jsonb('after'),
   ip: text('ip'),
+  createdAt: ts('created_at').notNull().defaultNow(),
+});
+
+// ------------------------------------------------------------- 0002 · operação
+
+export type TaskKind = 'cobranca' | 'documento' | 'reclamacao' | 'reserva' | 'ocorrencia' | 'retencao' | 'outro';
+export type TaskStatus = 'aberta' | 'resolvida' | 'cancelada';
+
+export const tasks = pgTable('tasks', {
+  id: uuid('id').primaryKey(),
+  orgId: uuid('org_id').notNull(),
+  branchId: uuid('branch_id').notNull(),
+  number: integer('number').notNull(),
+  kind: text('kind').$type<TaskKind>().notNull(),
+  title: text('title').notNull(),
+  detail: text('detail'),
+  memberId: uuid('member_id'),
+  originType: text('origin_type'),
+  originId: uuid('origin_id'),
+  ownerUserId: uuid('owner_user_id').notNull(),
+  dueOn: day('due_on'),
+  status: text('status').$type<TaskStatus>().notNull(),
+  shiftsPassed: integer('shifts_passed').notNull().default(0),
+  createdBy: uuid('created_by').notNull(),
+  resolvedBy: uuid('resolved_by'),
+  resolvedAt: ts('resolved_at'),
+  resolution: text('resolution'),
+  createdAt: ts('created_at').notNull().defaultNow(),
+});
+
+export const taskEvents = pgTable('task_events', {
+  id: uuid('id').primaryKey(),
+  orgId: uuid('org_id').notNull(),
+  taskId: uuid('task_id').notNull(),
+  kind: text('kind').$type<'criada' | 'nota' | 'transferida' | 'passou_turno' | 'resolvida' | 'cancelada' | 'reaberta'>().notNull(),
+  note: text('note'),
+  fromUser: uuid('from_user'),
+  toUser: uuid('to_user'),
+  byUser: uuid('by_user').notNull(),
+  createdAt: ts('created_at').notNull().defaultNow(),
+});
+
+export const staffNotices = pgTable('staff_notices', {
+  id: uuid('id').primaryKey(),
+  orgId: uuid('org_id').notNull(),
+  branchId: uuid('branch_id'),
+  audience: text('audience').array().$type<string[]>().notNull(),
+  priority: text('priority').$type<'urgente' | 'normal'>().notNull(),
+  body: text('body').notNull(),
+  createdBy: uuid('created_by').notNull(),
+  createdAt: ts('created_at').notNull().defaultNow(),
+});
+
+export const noticeReads = pgTable('notice_reads', {
+  orgId: uuid('org_id').notNull(),
+  noticeId: uuid('notice_id').notNull(),
+  userId: uuid('user_id').notNull(),
+  readAt: ts('read_at').notNull().defaultNow(),
+});
+
+export const messageRules = pgTable('message_rules', {
+  orgId: uuid('org_id').notNull(),
+  kind: text('kind').notNull(),
+  enabled: boolean('enabled').notNull(),
+  channel: text('channel').$type<'sms' | 'whatsapp'>().notNull(),
+  template: text('template').notNull(),
+  sendHour: smallint('send_hour').notNull(),
+  updatedBy: uuid('updated_by').notNull(),
+  updatedAt: ts('updated_at').notNull().defaultNow(),
+});
+
+export const messageLog = pgTable('message_log', {
+  id: uuid('id').primaryKey(),
+  orgId: uuid('org_id').notNull(),
+  outboxId: uuid('outbox_id').notNull(),
+  channel: text('channel').$type<'sms' | 'whatsapp'>().notNull(),
+  template: text('template').notNull(),
+  recipient: text('recipient').notNull(),
+  memberId: uuid('member_id'),
+  body: text('body').notNull(),
+  status: text('status').$type<'enviado' | 'entregue' | 'falhou'>().notNull(),
+  providerRef: text('provider_ref'),
+  error: text('error'),
+  createdAt: ts('created_at').notNull().defaultNow(),
+});
+
+export const notifications = pgTable('notifications', {
+  id: uuid('id').primaryKey(),
+  orgId: uuid('org_id').notNull(),
+  userId: uuid('user_id').notNull(),
+  outboxId: uuid('outbox_id'),
+  kind: text('kind').notNull(),
+  title: text('title').notNull(),
+  body: text('body').notNull(),
+  data: jsonb('data').$type<Record<string, unknown>>().notNull().default({}),
+  readAt: ts('read_at'),
+  createdAt: ts('created_at').notNull().defaultNow(),
+});
+
+export type ContactOutcome = 'sem_resposta' | 'vai_voltar' | 'voltou' | 'cancelou' | 'vai_renovar' | 'renovou' | 'nao_renova';
+
+export const memberContacts = pgTable('member_contacts', {
+  id: uuid('id').primaryKey(),
+  orgId: uuid('org_id').notNull(),
+  memberId: uuid('member_id').notNull(),
+  channel: text('channel').$type<'telefone' | 'sms' | 'whatsapp' | 'presencial'>().notNull(),
+  reason: text('reason').$type<'viagem' | 'lesao' | 'insatisfacao' | 'falta_de_tempo' | 'preco' | 'mudou_de_zona' | 'outro'>(),
+  outcome: text('outcome').$type<ContactOutcome>().notNull(),
+  note: text('note'),
+  byUser: uuid('by_user').notNull(),
   createdAt: ts('created_at').notNull().defaultNow(),
 });

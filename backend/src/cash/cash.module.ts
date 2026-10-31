@@ -3,11 +3,12 @@ import { ApprovalsModule } from '../approvals/approvals.module.js';
 import { ApprovalsService } from '../approvals/approvals.service.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { DomainError } from '../common/errors.js';
+import { TasksModule } from '../tasks/tasks.module.js';
 import { CashController } from './cash.controller.js';
 import { CashService } from './cash.service.js';
 
 @Module({
-  imports: [AuthModule, ApprovalsModule],
+  imports: [AuthModule, ApprovalsModule, TasksModule],
   controllers: [CashController],
   providers: [CashService],
   exports: [CashService],

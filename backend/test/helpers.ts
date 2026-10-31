@@ -10,7 +10,7 @@ export async function setup() {
   const env = loadEnv({ NODE_ENV: 'test', DATABASE_URL: 'memory://', ACCESS_TOKEN_MINUTES: String(60 * 24 * 365) });
   const clock = new Clock(new Date('2026-10-30T09:00:00+01:00'));
   const { app, database } = await createApp(env, { clock, logger: false });
-  const call = async (method: 'GET' | 'POST' | 'PATCH', url: string, body?: unknown, token?: string): Promise<Res> => {
+  const call = async (method: 'GET' | 'POST' | 'PATCH' | 'PUT', url: string, body?: unknown, token?: string): Promise<Res> => {
     const r = await app.inject({ method, url: `/v1${url}`, payload: body as any, headers: token ? { authorization: `Bearer ${token}` } : {} });
     return { status: r.statusCode, body: r.body ? JSON.parse(r.body) : null };
   };

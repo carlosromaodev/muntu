@@ -34,8 +34,13 @@ Código em [`backend/`](../../backend), separado das apps. As decisões estão r
 | Aprovações | `approvals/` | Pedidos, níveis de aprovação, decisão com senha, execução | RF-APR |
 | Acessos | `access/` | QR dinâmico, regras de entrada, anti-passback, manual, lotação, presentes | RF-ACE |
 | Ocorrências | `incidents/` | Reportar, urgência, estados, avisos | RF-OCO |
+| Pendências | `tasks/` | Pendências com responsável, histórico só de acrescentar, passagem de turno | RF-PEN-01/02, RF-TUR-04, RN-54, RN-64 |
+| Avisos à equipa | `notices/` | Avisos por público e filial, confirmação de leitura | RF-AVI-01 |
+| Mensagens | `messaging/` | Regras e modelos, lembretes, envio do outbox com repetição, registo, notificações na app | RF-AVI-02/03/04, RN-75/76, RNF-53 |
+| Relatórios | `reports/` | Painel do dono, esperado vs. recebido, financeiro do dia, renovações, alertas de fuga | RF-REL-01/02, RF-PER-02/03, RF-RET-02 |
+| Retenção | `retention/` | Membros em risco com sinais explicáveis, contactos | RF-RET-01/03 |
 
-Próximos módulos (mesma estrutura): pendências e passagem de turno completa (pendências), avisos à equipa, regras de mensagens e envio de SMS, aulas e PT, retenção, painel do dono, importação, exportação.
+Próximos módulos (mesma estrutura): aulas e PT, indicações, marca, cofre de documentos, importação, exportação.
 
 ## Dados
 
@@ -59,6 +64,26 @@ GRANT muntu_app TO muntu_api;
 
 `cash_movements`, `shift_counts`, `invoices`, `invoice_agt_events`, `checkins`, `incident_events` e `audit_log` têm triggers que recusam `UPDATE`, `DELETE` e `TRUNCATE`, e o papel da aplicação só tem `SELECT, INSERT`. Corrige-se com estorno (movimento inverso ligado ao original) ou nota de crédito.
 
+### Hora oficial (RNF-13)
+
+As colunas de data dos registos usam `muntu_now()`, que devolve `app.now` quando a transacção o define e `now()` caso contrário. Cada transacção da aplicação define `app.now` com o relógio do servidor, por isso em produção é igual a `now()` e nos testes acompanha o relógio fixo.
+
+## Envio de mensagens
+
+```
+ facto (pagamento, aviso, aprovação…) ──► outbox (mesma transacção)
+ lembretes (agendador, RN-75)        ──►   │
+                                           ▼
+                              agendador (WORKER_ENABLED, a cada 30 s)
+                                           │
+              push ──► notificações na app │ sms/whatsapp ──► fornecedor ──► message_log
+```
+
+- **Regras** (`message_rules`): ligar/desligar, canal, modelo e hora de envio por organização; sem registo, valem as de omissão (`messaging/templates.ts`). Uma regra desligada cancela as mensagens dessa regra ainda por enviar.
+- **Lembretes**: 3 dias antes, no dia, 3 dias depois e no fim da tolerância, boas-vindas, aniversário e saudades. Cada um tem uma chave única (regra + subscrição + data): correr o agendador mais vezes nunca duplica.
+- **Repetição**: falha temporária → nova tentativa em 1, 5, 15, 60 min; à 5.ª falha fica `falhou`. Quem já recebeu não recebe outra vez.
+- **Isolamento**: o agendador usa o papel `muntu_worker`, que só vê que organizações têm mensagens por enviar; o envio corre dentro de cada organização com a mesma RLS dos pedidos. Em produção: `GRANT muntu_worker TO muntu_api;`.
+
 ## Fluxos principais
 
 **Inscrição e pagamento.** `POST /membros` → `POST /membros/:id/subscricoes` (pendente) → `POST /pagamentos`. Dinheiro e TPA confirmam logo (exigem caixa aberto); Express e referência ficam pendentes até ao webhook assinado. Confirmar = movimento no livro razão + activar subscrição + factura-recibo + SMS, na mesma transacção.
@@ -66,6 +91,8 @@ GRANT muntu_app TO muntu_api;
 **Fecho cego e passagem de turno.** `POST /caixa/turnos/:id/receber` com as quantidades por nota e moeda e o valor avulso. A primeira submissão revela a diferença; com diferença é preciso decidir (ressalva ou revisão), justificar e assinar com a senha. O turno anterior fecha sem ser alterado e o novo abre com o dinheiro contado.
 
 **Aprovações.** Um módulo pede (`requestInTx`) e regista o que acontece ao aprovar (`register(kind, handler)`); o pedido fica pendente, o aprovador certo é calculado pelas regras do dono, e a decisão exige a senha. Ninguém aprova o próprio pedido.
+
+**Passagem de turno.** Quem recebe vê `GET /caixa/turnos/:id/resumo` (totais por meio, pendências abertas, ocorrências do turno). Ao assinar, as pendências de quem entregou passam para quem recebeu (`passou_turno` no histórico).
 
 **Acesso.** `GET /acessos/qr` (membro) devolve um token assinado de 30 s. `POST /acessos/validar` avalia estado, âmbito, horário, anti-passback e lotação, regista a entrada e devolve "entra/não entra" e o motivo.
 

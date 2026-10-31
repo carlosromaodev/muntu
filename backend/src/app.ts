@@ -11,7 +11,9 @@ import { Database } from './db/database.js';
 export async function createApp(env: Env, opts: { database?: Database; clock?: Clock; logger?: boolean } = {}) {
   const database = opts.database ?? (await Database.connect(env.DATABASE_URL));
   await database.migrate();
-  const app = await NestFactory.create<NestFastifyApplication>(AppModule.forRoot({ env, database, clock: opts.clock }), new FastifyAdapter({ trustProxy: true, bodyLimit: 1_048_576 }), {
+  const clock = opts.clock ?? new Clock();
+  database.useClock(clock);
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule.forRoot({ env, database, clock }), new FastifyAdapter({ trustProxy: true, bodyLimit: 1_048_576 }), {
     logger: opts.logger === false ? false : ['log', 'warn', 'error'],
   });
   app.setGlobalPrefix('v1');

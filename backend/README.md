@@ -32,7 +32,7 @@ JWT_SECRET=… QR_SECRET=… WEBHOOK_SECRET=… NODE_ENV=production \
 npm run build && npm run migrate && npm start
 ```
 
-O utilizador da base de dados não pode ser `SUPERUSER` nem ter `BYPASSRLS`, e tem de ser membro do papel `muntu_app` (criado pela primeira migração): `GRANT muntu_app TO muntu_api;`.
+O utilizador da base de dados não pode ser `SUPERUSER` nem ter `BYPASSRLS`, e tem de ser membro dos papéis `muntu_app` e `muntu_worker` (criados pelas migrações): `GRANT muntu_app, muntu_worker TO muntu_api;`.
 
 ## Estrutura
 
@@ -50,7 +50,12 @@ src/
 ├─ invoices/      facturas (FR, FT, NC), séries, cadeia de hash
 ├─ approvals/     pedidos de aprovação e decisão com senha
 ├─ access/        QR dinâmico, regras de entrada, lotação, presentes
-└─ incidents/     ocorrências
+├─ incidents/     ocorrências
+├─ tasks/         pendências que passam de turno em turno
+├─ notices/       avisos à equipa com confirmação de leitura
+├─ messaging/     regras de mensagens, lembretes, envio do outbox, notificações na app
+├─ reports/       painel do dono, esperado vs. recebido, financeiro, renovações
+└─ retention/     membros em risco e contactos
 test/             testes de API e de regras (node --test)
 ```
 
@@ -93,16 +98,34 @@ Valores em **cêntimos** (`3000000` = 30 000,00 Kz).
 | GET | `/acessos/lotacao/:filialId` | todos | Lotação ao vivo |
 | GET | `/acessos/presentes?filialId=` | equipa | Membros dentro agora |
 | GET · POST | `/ocorrencias` | todos | Listar · reportar |
-| PATCH | `/ocorrencias/:id/estado` | equipa | Em análise / resolvida (avisa o membro) |
+| PATCH | `/ocorrencias/:id/estado` | equipa | Em análise / resolvida (avisa o membro; fecha a pendência) |
+| GET | `/caixa/turnos/:id/resumo` | recepção, finanças | Resumo para passar o turno: totais por meio, pendências, ocorrências |
+| GET · POST | `/pendencias` | equipa | Listar (filial, estado, minhas, tipo) · criar |
+| GET | `/pendencias/:id` | equipa | Pendência com histórico |
+| POST | `/pendencias/:id/notas` · `/transferir` · `/resolver` · `/reabrir` | equipa | Nota, passar a outra pessoa, resolver ou cancelar, reabrir |
+| GET · POST | `/avisos` | equipa · gerente | Avisos para mim (`?porLer=true`) · enviar aviso |
+| POST | `/avisos/:id/lido` · `/avisos/lidos` | equipa | Confirmar leitura |
+| GET | `/avisos/:id/leituras` | quem enviou, dono | Quem leu e quem falta |
+| GET · PUT | `/mensagens/regras` · `/mensagens/regras/:tipo` | gerente · dono | Regras automáticas (ligar, canal, modelo, hora, `repor`) |
+| GET | `/mensagens/envios` | gerente | Registo de envios e mensagens a repetir |
+| POST | `/mensagens/enviar` | gerente | Envio manual a um segmento (activos, em dívida, bloqueados, plano) |
+| GET · POST | `/notificacoes` · `/notificacoes/:id/lida` · `/notificacoes/lidas` | todos | Notificações na app |
+| GET | `/relatorios/painel?de=&ate=&filialId=` | gerente, finanças | Esperado, recebido, activos, churn, ticket médio, ocupação por hora, alertas |
+| GET | `/relatorios/esperado-recebido` | gerente, finanças | A diferença linha a linha |
+| GET | `/relatorios/financeiro?dia=` | finanças, gerente | Entradas por meio, saídas, caixas abertos, por confirmar, devedores |
+| GET | `/relatorios/renovacoes?dias=7\|15\|30` | recepção, finanças, gerente | Renovações próximas, com última entrada e último contacto |
+| GET | `/retencao/risco` | equipa | Membros em risco e porquê |
+| POST · GET | `/retencao/contactos` · `/retencao/contactos/:membroId` | equipa | Registar contacto (sem resposta → pendência) · histórico |
 
 ## Testes
 
-`npm test` compila e corre testes de regras puras e de API contra a aplicação real, com PostgreSQL embutido em memória e relógio fixo. Cobrem isolamento entre ginásios (RLS), registos imutáveis, inscrição e pagamento, facturação sequencial, idempotência, webhook assinado, descontos e aprovações, estornos com nota de crédito, fecho cego e passagem de turno, regras de acesso e QR, e ocorrências.
+`npm test` compila e corre testes de regras puras e de API contra a aplicação real, com PostgreSQL embutido em memória e relógio fixo. Cobrem isolamento entre ginásios (RLS), registos imutáveis, inscrição e pagamento, facturação sequencial, idempotência, webhook assinado, descontos e aprovações, estornos com nota de crédito, fecho cego e passagem de turno, regras de acesso e QR, ocorrências, pendências que passam de turno, avisos com leitura, envio de SMS com repetição, regras e lembretes, painel e relatórios, e retenção.
 
 ## Em falta (próximos passos)
 
 - Comunicação real com a AGT (especificação técnica a confirmar, ver `docs/requisitos/06-questoes-em-aberto.md`) e exportação SAF-T (AO).
-- Envio do outbox (SMS, push, WhatsApp) por um processo agendado, com repetição.
-- Pendências e tarefas, avisos à equipa, regras de mensagens, aulas e PT, retenção, painel do dono, importação de planilhas, exportação de dados.
+- Ligar um fornecedor real de SMS e WhatsApp (o actual só regista) e push para telemóveis (hoje as notificações ficam na app).
+- Aulas e PT, indicações, marca do ginásio, cofre de documentos, importação de planilhas, exportação de dados.
+- Tarefas geradas por sinais combinados (RF-PEN-03) e recusa de mensagens promocionais pelo membro (RN-76).
 - Sincronização em lote para o modo sem rede.
 - Documento OpenAPI gerado.

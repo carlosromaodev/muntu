@@ -37,6 +37,12 @@ export class CashController {
     return this.cash.history(ctx, parse(uuid, filialId));
   }
 
+  /** Resumo do turno para a passagem (RF-TUR-04). */
+  @Get('turnos/:id/resumo')
+  summary(@Ctx() ctx: AuthCtx, @Param('id') id: string) {
+    return this.cash.summary(ctx, parse(uuid, id));
+  }
+
   @Post('turnos/:id/movimentos')
   movement(@Ctx() ctx: AuthCtx, @Param('id') id: string, @Body() body: unknown) {
     const b = parse(Movement, body);

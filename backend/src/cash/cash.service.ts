@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, lte, sql } from 'drizzle-orm';
 import { ApprovalsService } from '../approvals/approvals.service.js';
 import { AuthService } from '../auth/auth.service.js';
 import { canSeeBranch, hasRole, type AuthCtx } from '../auth/context.js';
@@ -11,7 +11,8 @@ import { AuditService } from '../core/audit.service.js';
 import { OutboxService } from '../core/outbox.service.js';
 import { SettingsService } from '../core/settings.service.js';
 import { DATABASE, type Database, type Tx } from '../db/database.js';
-import { cashMovements, shiftCounts, shifts, type MovementKind, type PayMethod, type ShiftKind } from '../db/schema.js';
+import { TasksService } from '../tasks/tasks.service.js';
+import { cashMovements, incidents, shiftCounts, shifts, users, type MovementKind, type PayMethod, type ShiftKind } from '../db/schema.js';
 
 export type Shift = typeof shifts.$inferSelect;
 type CountInput = { quantities: Record<string, number>; looseCents: number; decision?: 'ressalva' | 'revisao'; justification?: string };
@@ -31,6 +32,7 @@ export class CashService {
     private readonly settings: SettingsService,
     private readonly approvals: ApprovalsService,
     private readonly auth: AuthService,
+    private readonly tasks: TasksService,
   ) {}
 
   async openShiftOf(tx: Tx, branchId: string): Promise<Shift | null> {
@@ -159,8 +161,13 @@ export class CashService {
       if (input.withoutColleague) await this.outbox.enqueue(tx, ctx.orgId, 'push', 'perfil:gerente', 'turno.sem_colega', { shiftId, motivo: input.withoutColleagueReason });
       await this.audit.record(tx, ctx, purpose === 'fecho' ? 'caixa.fechado' : 'turno.recebido', 'shift', shiftId, { decision, ...reveal, justification: input.justification ?? null });
       let next: Shift | null = null;
-      if (purpose === 'recepcao') next = await this.insertShift(tx, ctx, shift.branchId, input.kind ?? 'tarde', counted, shift.id);
-      return { fechado: true, decisao: decision, ...reveal, novoTurno: next };
+      let handed = 0;
+      if (purpose === 'recepcao') {
+        next = await this.insertShift(tx, ctx, shift.branchId, input.kind ?? 'tarde', counted, shift.id);
+        // RN-54 · as pendências de quem entregou passam para quem recebeu.
+        handed = await this.tasks.handOver(tx, ctx, shift.branchId, shift.openedBy);
+      }
+      return { fechado: true, decisao: decision, ...reveal, novoTurno: next, ...(purpose === 'recepcao' ? { pendenciasRecebidas: handed } : {}) };
     });
   }
 
@@ -173,6 +180,42 @@ export class CashService {
     await tx.update(shifts).set({ status: 'aberto', closedBy: null, closedAt: null }).where(eq(shifts.id, shiftId));
     await this.audit.record(tx, approver, 'caixa.reaberto', 'shift', shiftId, { status: 'aberto' }, { status: 'fechado' });
     return { ...shift, status: 'aberto' as const };
+  }
+
+  /**
+   * RF-TUR-04 · resumo para passar o turno: totais por meio de pagamento, saídas,
+   * pendências abertas da filial e ocorrências registadas durante o turno.
+   * O esperado em dinheiro só aparece à gerência e às finanças (fecho cego).
+   */
+  summary(ctx: AuthCtx, shiftId: string) {
+    return this.database.withOrg(ctx, async (tx) => {
+      const [shift] = await tx.select().from(shifts).where(eq(shifts.id, shiftId));
+      if (!shift) throw notFound('Turno');
+      if (!canSeeBranch(ctx, shift.branchId)) throw forbidden();
+      const movs = await tx.select().from(cashMovements).where(eq(cashMovements.shiftId, shiftId));
+      const byMethod: Record<string, number> = {};
+      const byKind: Record<string, { quantidade: number; centimos: number }> = {};
+      for (const m of movs) {
+        if (m.kind === 'pagamento' || m.kind === 'estorno') byMethod[m.method] = (byMethod[m.method] ?? 0) + m.amountCents;
+        const k = (byKind[m.kind] ??= { quantidade: 0, centimos: 0 });
+        k.quantidade++;
+        k.centimos += m.amountCents;
+      }
+      const end = shift.closedAt ?? this.clock.now();
+      const occ = await tx.select({ id: incidents.id, code: incidents.code, type: incidents.type, urgency: incidents.urgency, status: incidents.status }).from(incidents).where(and(eq(incidents.branchId, shift.branchId), gte(incidents.createdAt, shift.openedAt), lte(incidents.createdAt, end)));
+      const open = await this.tasks.openForBranch(tx, shift.branchId);
+      const [op] = await tx.select({ name: users.name }).from(users).where(eq(users.id, shift.openedBy));
+      const showExpected = hasRole(ctx, 'gerente', 'financas');
+      return {
+        turno: { ...shift, operador: op?.name ?? null },
+        movimentos: movs.length,
+        recebidoPorMeioCentimos: byMethod,
+        porTipo: byKind,
+        ...(showExpected ? { esperadoDinheiroCentimos: await this.expectedCash(tx, shiftId) } : {}),
+        pendenciasAbertas: open.map((t) => ({ id: t.id, numero: t.number, tipo: t.kind, titulo: t.title, prazo: t.dueOn, turnosPassados: t.shiftsPassed, responsavelId: t.ownerUserId })),
+        ocorrencias: occ,
+      };
+    });
   }
 
   /** RF-CAI-08 · histórico de turnos com a contagem final. */

@@ -23,6 +23,8 @@ export type TenantContext = { orgId: string; userId: string };
  *  - `postgres://…`: PostgreSQL real (produção).
  */
 export class Database {
+  private clock: { now(): Date } | null = null;
+
   private constructor(
     readonly db: Db,
     private readonly execRaw: (text: string) => Promise<void>,
@@ -48,6 +50,15 @@ export class Database {
     return new Database(db, async (t) => void (await client.exec(t)), async (t) => (await client.query<Record<string, unknown>>(t)).rows, () => client.close());
   }
 
+  /** Relógio da aplicação: dá a hora oficial aos registos (app.now → muntu_now()). */
+  useClock(clock: { now(): Date }) {
+    this.clock = clock;
+  }
+
+  private nowSetting() {
+    return this.clock ? this.clock.now().toISOString() : '';
+  }
+
   /** Aplica as migrações em falta, por ordem, cada uma numa transacção. */
   async migrate(): Promise<string[]> {
     await this.execRaw('CREATE TABLE IF NOT EXISTS schema_migrations (name text PRIMARY KEY, applied_at timestamptz NOT NULL DEFAULT now())');
@@ -69,7 +80,7 @@ export class Database {
   async withOrg<T>(ctx: TenantContext, fn: (tx: Tx) => Promise<T>): Promise<T> {
     return this.db.transaction(async (tx) => {
       await tx.execute(sql`SET LOCAL ROLE muntu_app`);
-      await tx.execute(sql`SELECT set_config('app.org_id', ${ctx.orgId}, true), set_config('app.user_id', ${ctx.userId}, true)`);
+      await tx.execute(sql`SELECT set_config('app.org_id', ${ctx.orgId}, true), set_config('app.user_id', ${ctx.userId}, true), set_config('app.now', ${this.nowSetting()}, true)`);
       return fn(tx);
     });
   }
@@ -78,14 +89,17 @@ export class Database {
   async withUser<T>(userId: string, fn: (tx: Tx) => Promise<T>): Promise<T> {
     return this.db.transaction(async (tx) => {
       await tx.execute(sql`SET LOCAL ROLE muntu_app`);
-      await tx.execute(sql`SELECT set_config('app.org_id', '', true), set_config('app.user_id', ${userId}, true)`);
+      await tx.execute(sql`SELECT set_config('app.org_id', '', true), set_config('app.user_id', ${userId}, true), set_config('app.now', ${this.nowSetting()}, true)`);
       return fn(tx);
     });
   }
 
   /** Transacção de sistema (só autenticação: users e refresh_tokens). */
   async system<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
-    return this.db.transaction(fn);
+    return this.db.transaction(async (tx) => {
+      await tx.execute(sql`SELECT set_config('app.now', ${this.nowSetting()}, true)`);
+      return fn(tx);
+    });
   }
 
   async close() {
