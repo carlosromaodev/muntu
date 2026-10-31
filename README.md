@@ -4,6 +4,11 @@ Plataforma de gestão de ginásios: recepção, caixa e passagem de turno, finan
 gestão do dono, rede de ginásios e a app do membro.
 Um só código para **iOS, Android, web mobile e web desktop**, feito com Expo (SDK 58) e React Native.
 
+## Documentação e backend
+
+- **Requisitos** (funcionais, não funcionais e regras de negócio): [docs/](docs/README.md).
+- **Backend** (API para todas as apps): [backend/](backend/README.md), em NestJS + Drizzle + PostgreSQL. Instalar e testar no Windows com `scripts\backend-instalar.cmd`; arrancar com `scripts\backend-arrancar.cmd`.
+
 ## Arrancar no Windows
 
 1. Abra `scripts\instalar.cmd`. O script:

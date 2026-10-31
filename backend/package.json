@@ -1,0 +1,33 @@
+{
+  "name": "@muntu/backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "API do MUNTU: regras de negócio, dados e integrações (NestJS + Fastify + Drizzle + PostgreSQL).",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/src/main.js",
+    "dev": "tsc -p tsconfig.json && node dist/src/main.js",
+    "migrate": "tsc -p tsconfig.json && node dist/src/db/migrate-cli.js",
+    "test": "tsc -p tsconfig.json && node --test --test-concurrency=1 \"dist/test/**/*.test.js\""
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.3.0",
+    "@nestjs/common": "^11.1.0",
+    "@nestjs/core": "^11.1.0",
+    "@nestjs/platform-fastify": "^11.1.0",
+    "drizzle-orm": "^0.44.0",
+    "postgres": "^3.4.5",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "~5.9.2"
+  }
+}
